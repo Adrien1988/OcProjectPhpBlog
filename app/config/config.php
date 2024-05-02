@@ -1,5 +1,10 @@
 <?php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'php_blog');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
+
+return [
+    'database' => [
+        'host' => 'localhost',
+        'dbname' => 'php_blog',
+        'user' => 'root',
+        'password' => ''
+    ]
+    ];
