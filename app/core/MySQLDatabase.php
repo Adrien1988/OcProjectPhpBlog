@@ -3,14 +3,12 @@
 namespace App\Core\Database;
 
 
-
-// On "importe" PDO
 use PDO;
-
+use PDOStatement;
+use Iterator;
 
 /**
  * Classe MySQLDatabase qui implémente DatabaseInterface pour gérer les interactions avec la base de données MySQL.
- * Cette classe encapsule les fonctions de base de données, permettant une réutilisation facile et une maintenance centralisée.
  */
 class MySQLDatabase implements DatabaseInterface
 {
@@ -29,39 +27,44 @@ class MySQLDatabase implements DatabaseInterface
      * Exécute une requête SQL avec des paramètres et retourne les résultats.
      * @param string $sql La requête SQL à exécuter.
      * @param array $params Les paramètres à associer à la requête SQL, sous forme de tableau associatif.
-     * @return array Les résultats de la requête sous forme de tableau associatif.
+     * @return Iterator Les résultats de la requête sous forme d'Iterator.
      */
-    public function query(string $sql, array $params = []): array
+    public function query(string $sql, array $params = []): Iterator
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            yield $row;
+        }
     }
 
     /**
-     * Prépare et exécute une requête SQL avec des paramètres, similaire à la méthode query.
-     * Cette méthode est actuellement un duplicata de query() et pourrait être utilisée pour implémenter des comportements différents si nécessaire.
+     * Prépare une requête SQL à exécuter avec des paramètres.
      * @param string $sql La requête SQL à préparer.
-     * @param array $params Les paramètres de la requête.
-     * @return array Les données récupérées de la base de données.
+     * @return PDOStatement L'objet PDOStatement préparé.
      */
-    public function prepare(string $sql, array $params = []): array
+    public function prepare(string $sql): PDOStatement
     {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->pdo->prepare($sql);
+    }
+
+    /**
+     * Exécute un PDOStatement préparé avec des paramètres.
+     * @param PDOStatement $stmt Le PDOStatement à exécuter.
+     * @param array $params Les paramètres à associer.
+     * @return bool Le succès de l'exécution.
+     */
+    public function execute(PDOStatement $stmt, array $params = []): bool
+    {
+        return $stmt->execute($params);
     }
 
     /**
      * Retourne l'ID de la dernière ligne insérée.
-     *
-     * Cette méthode appelle la fonction PDO native lastInsertId pour obtenir l'ID généré
-     * pour la dernière insertion effectuée via l'objet PDO actuel. Elle est typiquement utilisée
-     * après une insertion dans une table avec une colonne ID auto-incrémentée.
-     * 
      * @return string L'ID de la dernière ligne insérée, retourné sous forme de chaîne.
      */
-    public function lastInsertId(): string {
+    public function lastInsertId(): string
+    {
         return $this->pdo->lastInsertId();
     }
 }
