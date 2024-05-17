@@ -240,10 +240,12 @@ class UsersRepository
                 'expire_at',
                 ];
 
-
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
-                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", htmlspecialchars($field, ENT_QUOTES, 'UTF-8')));
+                if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
+                    throw new \InvalidArgumentException("Invalid field name detected.");
+                }
+                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $field));
             }
         }
     }

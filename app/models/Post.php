@@ -13,7 +13,7 @@ class Post
      * @var integer $postId
      *
      * The unique identifier of the post.
-     */     
+     */
     private int $postId;
 
     /**
