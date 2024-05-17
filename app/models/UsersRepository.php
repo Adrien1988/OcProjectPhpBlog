@@ -188,10 +188,25 @@ class UsersRepository
      * 
      * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
      */
+    /**
+     * Crée un utilisateur à partir des données de résultat.
+     *
+     * @param array $row Les données de résultat pour créer un utilisateur.
+     * 
+     * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
+     * 
+     * @throws \InvalidArgumentException Si un champ requis est manquant.
+     */
     private function createUserFromResult(array $row): ?User
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données
-        $this->validateRow($row);
+        if (
+            empty($row['user_id']) || empty($row['last_name']) || empty($row['first_name']) ||
+            empty($row['email']) || empty($row['password']) || empty($row['role']) ||
+            empty($row['created_at']) || empty($row['expire_at'])
+        ) {
+            throw new \InvalidArgumentException("All fields except 'updated_at' and 'token' are required.");
+        }
 
         // Création de l'instance de User avec les données récupérées
         return new User(
@@ -203,52 +218,8 @@ class UsersRepository
             role: $row['role'],
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null,
-            token: ($row['token'] ?? ''),
+            token: $row['token'] ?? '',
             expireAt: new DateTime($row['expire_at'])
         );
-    }
-
-    /**
-     * Valide les champs requis dans un tableau de données.
-     *
-     * @param array $row Les données à valider.
-     * 
-     * @throws \InvalidArgumentException Si un champ requis est manquant ou invalide.
-     */
-    private function validateRow(array $row): void
-    {
-        $requiredFields = [
-                           'user_id',
-                           'last_name',
-                           'first_name',
-                           'email',
-                           'password',
-                           'role',
-                           'created_at',
-                           'expire_at',
-                          ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($row[$field])) {
-                // Assurez-vous que $field ne contient pas de caractères potentiellement dangereux
-                if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
-                    throw new \InvalidArgumentException($this->escape_output("Invalid field name detected."));
-                }
-                // Échapper la valeur dynamique avant de la passer à sprintf
-                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $this->escape_output($field)));
-            }
-        }
-    }
-
-    /**
-     * Échappe les caractères spéciaux dans une chaîne.
-     *
-     * @param string $string La chaîne à échapper.
-     * 
-     * @return string La chaîne échappée.
-     */
-    private function escape_output(string $string): string
-    {
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 }
