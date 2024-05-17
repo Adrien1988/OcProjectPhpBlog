@@ -6,11 +6,46 @@ use DateTime;
 
 class Comment
 {
+    /**
+     * @var int $commentId
+     * 
+     * The ID of the comment.
+     */
     private int $commentId;
+
+    /**
+     * @var string $content
+     * 
+     * The content of the comment.
+     */
     private string $content;
+
+    /**
+     * @var DateTime $createdAt
+     * 
+     * The date and time when the comment was created.
+     */
     private DateTime $createdAt;
+
+    /**
+     * @var bool $isValidated
+     * 
+     * Indicates whether the comment has been validated.
+     */
     private bool $isValidated;
+
+    /**
+     * @var int $postId
+     * 
+     * The ID of the post to which the comment belongs.
+     */
     private int $postId;
+
+    /**
+     * @var int $author
+     * 
+     * The ID of the author who wrote the comment.
+     */
     private int $author;
 
     // Getters et Setters
@@ -74,5 +109,4 @@ class Comment
     {
         $this->author = $author;
     }
-
 }

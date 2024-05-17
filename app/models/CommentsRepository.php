@@ -8,6 +8,11 @@ use DateTime;
 
 class CommentsRepository
 {
+    /**
+     * @var DatabaseInterface $db
+     * 
+     * The database interface for interacting with the database.
+     */
     private DatabaseInterface $db;
 
     /**
@@ -20,7 +25,7 @@ class CommentsRepository
         $this->db = $db;
     }
 
-    public function createComment(Comment $comment): Comment 
+    public function createComment(Comment $comment): Comment
     {
         $sql = "INSERT INTO comments (content, created_at, is_validated, post_id, author) VALUES (:content, :created_at, :is_validated, :post_id, :author)";
 
