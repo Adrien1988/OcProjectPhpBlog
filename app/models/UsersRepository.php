@@ -15,6 +15,7 @@ class UsersRepository
      */
     private DatabaseInterface $db;
 
+
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
@@ -32,14 +33,11 @@ class UsersRepository
      */
     public function findAll(): array
     {
-        // 'query' retourne maintenant un Iterator
         $results = $this->db->query("SELECT * FROM user");
-        // Initialiser un tableau pour stocker les objets Users
+
         $users = [];
 
-        // Parcourir chaque ligne retournée par la requête
         foreach ($results as $row) {
-            // Transforme la ligne en objet User et l'ajoute au tableau
             $users[] = $this->createUserFromResult($row);
         }
         return $users;
@@ -53,16 +51,12 @@ class UsersRepository
      */
     public function findById(int $userId): ?User
     {
-        // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID
         $result = $this->db->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
 
-        // Vérifie si le résultat contient au moins un enregistrement
         if (!empty($result)) {
-            // Utilise createUserFromResult pour transformer le premier enregistrement trouvé en objet User
             return $this->createUserFromResult($result[0]);
         }
 
-        // Retourne null si aucun enregistrement n'est trouvé
         return null;
     }
 
@@ -78,11 +72,9 @@ class UsersRepository
 
         foreach ($results as $result) {
             if ($result) {
-                // Utilise createUserFromResult pour transformer le premier enregistrement trouvé en objet User
                 return $this->createUserFromResult($result);
             }
         }
-        // Retourne null si aucun enregistrement n'est trouvé
         return null;
     }
 
@@ -99,13 +91,10 @@ class UsersRepository
      */
     public function createUser(User $user): User
     {
-        // La requête SQL pour insérer un nouvel user
         $sql = "INSERT INTO users (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
         $stmt = $this->db->prepare($sql);
 
-        // Liaison des valeurs à la requête préparée
         $stmt->bindValue(':last_name', $user->getLastName());
         $stmt->bindValue(':first_name', $user->getFirstName());
         $stmt->bindValue(':email', $user->getEmail());
@@ -116,12 +105,10 @@ class UsersRepository
         $stmt->bindValue(':token', $user->getToken());
         $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
 
-        // Exécution de la requête
         if (!$this->db->execute($stmt, [])) {
             throw new \Exception("Failed to insert the user into the database.");
         }
 
-        // Récupération et définition de l'ID de la dernière ligne insérée
         $user->setUserId((int) $this->db->lastInsertId());
 
         return $user;
@@ -140,19 +127,16 @@ class UsersRepository
      */
     public function updateUser(User $user): bool
     {
-        // La requête SQL pour mettre à jour un utilisateur existant
         $sql = "UPDATE users SET last_name = :last_name, first_name = :first_name, email = :email, 
          password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
          token = :token, expire_at = :expire_at WHERE user_id = :user_id";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
         $stmt = $this->db->prepare($sql);
 
-        // Liaison des valeurs à la requête préparée
         $stmt->bindValue(':last_name', $user->getLastName());
         $stmt->bindValue(':first_name', $user->getFirstName());
         $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());  // Assurez-vous que le mot de passe est déjà haché
+        $stmt->bindValue(':password', $user->getPassword());  
         $stmt->bindValue(':role', $user->getRole());
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
@@ -160,8 +144,7 @@ class UsersRepository
         $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':user_id', $user->getUserId());
 
-        // Exécution de la requête
-        if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        if (!$this->db->execute($stmt, [])) {
             throw new \Exception("Failed to update the user in the database.");
         }
 
@@ -181,17 +164,13 @@ class UsersRepository
      */
     public function deleteUser(int $userId): bool
     {
-        // La requête SQL pour supprimer un utilisateur
         $sql = "DELETE FROM users WHERE user_id = :user_id";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
         $stmt = $this->db->prepare($sql);
 
-        // Liaison de l'identifiant à la requête préparée
         $stmt->bindValue(':user_id', $userId);
 
-        // Exécution de la requête
-        if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        if (!$this->db->execute($stmt, [])) {
             throw new \Exception("Failed to delete the user from the database.");
         }
 
@@ -202,15 +181,13 @@ class UsersRepository
      * Crée un utilisateur à partir des données de résultat.
      *
      * @param array $row Les données de résultat pour créer un utilisateur.
-     * 
+     *
      * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
      */
     private function createUserFromResult(array $row): ?User
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données
         $this->validateRow($row);
 
-        // Création de l'instance de User avec les données récupérées
         return new User(
             userId: (int) $row['user_id'],
             lastName: $row['last_name'],
@@ -229,25 +206,24 @@ class UsersRepository
      * Valide les champs requis dans un tableau de données.
      *
      * @param array $row Les données à valider.
-     * 
+     *
      * @throws \InvalidArgumentException Si un champ requis est manquant ou invalide.
      */
     private function validateRow(array $row): void
     {
         $requiredFields = [
-            'user_id',
-            'last_name',
-            'first_name',
-            'email',
-            'password',
-            'role',
-            'created_at',
-            'expire_at',
-        ];
+                           'user_id',
+                           'last_name',
+                           'first_name',
+                           'email',
+                           'password',
+                           'role',
+                           'created_at',
+                           'expire_at',
+                          ];
 
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
-                // Assurez-vous que $field ne contient pas de caractères potentiellement dangereux
                 if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
                     throw new \InvalidArgumentException("Invalid field name detected.");
                 }
@@ -260,7 +236,7 @@ class UsersRepository
      * Échappe les caractères spéciaux dans une chaîne.
      *
      * @param string $string La chaîne à échapper.
-     * 
+     *
      * @return string La chaîne échappée.
      */
     private function escape_output($string): string
