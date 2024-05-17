@@ -8,6 +8,11 @@ use DateTime;
 
 class UsersRepository
 {
+    /**
+     * @var DatabaseInterface $db
+     *
+     * The database interface for interacting with the database.
+     */
     private DatabaseInterface $db;
 
     /**
@@ -205,11 +210,7 @@ class UsersRepository
     private function createUserFromResult(array $row): ?User
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données
-        if (
-            empty($row['user_id']) || empty($row['last_name']) || empty($row['first_name']) || empty($row['email']) || empty($row['password']) || empty($row['role']) || empty($row['created_at']) || empty($row['expire_at'])
-        ) {
-            throw new \InvalidArgumentException("All fields are required except 'token' and 'updated_at', which can be null.");
-        }
+        $this->validateRow($row);
 
         // Création de l'instance de User avec les données récupérées
         return new User(
@@ -224,5 +225,25 @@ class UsersRepository
             token: $row['token'] ?? '',
             expireAt: new DateTime($row['expire_at'])
         );
+    }
+
+    private function validateRow(array $row): void
+    {
+        $requiredFields = [
+            'user_id',
+            'last_name',
+            'first_name',
+            'email',
+            'password',
+            'role',
+            'created_at',
+            'expire_at'
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (empty($row[$field])) {
+                throw new \InvalidArgumentException("Field '$field' is required.");
+            }
+        }
     }
 }

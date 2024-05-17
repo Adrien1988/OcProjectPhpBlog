@@ -6,16 +6,76 @@ use DateTime;
 
 class User
 {
-    private int $userId;
-    private string $lastName;
-    private string $firstName;
-    private string $email;
-    private string $password;
-    private string $role;
-    private DateTime $createdAt;
-    private ?DateTime $updatedAt = null;
-    private string $token;
-    private DateTime $expireAt;
+    /**
+ * @var integer $userId
+ * 
+ * The unique identifier of the user.
+ */
+private int $userId;
+
+/**
+ * @var string $lastName
+ * 
+ * The last name of the user.
+ */
+private string $lastName;
+
+/**
+ * @var string $firstName
+ * 
+ * The first name of the user.
+ */
+private string $firstName;
+
+/**
+ * @var string $email
+ * 
+ * The email address of the user.
+ */
+private string $email;
+
+/**
+ * @var string $password
+ * 
+ * The hashed password of the user.
+ */
+private string $password;
+
+/**
+ * @var string $role
+ * 
+ * The role of the user (e.g., admin, user).
+ */
+private string $role;
+
+/**
+ * @var DateTime $createdAt
+ * 
+ * The date and time when the user account was created.
+ */
+private DateTime $createdAt;
+
+/**
+ * @var ?DateTime $updatedAt
+ * 
+ * The date and time when the user account was last updated, can be null.
+ */
+private ?DateTime $updatedAt = null;
+
+/**
+ * @var string $token
+ * 
+ * The authentication token for the user.
+ */
+private string $token;
+
+/**
+ * @var DateTime $expireAt
+ * 
+ * The date and time when the user's session or token expires.
+ */
+private DateTime $expireAt;
+
 
     // Getters et Setters
     public function getUserId(): int

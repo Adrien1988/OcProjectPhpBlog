@@ -11,6 +11,11 @@ use DateTime;
  */
 class PostsRepository
 {
+    /**
+     * @var DatabaseInterface $db
+     *
+     * The database interface for interacting with the database.
+     */
     private DatabaseInterface $db;
 
     /**

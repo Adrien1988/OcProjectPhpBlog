@@ -25,6 +25,15 @@ class CommentsRepository
         $this->db = $db;
     }
 
+    /**
+     * Insère un nouveau commentaire dans la base de données.
+     *
+     * @param Comment $comment L'objet commentaire à insérer.
+     * 
+     * @return Comment L'objet commentaire avec l'ID nouvellement assigné.
+     * 
+     * @throws \Exception Si l'insertion échoue.
+     */
     public function createComment(Comment $comment): Comment
     {
         $sql = "INSERT INTO comments (content, created_at, is_validated, post_id, author) VALUES (:content, :created_at, :is_validated, :post_id, :author)";
@@ -47,7 +56,26 @@ class CommentsRepository
         return $comment;
     }
 
+    /**
+     * Récupère tous les articles.
+     *
+     * @return Post[] Un tableau d'objets Post.
+     */
+    public function findAll(): array
+    {
+        // 'query' retourne maintenant un Iterator
+        $results = $this->db->query("SELECT * FROM comment");
 
+        // Initialiser un tableau pour stocker les objets Post
+        $comments = [];
+
+        // Parcourir chaque ligne retournée par la requête
+        foreach ($results as $row) {
+            $comments[] = $this->createCommentFromResult($row);
+        }
+
+        return $comments;
+    }
 
 
 

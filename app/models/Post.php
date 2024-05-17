@@ -9,13 +9,55 @@ use DateTime;
  */
 class Post
 {
-    private int $postId;
-    private string $title;
-    private string $chapo;
-    private string $content;
-    private int $author;
-    private DateTime $createdAt;
-    private ?DateTime $updatedAt = null;
+    /**
+ * @var integer $postId
+ * 
+ * The unique identifier of the post.
+ */
+private int $postId;
+
+/**
+ * @var string $title
+ * 
+ * The title of the post.
+ */
+private string $title;
+
+/**
+ * @var string $chapo
+ * 
+ * The introductory paragraph of the post.
+ */
+private string $chapo;
+
+/**
+ * @var string $content
+ * 
+ * The main content of the post.
+ */
+private string $content;
+
+/**
+ * @var integer $author
+ * 
+ * The identifier of the author who wrote the post.
+ */
+private int $author;
+
+/**
+ * @var DateTime $createdAt
+ * 
+ * The date and time when the post was created.
+ */
+private DateTime $createdAt;
+
+/**
+ * @var ?DateTime $updatedAt
+ * 
+ * The date and time when the post was last updated, can be null.
+ */
+private ?DateTime $updatedAt = null;
+
 
     // Getters and Setters
 
