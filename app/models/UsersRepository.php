@@ -13,19 +13,21 @@ class UsersRepository
      *
      * The database interface for interacting with the database.
      */
+
     private DatabaseInterface $dbi;
 
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $db Interface pour interagir avec la base de données.
+     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
      */
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-        
-    }// end __construct()
+    }
+    // end __construct()
+
 
     /**
      * Récupère tous les utilisateurs de la base de données.
@@ -41,8 +43,11 @@ class UsersRepository
         foreach ($results as $row) {
             $users[] = $this->createUserFromResult($row);
         }
+
         return $users;
+
     }
+
 
     /**
      * Récupère un utilisateur par son identifiant.
@@ -198,7 +203,7 @@ class UsersRepository
             role: $row['role'],
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null,
-            token: $row['token'] ?? '',
+            token: ($row['token'] ?? ''),
             expireAt: new DateTime($row['expire_at'])
         );
     }
