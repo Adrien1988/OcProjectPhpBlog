@@ -230,19 +230,20 @@ class UsersRepository
     private function validateRow(array $row): void
     {
         $requiredFields = [
-            'user_id',
-            'last_name',
-            'first_name',
-            'email',
-            'password',
-            'role',
-            'created_at',
-            'expire_at'
-        ];
+                'user_id',
+                'last_name',
+                'first_name',
+                'email',
+                'password',
+                'role',
+                'created_at',
+                'expire_at',
+                ];
+
 
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
-                throw new \InvalidArgumentException("Field '$field' is required.");
+                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", htmlspecialchars($field, ENT_QUOTES, 'UTF-8')));
             }
         }
     }

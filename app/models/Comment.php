@@ -15,35 +15,35 @@ class Comment
 
     /**
      * @var string $content
-     * 
+     *
      * The content of the comment.
      */
     private string $content;
 
     /**
      * @var DateTime $createdAt
-     * 
+     *
      * The date and time when the comment was created.
      */
     private DateTime $createdAt;
 
     /**
      * @var boolean $isValidated
-     * 
+     *
      * Indicates whether the comment has been validated.
      */
     private bool $isValidated;
 
     /**
      * @var integer $postId
-     * 
+     *
      * The ID of the post to which the comment belongs.
      */
     private int $postId;
 
     /**
      * @var integer $author
-     * 
+     *
      * The ID of the author who wrote the comment.
      */
     private int $author;

@@ -7,74 +7,74 @@ use DateTime;
 class User
 {
     /**
- * @var integer $userId
- * 
- * The unique identifier of the user.
- */
-private int $userId;
+     * @var integer $userId
+     *
+     * The unique identifier of the user.
+     */
+    private int $userId;
 
-/**
- * @var string $lastName
- * 
- * The last name of the user.
- */
-private string $lastName;
+    /**
+     * @var string $lastName
+     *
+     * The last name of the user.
+     */
+    private string $lastName;
 
-/**
- * @var string $firstName
- * 
- * The first name of the user.
- */
-private string $firstName;
+    /**
+     * @var string $firstName
+     *
+     * The first name of the user.
+     */
+    private string $firstName;
 
-/**
- * @var string $email
- * 
- * The email address of the user.
- */
-private string $email;
+    /**
+     * @var string $email
+     *
+     * The email address of the user.
+     */
+    private string $email;
 
-/**
- * @var string $password
- * 
- * The hashed password of the user.
- */
-private string $password;
+    /**
+     * @var string $password
+     *
+     * The hashed password of the user.
+     */
+    private string $password;
 
-/**
- * @var string $role
- * 
- * The role of the user (e.g., admin, user).
- */
-private string $role;
+    /**
+     * @var string $role
+     *
+     * The role of the user (e.g., admin, user).
+     */
+    private string $role;
 
-/**
- * @var DateTime $createdAt
- * 
- * The date and time when the user account was created.
- */
-private DateTime $createdAt;
+    /**
+     * @var DateTime $createdAt
+     *
+     * The date and time when the user account was created.
+     */
+    private DateTime $createdAt;
 
-/**
- * @var ?DateTime $updatedAt
- * 
- * The date and time when the user account was last updated, can be null.
- */
-private ?DateTime $updatedAt = null;
+    /**
+     * @var ?DateTime $updatedAt
+     *
+     * The date and time when the user account was last updated, can be null.
+     */
+    private ?DateTime $updatedAt = null;
 
-/**
- * @var string $token
- * 
- * The authentication token for the user.
- */
-private string $token;
+    /**
+     * @var string $token
+     *
+     * The authentication token for the user.
+     */
+    private string $token;
 
-/**
- * @var DateTime $expireAt
- * 
- * The date and time when the user's session or token expires.
- */
-private DateTime $expireAt;
+    /**
+     * @var DateTime $expireAt
+     *
+     * The date and time when the user's session or token expires.
+     */
+    private DateTime $expireAt;
 
 
     // Getters et Setters
@@ -143,7 +143,7 @@ private DateTime $expireAt;
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTime $createdAt): void 
+    public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -158,7 +158,8 @@ private DateTime $expireAt;
         $this->updatedAt = $updatedAt;
     }
 
-    public function getToken(): string{
+    public function getToken(): string
+    {
         return $this->token;
     }
 

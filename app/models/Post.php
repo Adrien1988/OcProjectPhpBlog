@@ -10,53 +10,53 @@ use DateTime;
 class Post
 {
     /**
- * @var integer $postId
- * 
- * The unique identifier of the post.
- */
-private int $postId;
+     * @var integer $postId
+     *
+     * The unique identifier of the post.
+     */     
+    private int $postId;
 
-/**
- * @var string $title
- * 
- * The title of the post.
- */
-private string $title;
+    /**
+     * @var string $title
+     *
+     * The title of the post.
+     */     
+    private string $title;
 
-/**
- * @var string $chapo
- * 
- * The introductory paragraph of the post.
- */
-private string $chapo;
+    /**
+     * @var string $chapo
+     *
+     * The introductory paragraph of the post.
+     */     
+    private string $chapo;
 
-/**
- * @var string $content
- * 
- * The main content of the post.
- */
-private string $content;
+    /**
+     * @var string $content
+     *
+     * The main content of the post.
+     */     
+    private string $content;
 
-/**
- * @var integer $author
- * 
- * The identifier of the author who wrote the post.
- */
-private int $author;
+    /**
+     * @var integer $author
+     *
+     * The identifier of the author who wrote the post.
+     */     
+    private int $author;
 
-/**
- * @var DateTime $createdAt
- * 
- * The date and time when the post was created.
- */
-private DateTime $createdAt;
+    /**
+     * @var DateTime $createdAt
+     *
+     * The date and time when the post was created.
+     */     
+    private DateTime $createdAt;
 
-/**
- * @var ?DateTime $updatedAt
- * 
- * The date and time when the post was last updated, can be null.
- */
-private ?DateTime $updatedAt = null;
+    /**
+     * @var ?DateTime $updatedAt
+     *
+     * The date and time when the post was last updated, can be null.
+     */     
+    private ?DateTime $updatedAt = null;
 
 
     // Getters and Setters
