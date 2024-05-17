@@ -9,11 +9,11 @@ use DateTime;
 class UsersRepository
 {
     /**
-     * @var DatabaseInterface $db
+     * @var DatabaseInterface $dbi
      *
      * The database interface for interacting with the database.
      */
-    private DatabaseInterface $db;
+    private DatabaseInterface $dbi;
 
 
     /**
@@ -21,10 +21,11 @@ class UsersRepository
      *
      * @param DatabaseInterface $db Interface pour interagir avec la base de données.
      */
-    public function __construct(DatabaseInterface $db)
+    public function __construct(DatabaseInterface $dbi)
     {
-        $this->db = $db;
-    }
+        $this->dbi = $dbi;
+        
+    }// end __construct()
 
     /**
      * Récupère tous les utilisateurs de la base de données.
@@ -33,7 +34,7 @@ class UsersRepository
      */
     public function findAll(): array
     {
-        $results = $this->db->query("SELECT * FROM user");
+        $results = $this->dbi->query("SELECT * FROM user");
 
         $users = [];
 
@@ -51,7 +52,7 @@ class UsersRepository
      */
     public function findById(int $userId): ?User
     {
-        $result = $this->db->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
+        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
 
         if (!empty($result)) {
             return $this->createUserFromResult($result[0]);
@@ -68,7 +69,7 @@ class UsersRepository
      */
     public function findByEmail(string $email): ?User
     {
-        $results = $this->db->query("SELECT * FROM users WHERE email = :email", [':email' => $email]);
+        $results = $this->dbi->query("SELECT * FROM users WHERE email = :email", [':email' => $email]);
 
         foreach ($results as $result) {
             if ($result) {
@@ -93,7 +94,7 @@ class UsersRepository
     {
         $sql = "INSERT INTO users (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->dbi->prepare($sql);
 
         $stmt->bindValue(':last_name', $user->getLastName());
         $stmt->bindValue(':first_name', $user->getFirstName());
@@ -105,11 +106,11 @@ class UsersRepository
         $stmt->bindValue(':token', $user->getToken());
         $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
 
-        if (!$this->db->execute($stmt, [])) {
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to insert the user into the database.");
         }
 
-        $user->setUserId((int) $this->db->lastInsertId());
+        $user->setUserId((int) $this->dbi->lastInsertId());
 
         return $user;
     }
@@ -131,12 +132,12 @@ class UsersRepository
          password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
          token = :token, expire_at = :expire_at WHERE user_id = :user_id";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->dbi->prepare($sql);
 
         $stmt->bindValue(':last_name', $user->getLastName());
         $stmt->bindValue(':first_name', $user->getFirstName());
         $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());  
+        $stmt->bindValue(':password', $user->getPassword());
         $stmt->bindValue(':role', $user->getRole());
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
@@ -144,7 +145,7 @@ class UsersRepository
         $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':user_id', $user->getUserId());
 
-        if (!$this->db->execute($stmt, [])) {
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to update the user in the database.");
         }
 
@@ -166,11 +167,11 @@ class UsersRepository
     {
         $sql = "DELETE FROM users WHERE user_id = :user_id";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->dbi->prepare($sql);
 
         $stmt->bindValue(':user_id', $userId);
 
-        if (!$this->db->execute($stmt, [])) {
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to delete the user from the database.");
         }
 
