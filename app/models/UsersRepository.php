@@ -199,13 +199,11 @@ class UsersRepository
     }
 
     /**
-     * Crée une instance de User à partir d'un tableau de données.
-     * Cette méthode vérifie que toutes les données requises sont présentes
-     * et utilise des paramètres nommés pour plus de clarté lors de la création de l'objet User.
+     * Crée un utilisateur à partir des données de résultat.
      *
-     * @param array $row Les données de l'utilisateur extraites de la base de données.
-     * @return User L'instance de User créée, ou null si les données essentielles manquent.
-     * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
+     * @param array $row Les données de résultat pour créer un utilisateur.
+     * 
+     * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
      */
     private function createUserFromResult(array $row): ?User
     {
@@ -227,26 +225,46 @@ class UsersRepository
         );
     }
 
+    /**
+     * Valide les champs requis dans un tableau de données.
+     *
+     * @param array $row Les données à valider.
+     * 
+     * @throws \InvalidArgumentException Si un champ requis est manquant ou invalide.
+     */
     private function validateRow(array $row): void
     {
         $requiredFields = [
-                'user_id',
-                'last_name',
-                'first_name',
-                'email',
-                'password',
-                'role',
-                'created_at',
-                'expire_at',
-                ];
+            'user_id',
+            'last_name',
+            'first_name',
+            'email',
+            'password',
+            'role',
+            'created_at',
+            'expire_at',
+        ];
 
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
+                // Assurez-vous que $field ne contient pas de caractères potentiellement dangereux
                 if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
                     throw new \InvalidArgumentException("Invalid field name detected.");
                 }
-                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $field));
+                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $this->escape_output($field)));
             }
         }
+    }
+
+    /**
+     * Échappe les caractères spéciaux dans une chaîne.
+     *
+     * @param string $string La chaîne à échapper.
+     * 
+     * @return string La chaîne échappée.
+     */
+    private function escape_output($string): string
+    {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 }
