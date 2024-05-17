@@ -10,7 +10,7 @@ class CommentsRepository
 {
     /**
      * @var DatabaseInterface $db
-     * 
+     *
      * The database interface for interacting with the database.
      */
     private DatabaseInterface $db;

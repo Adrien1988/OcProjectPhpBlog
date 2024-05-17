@@ -7,8 +7,8 @@ use DateTime;
 class Comment
 {
     /**
-     * @var int $commentId
-     * 
+     * @var integer $commentId
+     *
      * The ID of the comment.
      */
     private int $commentId;
@@ -28,21 +28,21 @@ class Comment
     private DateTime $createdAt;
 
     /**
-     * @var bool $isValidated
+     * @var boolean $isValidated
      * 
      * Indicates whether the comment has been validated.
      */
     private bool $isValidated;
 
     /**
-     * @var int $postId
+     * @var integer $postId
      * 
      * The ID of the post to which the comment belongs.
      */
     private int $postId;
 
     /**
-     * @var int $author
+     * @var integer $author
      * 
      * The ID of the author who wrote the comment.
      */

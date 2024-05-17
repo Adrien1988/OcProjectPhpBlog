@@ -104,8 +104,7 @@ class UsersRepository
         $stmt->bindValue(':last_name', $user->getLastName());
         $stmt->bindValue(':first_name', $user->getFirstName());
         $stmt->bindValue(':email', $user->getEmail());
-        // Assurez-vous que le mot de passe est déjà haché
-        $stmt->bindValue(':password', $user->getPassword());  
+        $stmt->bindValue(':password', $user->getPassword());
         $stmt->bindValue(':role', $user->getRole());
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
