@@ -43,7 +43,6 @@ class UsersRepository
         }
 
         return $users;
-
     }
 
 
@@ -186,13 +185,15 @@ class UsersRepository
      * Crée un utilisateur à partir des données de résultat.
      *
      * @param array $row Les données de résultat pour créer un utilisateur.
-     *
+     * 
      * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
      */
     private function createUserFromResult(array $row): ?User
     {
+        // Vérification de la présence de tous les champs requis dans la ligne de données
         $this->validateRow($row);
 
+        // Création de l'instance de User avec les données récupérées
         return new User(
             userId: (int) $row['user_id'],
             lastName: $row['last_name'],
@@ -211,7 +212,7 @@ class UsersRepository
      * Valide les champs requis dans un tableau de données.
      *
      * @param array $row Les données à valider.
-     *
+     * 
      * @throws \InvalidArgumentException Si un champ requis est manquant ou invalide.
      */
     private function validateRow(array $row): void
@@ -229,10 +230,12 @@ class UsersRepository
 
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
+                // Assurez-vous que $field ne contient pas de caractères potentiellement dangereux
                 if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
-                    throw new \InvalidArgumentException("Invalid field name detected.");
+                    throw new \InvalidArgumentException($this->escape_output("Invalid field name detected."));
                 }
-                throw new \InvalidArgumentException($this->escape_output(sprintf("Field '%s' is required.", $field)));
+                // Échapper la valeur dynamique avant de la passer à sprintf
+                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $this->escape_output($field)));
             }
         }
     }
@@ -241,10 +244,10 @@ class UsersRepository
      * Échappe les caractères spéciaux dans une chaîne.
      *
      * @param string $string La chaîne à échapper.
-     *
+     * 
      * @return string La chaîne échappée.
      */
-    private function escape_output($string): string
+    private function escape_output(string $string): string
     {
         return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
