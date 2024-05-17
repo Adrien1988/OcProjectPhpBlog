@@ -12,10 +12,10 @@ class User
     private string $email;
     private string $password;
     private string $role;
-    private \DateTime $createdAt;
-    private \DateTime $updatedAt;
+    private DateTime $createdAt;
+    private ?DateTime $updatedAt = null;
     private string $token;
-    private \DateTime $expireAt;
+    private DateTime $expireAt;
 
     // Getters et Setters
     public function getUserId(): int

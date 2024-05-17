@@ -50,7 +50,7 @@ class PostsRepository
      * @param int $postId L'identifiant de l'article à récupérer.
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
-    public function find(int $postId): ?Post
+    public function findById(int $postId): ?Post
     {
         // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID
         $result = $this->db->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
@@ -79,7 +79,7 @@ class PostsRepository
     public function createPost(Post $post): Post
     {
         // La requête SQL pour insérer un nouvel article
-        $sql = "INSERT INTO posts (title, chapo, content, author, created_at, updated_at) 
+        $sql = "INSERT INTO post (title, chapo, content, author, created_at, updated_at) 
                 VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
@@ -99,7 +99,7 @@ class PostsRepository
         }
 
         // Récupération et définition de l'ID de la dernière ligne insérée
-        $post->setId((int) $this->db->lastInsertId());
+        $post->setPostId((int) $this->db->lastInsertId());
 
         return $post;
     }
@@ -132,7 +132,7 @@ class PostsRepository
         $stmt->bindValue(':author', $post->getAuthor());
         $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':post_id', $post->getId());
+        $stmt->bindValue(':post_id', $post->getPostId());
 
         // Exécution de la requête
         if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
@@ -195,7 +195,7 @@ class PostsRepository
 
         // Création de l'instance de Post avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté
         return new Post(
-            id: (int) $row['post_id'],
+            postId: (int) $row['post_id'],
             title: $row['title'],
             chapo: $row['chapo'],
             content: $row['content'],

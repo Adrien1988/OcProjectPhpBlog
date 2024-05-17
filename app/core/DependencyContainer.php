@@ -25,6 +25,6 @@ class DependencyContainer
             );
             $this->instances['database'] = new MySQLDatabase($pdo);
         }
-        return $this->instances['databse'];
+        return $this->instances['database'];
     }
 }

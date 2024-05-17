@@ -9,24 +9,24 @@ use DateTime;
  */
 class Post
 {
-    private int $id;
+    private int $postId;
     private string $title;
     private string $chapo;
     private string $content;
     private int $author;
     private DateTime $createdAt;
-    private ?DateTime $updatedAt;
+    private ?DateTime $updatedAt = null;
 
     // Getters and Setters
 
-    public function getId(): ?int
+    public function getPostId(): int
     {
-        return $this->id;
+        return $this->postId;
     }
 
-    public function setId(int $id): void
+    public function setPostId(int $postId): void
     {
-        $this->id = $id;
+        $this->postId = $postId;
     }
 
     public function getTitle(): string
