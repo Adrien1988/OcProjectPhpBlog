@@ -13,7 +13,6 @@ class UsersRepository
      *
      * The database interface for interacting with the database.
      */
-
     private DatabaseInterface $dbi;
 
 
@@ -26,7 +25,6 @@ class UsersRepository
     {
         $this->dbi = $dbi;
     }
-    // end __construct()
 
 
     /**
@@ -81,6 +79,7 @@ class UsersRepository
                 return $this->createUserFromResult($result);
             }
         }
+
         return null;
     }
 
@@ -233,7 +232,7 @@ class UsersRepository
                 if (!preg_match('/^[a-zA-Z0-9_]+$/', $field)) {
                     throw new \InvalidArgumentException("Invalid field name detected.");
                 }
-                throw new \InvalidArgumentException(sprintf("Field '%s' is required.", $this->escape_output($field)));
+                throw new \InvalidArgumentException($this->escape_output(sprintf("Field '%s' is required.", $field)));
             }
         }
     }
