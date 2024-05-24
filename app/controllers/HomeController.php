@@ -27,7 +27,7 @@ class HomeController
     {
         $this->twig = $twig;
 
-    } //end__construct().
+    } //end __construct().
 
 
     /**
