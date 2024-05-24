@@ -63,6 +63,7 @@ class UsersRepository
         return null;
     }
 
+
     /**
      * Récupère un utilisateur par son adresse email utilisant une requête itérative.
      *
@@ -81,6 +82,7 @@ class UsersRepository
 
         return null;
     }
+
 
     /**
      * Insère un nouvel utilisateur dans la base de données.
@@ -117,6 +119,7 @@ class UsersRepository
 
         return $user;
     }
+
 
     /**
      * Met à jour un utilisateur existant dans la base de données.
@@ -155,6 +158,7 @@ class UsersRepository
         return true;
     }
 
+
     /**
      * Supprime un utilisateur existant dans la base de données basé sur son identifiant.
      *
@@ -181,20 +185,14 @@ class UsersRepository
         return true;
     }
 
+
     /**
      * Crée un utilisateur à partir des données de résultat.
      *
      * @param array $row Les données de résultat pour créer un utilisateur.
-     * 
-     * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
-     */
-    /**
-     * Crée un utilisateur à partir des données de résultat.
      *
-     * @param array $row Les données de résultat pour créer un utilisateur.
-     * 
      * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
-     * 
+     *
      * @throws \InvalidArgumentException Si un champ requis est manquant.
      */
     private function createUserFromResult(array $row): ?User

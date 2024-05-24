@@ -15,6 +15,7 @@ class CommentsRepository
      */
     private DatabaseInterface $db;
 
+
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
@@ -25,13 +26,14 @@ class CommentsRepository
         $this->db = $db;
     }
 
+
     /**
      * Insère un nouveau commentaire dans la base de données.
      *
      * @param Comment $comment L'objet commentaire à insérer.
-     * 
+     *
      * @return Comment L'objet commentaire avec l'ID nouvellement assigné.
-     * 
+     *
      * @throws \Exception Si l'insertion échoue.
      */
     public function createComment(Comment $comment): Comment
@@ -56,6 +58,7 @@ class CommentsRepository
         return $comment;
     }
 
+
     /**
      * Récupère tous les articles.
      *
@@ -78,7 +81,27 @@ class CommentsRepository
     }
 
 
-
+    /**
+     * Met à jour le statut de validation d'un commentaire.
+     *
+     * @param int $commentId L'identifiant du commentaire à mettre à jour.
+     * @param bool $isValidated Le nouveau statut de validation.
+     * @return bool Retourne true si la mise à jour a réussi, sinon false.
+     * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
+     */
+    public function updateCommentStatus(int $commentId, bool $isValidated): bool
+    {
+        $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
+        $stmt = $this->db->prepare($sql);
+        $params = [
+            ':is_validated' => $isValidated,
+            ':comment_id' => $commentId
+        ];
+        if (!$this->db->execute($stmt, $params)) {
+            throw new \Exception("Failed to update the comment status in the database.");
+        }
+        return true;
+    }
 
 
     /**
