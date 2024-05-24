@@ -41,7 +41,7 @@ $twig = new Environment(
 );
 
 // Charger les routes.
-$routes = include(__DIR__.'/../config/routes.php');
+$routes = include_once __DIR__.'/../config/routes.php';
 
 // Initialiser le contexte de la requête.
 $context = new RequestContext();

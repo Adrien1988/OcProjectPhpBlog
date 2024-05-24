@@ -19,28 +19,28 @@ class CsrfMiddleware
 
 
     /**
-    * Constructeur de la classe.
-    *
-    * Initialise l'instance AntiCSRF pour la protection contre les attaques CSRF.
-    */
+     * Constructeur de la classe.
+     *
+     * Initialise l'instance AntiCSRF pour la protection contre les attaques CSRF.
+     */
     public function __construct()
     {
         $this->antiCSRF = new AntiCSRF();
 
-    } //end_construct()
+    } //end_construct().
 
 
     /**
-    * Gère les requêtes entrantes et applique la protection CSRF.
-    *
-    * Cette méthode vérifie la validité du token CSRF pour les requêtes POST
-    * et insère un nouveau token pour les requêtes GET.
-    *
-    * @param Request $request La requête entrante.
-    * @param callable $next Le prochain middleware ou contrôleur à exécuter.
-    * @return Response La réponse générée après le traitement de la requête.
-    * @throws AccessDeniedHttpException Si le token CSRF est invalide pour une requête POST.
-    */
+     * Gère les requêtes entrantes et applique la protection CSRF.
+     *
+     * Cette méthode vérifie la validité du token CSRF pour les requêtes POST
+     * et insère un nouveau token pour les requêtes GET.
+     *
+     * @param Request   $request La requête entrante.
+     * @param callable  $next    Le prochain middleware ou contrôleur à exécuter.
+     * @return Response La réponse générée après le traitement de la requête.
+     * @throws AccessDeniedHttpException Si le token CSRF est invalide pour une requête POST.
+     */
     public function handle(Request $request, callable $next): Response
     {
         if ($request->isMethod('POST') === true) {

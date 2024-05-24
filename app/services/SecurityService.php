@@ -15,15 +15,15 @@ class SecurityService
 
 
     /**
-    * Constructeur de la classe.
-    *
-    * Initialise l'instance AntiXSS pour la protection contre les attaques XSS.
-    */
+     * Constructeur de la classe.
+     *
+     * Initialise l'instance AntiXSS pour la protection contre les attaques XSS.
+     */
     public function __construct()
     {
         $this->antiXSS = new AntiXSS();
-        
-    } // end __construct()
+
+    } // end __construct().
 
 
     /**
