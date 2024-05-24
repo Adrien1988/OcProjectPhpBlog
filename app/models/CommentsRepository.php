@@ -49,7 +49,7 @@ class CommentsRepository
         $stmt->bindValue(':author', $comment->getAuthor());
         $stmt->bindValue(':comment_id', $comment->getCommentId());
 
-        if (!$this->db->execute($stmt, [])) {
+        if ($this->db->execute($stmt, []) === false) {
             throw new \Exception("Failed to insert the comment into the database.");
         }
 
@@ -66,13 +66,13 @@ class CommentsRepository
      */
     public function findAll(): array
     {
-        // 'query' retourne maintenant un Iterator
+        // 'query' retourne maintenant un Iterator.
         $results = $this->db->query("SELECT * FROM comment");
 
-        // Initialiser un tableau pour stocker les objets Post
+        // Initialiser un tableau pour stocker les objets Post.
         $comments = [];
 
-        // Parcourir chaque ligne retournée par la requête
+        // Parcourir chaque ligne retournée par la requête.
         foreach ($results as $row) {
             $comments[] = $this->createCommentFromResult($row);
         }
@@ -84,7 +84,7 @@ class CommentsRepository
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param int $commentId L'identifiant du commentaire à mettre à jour.
+     * @param int $commentId  L'identifiant du commentaire à mettre à jour.
      * @param bool $isValidated Le nouveau statut de validation.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
@@ -94,12 +94,13 @@ class CommentsRepository
         $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
         $stmt = $this->db->prepare($sql);
         $params = [
-            ':is_validated' => $isValidated,
-            ':comment_id' => $commentId
-        ];
-        if (!$this->db->execute($stmt, $params)) {
+                   ':is_validated' => $isValidated,
+                   ':comment_id' => $commentId
+                  ];
+        if (!$this->db->execute($stmt, $params) === false) {
             throw new \Exception("Failed to update the comment status in the database.");
         }
+
         return true;
     }
 
