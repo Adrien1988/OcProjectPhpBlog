@@ -24,7 +24,7 @@ interface DatabaseInterface
      * @param array $params  Les paramètres à lier à la requête, si nécessaire.
      * @return Iterator Les résultats de la requête.
      */
-    public function query(string $sql, array $params = []): Iterator;
+    public function query(string $sql, array $params=[]): Iterator;
 
     /**
      * Prépare une requête SQL avec des paramètres et retourne un objet pour exécuter cette requête.
@@ -44,7 +44,7 @@ interface DatabaseInterface
      * @param array         $params Les paramètres à lier à la déclaration.
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
-    public function execute(\PDOStatement $stmt, array $params = []): bool;
+    public function execute(\PDOStatement $stmt, array $params=[]): bool;
 
 
     /**
