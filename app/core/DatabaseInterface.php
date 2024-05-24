@@ -21,17 +21,18 @@ interface DatabaseInterface
      * Peut lever une exception si la requête échoue.
      *
      * @param string $sql    La chaîne de la requête SQL à exécuter.
-     * @param array $params  Les paramètres à lier à la requête, si nécessaire.
+     * @param array  $params  Les paramètres à lier à la requête, si nécessaire.
      * @return Iterator Les résultats de la requête.
      */
     public function query(string $sql, array $params=[]): Iterator;
+
 
     /**
      * Prépare une requête SQL avec des paramètres et retourne un objet pour exécuter cette requête.
      * Peut lever une exception si la préparation échoue.
      *
      * @param string $sql    La chaîne de la requête SQL à préparer.
-     * @param array $params  Les paramètres à lier à la requête préparée.
+     * @param array  $params  Les paramètres à lier à la requête préparée.
      * @return PDOStatement Un objet représentant la requête préparée.
      */
     public function prepare(string $sql): \PDOStatement;
@@ -54,5 +55,6 @@ interface DatabaseInterface
      * @return string L'identifiant de la dernière ligne insérée sous forme de chaîne.
      */
     public function lastInsertId(): string;
+
 
 }
