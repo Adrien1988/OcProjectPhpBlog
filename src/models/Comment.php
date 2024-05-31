@@ -4,107 +4,177 @@ namespace App\Models;
 
 use DateTime;
 
+/**
+ * Class Comment
+ *
+ * Représente un commentaire dans le système.
+ */
 class Comment
 {
+
     /**
-     * @var integer $commentId
-     *
      * The ID of the comment.
+     *
+     * @var int
      */
     private int $commentId;
 
     /**
-     * @var string $content
-     *
      * The content of the comment.
+     *
+     * @var string
      */
     private string $content;
 
     /**
-     * @var DateTime $createdAt
-     *
      * The date and time when the comment was created.
+     *
+     * @var DateTime
      */
     private DateTime $createdAt;
 
     /**
-     * @var boolean $isValidated
-     *
      * Indicates whether the comment has been validated.
+     *
+     * @var bool
      */
     private bool $isValidated;
 
     /**
-     * @var integer $postId
-     *
      * The ID of the post to which the comment belongs.
+     *
+     * @var int
      */
     private int $postId;
 
     /**
-     * @var integer $author
-     *
      * The ID of the author who wrote the comment.
+     *
+     * @var int
      */
     private int $author;
 
-    // Getters et Setters
-
+    /**
+     * Gets the ID of the comment.
+     *
+     * @return int
+     */
     public function getCommentId(): int
     {
         return $this->commentId;
     }
 
+    /**
+     * Sets the ID of the comment.
+     *
+     * @param int $commentId
+     * @return void
+     */
     public function setCommentId(int $commentId): void
     {
         $this->commentId = $commentId;
     }
 
+    /**
+     * Gets the content of the comment.
+     *
+     * @return string
+     */
     public function getContent(): string
     {
         return $this->content;
     }
 
+    /**
+     * Sets the content of the comment.
+     *
+     * @param string $content
+     * @return void
+     */
     public function setContent(string $content): void
     {
         $this->content = $content;
     }
 
+    /**
+     * Gets the date and time when the comment was created.
+     *
+     * @return DateTime
+     */
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
+    /**
+     * Sets the date and time when the comment was created.
+     *
+     * @param DateTime $createdAt
+     * @return void
+     */
     public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
+    /**
+     * Gets whether the comment has been validated.
+     *
+     * @return bool
+     */
     public function getIsValidated(): bool
     {
         return $this->isValidated;
     }
 
+    /**
+     * Sets whether the comment has been validated.
+     *
+     * @param bool $isValidated
+     * @return void
+     */
     public function setIsValidated(bool $isValidated): void
     {
         $this->isValidated = $isValidated;
     }
 
+    /**
+     * Gets the ID of the post to which the comment belongs.
+     *
+     * @return int
+     */
     public function getPostId(): int
     {
         return $this->postId;
     }
 
+    /**
+     * Sets the ID of the post to which the comment belongs.
+     *
+     * @param int $postId
+     * @return void
+     */
     public function setPostId(int $postId): void
     {
         $this->postId = $postId;
     }
 
+    /**
+     * Gets the ID of the author who wrote the comment.
+     *
+     * @return int
+     */
     public function getAuthor(): int
     {
         return $this->author;
     }
 
+    /**
+     * Sets the ID of the author who wrote the comment.
+     *
+     * @param int $author
+     * @return void
+     */
     public function setAuthor(int $author): void
     {
         $this->author = $author;

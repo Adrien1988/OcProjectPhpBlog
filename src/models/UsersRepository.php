@@ -8,6 +8,7 @@ use DateTime;
 
 class UsersRepository
 {
+
     /**
      * @var DatabaseInterface $dbi
      *
@@ -24,6 +25,7 @@ class UsersRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
+
     }
 
 
@@ -197,16 +199,20 @@ class UsersRepository
      */
     private function createUserFromResult(array $row): ?User
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données
-        if (
-            empty($row['user_id']) || empty($row['last_name']) || empty($row['first_name']) ||
-            empty($row['email']) || empty($row['password']) || empty($row['role']) ||
-            empty($row['created_at']) || empty($row['expire_at'])
+        // Vérification de la présence de tous les champs requis dans la ligne de données.
+        if (empty($row['user_id']) 
+            || empty($row['last_name']) 
+            || empty($row['first_name']) 
+            || empty($row['email']) 
+            || empty($row['password']) 
+            || empty($row['role']) 
+            || empty($row['created_at']) 
+            || empty($row['expire_at'])
         ) {
             throw new \InvalidArgumentException("All fields except 'updated_at' and 'token' are required.");
         }
 
-        // Création de l'instance de User avec les données récupérées
+        // Création de l'instance de User avec les données récupérées.
         return new User(
             userId: (int) $row['user_id'],
             lastName: $row['last_name'],
@@ -219,5 +225,8 @@ class UsersRepository
             token: $row['token'] ?? '',
             expireAt: new DateTime($row['expire_at'])
         );
+
     }
+
+
 }

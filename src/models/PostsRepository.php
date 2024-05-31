@@ -11,22 +11,26 @@ use DateTime;
  */
 class PostsRepository
 {
+
     /**
-     * @var DatabaseInterface $db
+     * @var DatabaseInterface $dbi
      *
      * The database interface for interacting with the database.
      */
-    private DatabaseInterface $db;
+    private DatabaseInterface $dbi;
+
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $db Interface pour interagir avec la base de données.
+     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
      */
-    public function __construct(DatabaseInterface $db)
+    public function __construct(DatabaseInterface $dbi)
     {
-        $this->db = $db;
+        $this->dbi = $dbi;
+
     }
+
 
     /**
      * Récupère tous les articles.
@@ -35,19 +39,21 @@ class PostsRepository
      */
     public function findAll(): array
     {
-        // 'query' retourne maintenant un Iterator
-        $results = $this->db->query("SELECT * FROM post");
+        // 'query' retourne maintenant un Iterator.
+        $results = $this->dbi->query("SELECT * FROM post");
 
-        // Initialiser un tableau pour stocker les objets Post
+        // Initialiser un tableau pour stocker les objets Post.
         $posts = [];
 
-        // Parcourir chaque ligne retournée par la requête
+        // Parcourir chaque ligne retournée par la requête.
         foreach ($results as $row) {
             $posts[] = $this->createPostFromResult($row);
         }
 
         return $posts;
+
     }
+
 
     /**
      * Récupère un article par son identifiant.
@@ -57,18 +63,20 @@ class PostsRepository
      */
     public function findById(int $postId): ?Post
     {
-        // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID
-        $result = $this->db->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
+        // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID.
+        $result = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
 
-        // Vérifie si le résultat contient au moins un enregistrement
+        // Vérifie si le résultat contient au moins un enregistrement.
         if (!empty($result)) {
-            // Utilise createPostFromResult pour transformer le premier enregistrement trouvé en objet Post
+            // Utilise createPostFromResult pour transformer le premier enregistrement trouvé en objet Post.
             return $this->createPostFromResult($result[0]);
         }
 
-        // Retourne null si aucun enregistrement n'est trouvé
+        // Retourne null si aucun enregistrement n'est trouvé.
         return null;
+
     }
+
 
     /**
      * Insère un nouvel article dans la base de données.
@@ -83,14 +91,14 @@ class PostsRepository
      */
     public function createPost(Post $post): Post
     {
-        // La requête SQL pour insérer un nouvel article
+        // La requête SQL pour insérer un nouvel article.
         $sql = "INSERT INTO post (title, chapo, content, author, created_at, updated_at) 
                 VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
-        $stmt = $this->db->prepare($sql);
+        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
+        $stmt = $this->dbi->prepare($sql);
 
-        // Liaison des valeurs à la requête préparée
+        // Liaison des valeurs à la requête préparée.
         $stmt->bindValue(':title', $post->getTitle());
         $stmt->bindValue(':chapo', $post->getChapo());
         $stmt->bindValue(':content', $post->getContent());
@@ -99,15 +107,17 @@ class PostsRepository
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
         // Exécution de la requête
-        if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to insert the post into the database.");
         }
 
-        // Récupération et définition de l'ID de la dernière ligne insérée
-        $post->setPostId((int) $this->db->lastInsertId());
+        // Récupération et définition de l'ID de la dernière ligne insérée.
+        $post->setPostId((int) $this->dbi->lastInsertId());
 
         return $post;
+
     }
+
 
     /**
      * Met à jour un article existant dans la base de données.
@@ -122,15 +132,15 @@ class PostsRepository
      */
     public function updatePost(Post $post): bool
     {
-        // La requête SQL pour mettre à jour un article existant
+        // La requête SQL pour mettre à jour un article existant.
         $sql = "UPDATE posts SET title = :title, chapo = :chapo, content = :content, 
                 author = :author, created_at = :created_at, updated_at = :updated_at 
                 WHERE post_id = :post_id";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
-        $stmt = $this->db->prepare($sql);
+        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
+        $stmt = $this->dbi->prepare($sql);
 
-        // Liaison des valeurs à la requête préparée
+        // Liaison des valeurs à la requête préparée.
         $stmt->bindValue(':title', $post->getTitle());
         $stmt->bindValue(':chapo', $post->getChapo());
         $stmt->bindValue(':content', $post->getContent());
@@ -139,13 +149,15 @@ class PostsRepository
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
         $stmt->bindValue(':post_id', $post->getPostId());
 
-        // Exécution de la requête
-        if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        // Exécution de la requête.
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to update the post in the database.");
         }
 
         return true;
+
     }
+
 
     /**
      * Supprime un article existant dans la base de données basé sur son identifiant.
@@ -160,21 +172,22 @@ class PostsRepository
      */
     public function deletePost(int $postId): bool
     {
-        // La requête SQL pour supprimer un article
+        // La requête SQL pour supprimer un article.
         $sql = "DELETE FROM posts WHERE post_id = :post_id";
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface
-        $stmt = $this->db->prepare($sql);
+        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
+        $stmt = $this->dbi->prepare($sql);
 
-        // Liaison de l'identifiant à la requête préparée
+        // Liaison de l'identifiant à la requête préparée.
         $stmt->bindValue(':post_id', $postId);
 
-        // Exécution de la requête
-        if (!$this->db->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        // Exécution de la requête.
+        if (!$this->dbi->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
             throw new \Exception("Failed to delete the post from the database.");
         }
 
         return true;
+
     }
 
 
@@ -190,7 +203,7 @@ class PostsRepository
      */
     private function createPostFromResult(array $row): ?Post
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données
+        // Vérification de la présence de tous les champs requis dans la ligne de données.
         if (
             empty($row['post_id']) || empty($row['title']) || empty($row['chapo']) ||
             empty($row['content']) || empty($row['author']) || empty($row['created_at'])
@@ -198,7 +211,7 @@ class PostsRepository
             throw new \InvalidArgumentException("All fields except 'updated_at' are required.");
         }
 
-        // Création de l'instance de Post avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté
+        // Création de l'instance de Post avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté.
         return new Post(
             postId: (int) $row['post_id'],
             title: $row['title'],
@@ -208,5 +221,8 @@ class PostsRepository
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null
         );
+
     }
+
+
 }

@@ -9,125 +9,202 @@ use DateTime;
  */
 class Post
 {
+
     /**
-     * @var integer $postId
-     *
      * The unique identifier of the post.
+     *
+     * @var int
      */
     private int $postId;
 
     /**
-     * @var string $title
-     *
      * The title of the post.
+     *
+     * @var string
      */     
     private string $title;
 
     /**
-     * @var string $chapo
-     *
      * The introductory paragraph of the post.
+     *
+     * @var string
      */     
     private string $chapo;
 
     /**
-     * @var string $content
-     *
      * The main content of the post.
+     *
+     * @var string
      */     
     private string $content;
 
     /**
-     * @var integer $author
-     *
      * The identifier of the author who wrote the post.
+     *
+     * @var int
      */     
     private int $author;
 
     /**
-     * @var DateTime $createdAt
-     *
      * The date and time when the post was created.
+     *
+     * @var DateTime
      */     
     private DateTime $createdAt;
 
     /**
-     * @var ?DateTime $updatedAt
-     *
      * The date and time when the post was last updated, can be null.
+     *
+     * @var ?DateTime
      */     
     private ?DateTime $updatedAt = null;
 
-
-    // Getters and Setters
-
+    /**
+     * Gets the unique identifier of the post.
+     *
+     * @return int
+     */
     public function getPostId(): int
     {
         return $this->postId;
     }
 
+    /**
+     * Sets the unique identifier of the post.
+     *
+     * @param int $postId
+     * @return void
+     */
     public function setPostId(int $postId): void
     {
         $this->postId = $postId;
     }
 
+    /**
+     * Gets the title of the post.
+     *
+     * @return string
+     */
     public function getTitle(): string
     {
         return $this->title;
     }
 
+    /**
+     * Sets the title of the post.
+     *
+     * @param string $title
+     * @return void
+     */
     public function setTitle(string $title): void
     {
         $this->title = $title;
     }
 
+    /**
+     * Gets the introductory paragraph of the post.
+     *
+     * @return string
+     */
     public function getChapo(): string
     {
         return $this->chapo;
     }
 
+    /**
+     * Sets the introductory paragraph of the post.
+     *
+     * @param string $chapo
+     * @return void
+     */
     public function setChapo(string $chapo): void
     {
         $this->chapo = $chapo;
     }
 
+    /**
+     * Gets the main content of the post.
+     *
+     * @return string
+     */
     public function getContent(): string
     {
         return $this->content;
     }
 
+    /**
+     * Sets the main content of the post.
+     *
+     * @param string $content
+     * @return void
+     */
     public function setContent(string $content): void
     {
         $this->content = $content;
     }
 
+    /**
+     * Gets the identifier of the author who wrote the post.
+     *
+     * @return int
+     */
     public function getAuthor(): int
     {
         return $this->author;
     }
 
+    /**
+     * Sets the identifier of the author who wrote the post.
+     *
+     * @param int $author
+     * @return void
+     */
     public function setAuthor(int $author): void
     {
         $this->author = $author;
     }
 
+    /**
+     * Gets the date and time when the post was created.
+     *
+     * @return DateTime
+     */
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
+    /**
+     * Sets the date and time when the post was created.
+     *
+     * @param DateTime $createdAt
+     * @return void
+     */
     public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
+    /**
+     * Gets the date and time when the post was last updated.
+     *
+     * @return ?DateTime
+     */
     public function getUpdatedAt(): ?DateTime
     {
         return $this->updatedAt;
     }
 
+    /**
+     * Sets the date and time when the post was last updated.
+     *
+     * @param ?DateTime $updatedAt
+     * @return void
+     */
     public function setUpdatedAt(?DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
+
+
 }

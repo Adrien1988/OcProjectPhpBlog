@@ -8,22 +8,23 @@ use DateTime;
 
 class CommentsRepository
 {
+
     /**
-     * @var DatabaseInterface $db
+     * @var DatabaseInterface $dbi
      *
      * The database interface for interacting with the database.
      */
-    private DatabaseInterface $db;
+    private DatabaseInterface $dbi;
 
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $db Interface pour interagir avec la base de données.
+     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
      */
-    public function __construct(DatabaseInterface $db)
+    public function __construct(DatabaseInterface $dbi)
     {
-        $this->db = $db;
+        $this->dbi = $dbi;
     }
 
 
@@ -40,7 +41,7 @@ class CommentsRepository
     {
         $sql = "INSERT INTO comments (content, created_at, is_validated, post_id, author) VALUES (:content, :created_at, :is_validated, :post_id, :author)";
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->dbi->prepare($sql);
 
         $stmt->bindValue(':content', $comment->getContent());
         $stmt->bindValue(':created_at', $comment->getCreatedAt()->format('Y-m-d H:i:s'));
@@ -49,11 +50,11 @@ class CommentsRepository
         $stmt->bindValue(':author', $comment->getAuthor());
         $stmt->bindValue(':comment_id', $comment->getCommentId());
 
-        if ($this->db->execute($stmt, []) === false) {
+        if ($this->dbi->execute($stmt, []) === false) {
             throw new \Exception("Failed to insert the comment into the database.");
         }
 
-        $comment->setCommentId((int) $this->db->lastInsertId());
+        $comment->setCommentId((int) $this->dbi->lastInsertId());
 
         return $comment;
     }
@@ -67,7 +68,7 @@ class CommentsRepository
     public function findAll(): array
     {
         // 'query' retourne maintenant un Iterator.
-        $results = $this->db->query("SELECT * FROM comment");
+        $results = $this->dbi->query("SELECT * FROM comment");
 
         // Initialiser un tableau pour stocker les objets Post.
         $comments = [];
@@ -92,12 +93,12 @@ class CommentsRepository
     public function updateCommentStatus(int $commentId, bool $isValidated): bool
     {
         $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->dbi->prepare($sql);
         $params = [
-                   ':is_validated' => $isValidated,
-                   ':comment_id' => $commentId
-                  ];
-        if (!$this->db->execute($stmt, $params) === false) {
+            ':is_validated' => $isValidated,
+            ':comment_id' => $commentId
+        ];
+        if (!$this->dbi->execute($stmt, $params) === false) {
             throw new \Exception("Failed to update the comment status in the database.");
         }
 
@@ -116,8 +117,12 @@ class CommentsRepository
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (
-            empty($row['comment_id']) || empty($row['content']) || empty($row['created_at']) || !isset($row['is_validated']) || empty($row['post_id']) || empty($row['author'])
+        if (empty($row['comment_id']) 
+            || empty($row['content']) 
+            || empty($row['created_at']) 
+            || !isset($row['is_validated']) 
+            || empty($row['post_id']) 
+            || empty($row['author'])
         ) {
             throw new \InvalidArgumentException("All fields are required.");
         }
@@ -130,5 +135,8 @@ class CommentsRepository
             postId: (int) $row['post_id'],
             author: (int) $row['author']
         );
+
     }
+
+
 }
