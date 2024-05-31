@@ -14,8 +14,6 @@ use Iterator;
  */
 interface DatabaseInterface
 {
-
-
     /**
      * Exécute une requête SQL avec les paramètres donnés et retourne un itérateur de résultats.
      *
@@ -23,7 +21,7 @@ interface DatabaseInterface
      * @param array  $params  Les paramètres à lier à la requête SQL.
      * @return Iterator        Un itérateur pour les résultats de la requête.
      */
-    public function query(string $sql, array $params=[]): Iterator;
+    public function query(string $sql, array $params = []): Iterator;
 
 
     /**
@@ -44,7 +42,7 @@ interface DatabaseInterface
      * @param array         $params Les paramètres à lier à la déclaration.
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
-    public function execute(\PDOStatement $stmt, array $params=[]): bool;
+    public function execute(\PDOStatement $stmt, array $params = []): bool;
 
 
     /**
@@ -54,6 +52,4 @@ interface DatabaseInterface
      * @return string L'identifiant de la dernière ligne insérée sous forme de chaîne.
      */
     public function lastInsertId(): string;
-
-
 }

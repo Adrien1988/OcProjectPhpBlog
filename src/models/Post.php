@@ -9,7 +9,6 @@ use DateTime;
  */
 class Post
 {
-
     /**
      * The unique identifier of the post.
      *
@@ -207,6 +206,4 @@ class Post
     {
         $this->updatedAt = $updatedAt;
     }
-
-
 }

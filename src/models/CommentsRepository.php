@@ -2,13 +2,14 @@
 
 namespace Models;
 
-use App\Models\Comment;
-use App\Core\Database\DatabaseInterface;
 use DateTime;
+use Exception;
+use App\Models\Comment;
+use InvalidArgumentException;
+use App\Core\Database\DatabaseInterface;
 
 class CommentsRepository
 {
-
     /**
      * @var DatabaseInterface $dbi
      *
@@ -25,7 +26,6 @@ class CommentsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-
     }
 
 
@@ -36,7 +36,7 @@ class CommentsRepository
      *
      * @return Comment L'objet commentaire avec l'ID nouvellement assigné.
      *
-     * @throws \Exception Si l'insertion échoue.
+     * @throws Exception Si l'insertion échoue.
      */
     public function createComment(Comment $comment): Comment
     {
@@ -46,13 +46,13 @@ class CommentsRepository
 
         $stmt->bindValue(':content', $comment->getContent());
         $stmt->bindValue(':created_at', $comment->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':is_validated', $comment->getIsValidated(), \PDO::PARAM_BOOL);
+        $stmt->bindValue(':is_validated', $comment->isValidated(), \PDO::PARAM_BOOL);
         $stmt->bindValue(':post_id', $comment->getPostId());
         $stmt->bindValue(':author', $comment->getAuthor());
         $stmt->bindValue(':comment_id', $comment->getCommentId());
 
         if ($this->dbi->execute($stmt, []) === false) {
-            throw new \Exception("Failed to insert the comment into the database.");
+            throw new Exception("Failed to insert the comment into the database.");
         }
 
         $comment->setCommentId((int) $this->dbi->lastInsertId());
@@ -89,7 +89,7 @@ class CommentsRepository
      * @param int  $commentId  L'identifiant du commentaire à mettre à jour.
      * @param bool $isValidated Le nouveau statut de validation.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
-     * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
+     * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updateCommentStatus(int $commentId, bool $isValidated): bool
     {
@@ -100,7 +100,7 @@ class CommentsRepository
                    ':comment_id' => $commentId
                   ];
         if (!$this->dbi->execute($stmt, $params) === false) {
-            throw new \Exception("Failed to update the comment status in the database.");
+            throw new Exception("Failed to update the comment status in the database.");
         }
 
         return true;
@@ -114,18 +114,19 @@ class CommentsRepository
      *
      * @param array $row Les données du commentaire extraites de la base de données.
      * @return Comment L'instance de Comment créée, ou null si les données essentielles manquent.
-     * @throws \InvalidArgumentException Si des données obligatoires sont manquantes.
+     * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (empty($row['comment_id'])
+        if (
+            empty($row['comment_id'])
             || empty($row['content'])
             || empty($row['created_at'])
             || !isset($row['is_validated'])
             || empty($row['post_id'])
             || empty($row['author'])
         ) {
-            throw new \InvalidArgumentException("All fields are required.");
+            throw new InvalidArgumentException("All fields are required.");
         }
 
         return new Comment(
@@ -136,8 +137,5 @@ class CommentsRepository
             postId: (int) $row['post_id'],
             author: (int) $row['author']
         );
-
     }
-
-
 }

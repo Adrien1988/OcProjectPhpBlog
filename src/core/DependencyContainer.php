@@ -13,7 +13,6 @@ use PDO;
  */
 class DependencyContainer
 {
-
     /**
      * Configuration pour les dépendances.
      *
@@ -37,7 +36,6 @@ class DependencyContainer
     public function __construct(array $configurations)
     {
         $this->configurations = $configurations;
-
     }
 
 
@@ -58,6 +56,5 @@ class DependencyContainer
         }
 
         return $this->instances['database'];
-
     }
 }

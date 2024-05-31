@@ -11,7 +11,6 @@ use Iterator;
  */
 class MySQLDatabase implements DatabaseInterface
 {
-
     /**
      * Instance PDO pour les interactions avec la base de données.
      *
@@ -28,7 +27,6 @@ class MySQLDatabase implements DatabaseInterface
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-
     }
 
 
@@ -58,7 +56,6 @@ class MySQLDatabase implements DatabaseInterface
     public function prepare(string $sql): PDOStatement
     {
         return $this->pdo->prepare($sql);
-
     }
 
 
@@ -72,7 +69,6 @@ class MySQLDatabase implements DatabaseInterface
     public function execute(PDOStatement $stmt, array $params = []): bool
     {
         return $stmt->execute($params);
-
     }
 
 
@@ -84,6 +80,5 @@ class MySQLDatabase implements DatabaseInterface
     public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
-
     }
 }

@@ -11,7 +11,6 @@ use DateTime;
  */
 class Comment
 {
-
     /**
      * The ID of the comment.
      *
@@ -124,7 +123,7 @@ class Comment
      *
      * @return bool
      */
-    public function getIsValidated(): bool
+    public function isValidated(): bool
     {
         return $this->isValidated;
     }

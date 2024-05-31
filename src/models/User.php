@@ -9,7 +9,6 @@ use DateTime;
  */
 class User
 {
-
     /**
      * The unique identifier of the user.
      *
@@ -89,7 +88,6 @@ class User
     public function getUserId(): int
     {
         return $this->userId;
-
     }
 
 

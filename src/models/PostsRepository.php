@@ -2,16 +2,17 @@
 
 namespace Models;
 
-use App\Models\Post;
-use App\Core\Database\DatabaseInterface;
 use DateTime;
+use Exception;
+use App\Models\Post;
+use InvalidArgumentException;
+use App\Core\Database\DatabaseInterface;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
  */
 class PostsRepository
 {
-
     /**
      * @var DatabaseInterface $dbi
      *
@@ -28,7 +29,6 @@ class PostsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-
     }
 
 
@@ -51,7 +51,6 @@ class PostsRepository
         }
 
         return $posts;
-
     }
 
 
@@ -74,7 +73,6 @@ class PostsRepository
 
         // Retourne null si aucun enregistrement n'est trouvé.
         return null;
-
     }
 
 
@@ -87,7 +85,7 @@ class PostsRepository
      *
      * @param Post $post L'objet Post à insérer dans la base de données.
      * @return Post Retourne l'objet Post avec l'identifiant attribué après l'insertion.
-     * @throws \Exception Si l'insertion échoue pour une raison quelconque.
+     * @throws Exception Si l'insertion échoue pour une raison quelconque.
      */
     public function createPost(Post $post): Post
     {
@@ -108,14 +106,13 @@ class PostsRepository
 
         // Exécution de la requête
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to insert the post into the database.");
+            throw new Exception("Failed to insert the post into the database.");
         }
 
         // Récupération et définition de l'ID de la dernière ligne insérée.
         $post->setPostId((int) $this->dbi->lastInsertId());
 
         return $post;
-
     }
 
 
@@ -128,7 +125,7 @@ class PostsRepository
      *
      * @param Post $post L'objet Post à mettre à jour dans la base de données.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
-     * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
+     * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updatePost(Post $post): bool
     {
@@ -151,11 +148,10 @@ class PostsRepository
 
         // Exécution de la requête.
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to update the post in the database.");
+            throw new Exception("Failed to update the post in the database.");
         }
 
         return true;
-
     }
 
 
@@ -168,7 +164,7 @@ class PostsRepository
      *
      * @param int $postId L'identifiant de l'article à supprimer.
      * @return bool Retourne true si la suppression a réussi, sinon false.
-     * @throws \Exception Si la suppression échoue pour une raison quelconque.
+     * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
     public function deletePost(int $postId): bool
     {
@@ -183,11 +179,10 @@ class PostsRepository
 
         // Exécution de la requête.
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to delete the post from the database.");
+            throw new Exception("Failed to delete the post from the database.");
         }
 
         return true;
-
     }
 
 
@@ -204,14 +199,15 @@ class PostsRepository
     private function createPostFromResult(array $row): ?Post
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (empty($row['post_id'])
+        if (
+            empty($row['post_id'])
             || empty($row['title'])
             || empty($row['chapo'])
             || empty($row['content'])
             || empty($row['author'])
             || empty($row['created_at'])
         ) {
-            throw new \InvalidArgumentException("All fields except 'updated_at' are required.");
+            throw new InvalidArgumentException("All fields except 'updated_at' are required.");
         }
 
         // Création de l'instance de Post avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté.
@@ -224,8 +220,5 @@ class PostsRepository
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null
         );
-
     }
-
-
 }

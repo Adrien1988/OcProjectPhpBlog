@@ -2,13 +2,14 @@
 
 namespace Models;
 
-use App\Models\User;
-use App\Core\Database\DatabaseInterface;
 use DateTime;
+use Exception;
+use App\Models\User;
+use InvalidArgumentException;
+use App\Core\Database\DatabaseInterface;
 
 class UsersRepository
 {
-
     /**
      * @var DatabaseInterface $dbi
      *
@@ -25,7 +26,6 @@ class UsersRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-
     }
 
 
@@ -45,7 +45,6 @@ class UsersRepository
         }
 
         return $users;
-
     }
 
 
@@ -96,7 +95,7 @@ class UsersRepository
      *
      * @param User $user L'objet User à insérer dans la base de données.
      * @return User Retourne l'objet User avec l'identifiant attribué après l'insertion.
-     * @throws \Exception Si l'insertion échoue pour une raison quelconque.
+     * @throws Exception Si l'insertion échoue pour une raison quelconque.
      */
     public function createUser(User $user): User
     {
@@ -115,7 +114,7 @@ class UsersRepository
         $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
 
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to insert the user into the database.");
+            throw new Exception("Failed to insert the user into the database.");
         }
 
         $user->setUserId((int) $this->dbi->lastInsertId());
@@ -133,7 +132,7 @@ class UsersRepository
      *
      * @param User $user L'objet User à mettre à jour dans la base de données.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
-     * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
+     * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updateUser(User $user): bool
     {
@@ -155,7 +154,7 @@ class UsersRepository
         $stmt->bindValue(':user_id', $user->getUserId());
 
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to update the user in the database.");
+            throw new Exception("Failed to update the user in the database.");
         }
 
         return true;
@@ -171,7 +170,7 @@ class UsersRepository
      *
      * @param int $userId L'identifiant de l'utilisateur à supprimer.
      * @return bool Retourne true si la suppression a réussi, sinon false.
-     * @throws \Exception Si la suppression échoue pour une raison quelconque.
+     * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
     public function deleteUser(int $userId): bool
     {
@@ -182,7 +181,7 @@ class UsersRepository
         $stmt->bindValue(':user_id', $userId);
 
         if (!$this->dbi->execute($stmt, [])) {
-            throw new \Exception("Failed to delete the user from the database.");
+            throw new Exception("Failed to delete the user from the database.");
         }
 
         return true;
@@ -190,30 +189,43 @@ class UsersRepository
 
 
     /**
-     * Crée un utilisateur à partir des données de résultat.
+     * Crée un utilisateur à partir d'une ligne de données.
      *
-     * @param array $row Les données de résultat pour créer un utilisateur.
-     *
-     * @return User|null L'instance de l'utilisateur créé ou null si les données sont invalides.
-     *
-     * @throws \InvalidArgumentException Si un champ requis est manquant.
+     * @param array $row La ligne de données contenant les informations de l'utilisateur.
+     * @return User|null L'instance de User créée ou null en cas d'erreur.
+     * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function createUserFromResult(array $row): ?User
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (empty($row['user_id'])
-            || empty($row['last_name'])
-            || empty($row['first_name'])
-            || empty($row['email'])
-            || empty($row['password'])
-            || empty($row['role'])
-            || empty($row['created_at'])
-            || empty($row['expire_at'])
-        ) {
-            throw new \InvalidArgumentException("All fields except 'updated_at' and 'token' are required.");
-        }
+        $this->validateRow($row);
 
-        // Création de l'instance de User avec les données récupérées.
+        return $this->buildUserFromRow($row);
+    }
+
+    /**
+     * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
+     *
+     * @param array $row La ligne de données à valider.
+     * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
+     */
+    private function validateRow(array $row): void
+    {
+        $requiredFields = ['user_id', 'last_name', 'first_name', 'email', 'password', 'role', 'created_at', 'expire_at'];
+        foreach ($requiredFields as $field) {
+            if (empty($row[$field])) {
+                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' et 'token' sont requis.");
+            }
+        }
+    }
+
+    /**
+     * Construit une instance de User à partir de la ligne de données.
+     *
+     * @param array $row La ligne de données contenant les informations de l'utilisateur.
+     * @return User L'instance de User créée.
+     */
+    private function buildUserFromRow(array $row): User
+    {
         return new User(
             userId: (int) $row['user_id'],
             lastName: $row['last_name'],
@@ -226,8 +238,5 @@ class UsersRepository
             token: $row['token'] ?? '',
             expireAt: new DateTime($row['expire_at'])
         );
-
     }
-
-
 }

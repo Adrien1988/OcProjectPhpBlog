@@ -9,7 +9,6 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class CsrfMiddleware
 {
-
     /**
      * Instance pour gérer la protection contre les attaques CSRF.
      *
@@ -26,7 +25,6 @@ class CsrfMiddleware
     public function __construct()
     {
         $this->antiCSRF = new AntiCSRF();
-
     } //end_construct().
 
 

@@ -6,7 +6,6 @@ use voku\helper\AntiXSS;
 
 class SecurityService
 {
-
     /**
      * Instance pour gérer la protection contre les attaques XSS.
      *
@@ -23,7 +22,6 @@ class SecurityService
     public function __construct()
     {
         $this->antiXSS = new AntiXSS();
-
     }
 
 
@@ -38,8 +36,5 @@ class SecurityService
     public function cleanInput(string $input): string
     {
         return $this->antiXSS->xss_clean($input);
-
     }
-
-
 }
