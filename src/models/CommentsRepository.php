@@ -119,21 +119,23 @@ class CommentsRepository
      * et utilise des paramètres nommés pour plus de clarté lors de la création de l'objet Comment.
      *
      * @param  array $row Les données du commentaire extraites de la base de données.
-     * @return Comment L'instance de Comment créée, ou null si les données essentielles manquent.
+     * @return Comment|null L'instance de Comment créée, ou null si les données essentielles manquent.
      * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (empty($row['comment_id'])
-            || empty($row['content'])
-            || empty($row['created_at'])
-            || !isset($row['is_validated'])
-            || empty($row['post_id'])
-            || empty($row['author'])
+        // Vérification de la présence de tous les champs requis dans la ligne de données.
+        if ($this->isFieldEmpty($row, 'comment_id')
+            || $this->isFieldEmpty($row, 'content')
+            || $this->isFieldEmpty($row, 'created_at')
+            || !array_key_exists('is_validated', $row)
+            || $this->isFieldEmpty($row, 'post_id')
+            || $this->isFieldEmpty($row, 'author')
         ) {
             throw new InvalidArgumentException("All fields are required.");
         }
 
+        // Création de l'instance de Comment avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté.
         return new Comment(
             commentId: (int) $row['comment_id'],
             content: $row['content'],
@@ -144,6 +146,21 @@ class CommentsRepository
         );
 
     }//end createCommentFromResult()
+
+
+    /**
+     * Vérifie si un champ est vide (non défini ou vide).
+     *
+     * @param  array  $row   Le tableau de
+     *                       données.
+     * @param  string $field Le nom du champ à vérifier.
+     * @return bool Retourne true si le champ est vide, sinon false.
+     */
+    private function isFieldEmpty(array $row, string $field): bool
+    {
+        return !isset($row[$field]) || $row[$field] === '';
+
+    }//end isFieldEmpty()
 
 
 }//end class

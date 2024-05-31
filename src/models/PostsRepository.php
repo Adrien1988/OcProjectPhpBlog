@@ -206,12 +206,12 @@ class PostsRepository
     private function createPostFromResult(array $row): ?Post
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (empty($row['post_id'])
-            || empty($row['title'])
-            || empty($row['chapo'])
-            || empty($row['content'])
-            || empty($row['author'])
-            || empty($row['created_at'])
+        if ($this->isFieldEmpty($row, 'post_id')
+            || $this->isFieldEmpty($row, 'title')
+            || $this->isFieldEmpty($row, 'chapo')
+            || $this->isFieldEmpty($row, 'content')
+            || $this->isFieldEmpty($row, 'author')
+            || $this->isFieldEmpty($row, 'created_at')
         ) {
             throw new InvalidArgumentException("All fields except 'updated_at' are required.");
         }
@@ -228,6 +228,21 @@ class PostsRepository
         );
 
     }//end createPostFromResult()
+
+
+    /**
+     * Vérifie si un champ est vide (non défini ou vide).
+     *
+     * @param  array  $row   Le tableau de
+     *                       données.
+     * @param  string $field Le nom du champ à vérifier.
+     * @return bool Retourne true si le champ est vide, sinon false.
+     */
+    private function isFieldEmpty(array $row, string $field): bool
+    {
+        return !isset($row[$field]) || $row[$field] === '';
+
+    }//end isFieldEmpty()
 
 
 }//end class

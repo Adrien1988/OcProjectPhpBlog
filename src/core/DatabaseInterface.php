@@ -32,11 +32,8 @@ interface DatabaseInterface
      * Prépare une requête SQL avec des paramètres et retourne un objet pour exécuter cette requête.
      * Peut lever une exception si la préparation échoue.
      *
-     * @param  string $sql    La chaîne de la requête SQL
-     *                        à préparer.
-     * @param  array  $params Les paramètres à lier à la
-     *                        requête préparée.
-     * @return PDOStatement    Un objet représentant la requête préparée.
+     * @param  string $sql La chaîne de la requête SQL à préparer.
+     * @return PDOStatement Un objet représentant la requête préparée.
      */
     public function prepare(string $sql): \PDOStatement;
 
