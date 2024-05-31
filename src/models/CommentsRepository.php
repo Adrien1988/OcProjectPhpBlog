@@ -124,18 +124,51 @@ class CommentsRepository
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if ($this->isFieldEmpty($row, 'comment_id')
-            || $this->isFieldEmpty($row, 'content')
-            || $this->isFieldEmpty($row, 'created_at')
-            || !array_key_exists('is_validated', $row)
-            || $this->isFieldEmpty($row, 'post_id')
-            || $this->isFieldEmpty($row, 'author')
-        ) {
-            throw new InvalidArgumentException("All fields are required.");
+        $this->validateRow($row);
+
+        return $this->buildCommentFromRow($row);
+
+    }//end createCommentFromResult()
+
+
+    /**
+     * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
+     *
+     * @param  array $row La ligne de données à valider.
+     * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
+     */
+    private function validateRow(array $row): void
+    {
+        $requiredFields = [
+            'comment_id',
+            'content',
+            'created_at',
+            'is_validated',
+            'post_id',
+            'author',
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (array_key_exists($field, $row) === false || $row[$field] === '') {
+                if ($field === 'is_validated' && array_key_exists($field, $row) === false) {
+                    throw new InvalidArgumentException("Le champ 'is_validated' est requis.");
+                } else if ($field !== 'is_validated') {
+                    throw new InvalidArgumentException("Tous les champs sont requis.");
+                }
+            }
         }
 
-        // Création de l'instance de Comment avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté.
+    }//end validateRow()
+
+
+    /**
+     * Construit une instance de Comment à partir de la ligne de données.
+     *
+     * @param  array $row La ligne de données contenant les informations du commentaire.
+     * @return Comment L'instance de Comment créée.
+     */
+    private function buildCommentFromRow(array $row): Comment
+    {
         return new Comment(
             commentId: (int) $row['comment_id'],
             content: $row['content'],
@@ -145,22 +178,7 @@ class CommentsRepository
             author: (int) $row['author']
         );
 
-    }//end createCommentFromResult()
-
-
-    /**
-     * Vérifie si un champ est vide (non défini ou vide).
-     *
-     * @param  array  $row   Le tableau de
-     *                       données.
-     * @param  string $field Le nom du champ à vérifier.
-     * @return bool Retourne true si le champ est vide, sinon false.
-     */
-    private function isFieldEmpty(array $row, string $field): bool
-    {
-        return !isset($row[$field]) || $row[$field] === '';
-
-    }//end isFieldEmpty()
+    }//end buildCommentFromRow()
 
 
 }//end class

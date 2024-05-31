@@ -205,18 +205,47 @@ class PostsRepository
      */
     private function createPostFromResult(array $row): ?Post
     {
-        // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if ($this->isFieldEmpty($row, 'post_id')
-            || $this->isFieldEmpty($row, 'title')
-            || $this->isFieldEmpty($row, 'chapo')
-            || $this->isFieldEmpty($row, 'content')
-            || $this->isFieldEmpty($row, 'author')
-            || $this->isFieldEmpty($row, 'created_at')
-        ) {
-            throw new InvalidArgumentException("All fields except 'updated_at' are required.");
+        $this->validateRow($row);
+
+        return $this->buildPostFromRow($row);
+
+    }//end createPostFromResult()
+
+
+    /**
+     * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
+     *
+     * @param  array $row La ligne de données à valider.
+     * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
+     */
+    private function validateRow(array $row): void
+    {
+        $requiredFields = [
+            'post_id',
+            'title',
+            'chapo',
+            'content',
+            'author',
+            'created_at',
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (array_key_exists($field, $row) === false || $row[$field] === '') {
+                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' sont requis.");
+            }
         }
 
-        // Création de l'instance de Post avec les données récupérées, en utilisant des paramètres nommés pour plus de clarté.
+    }//end validateRow()
+
+
+    /**
+     * Construit une instance de Post à partir de la ligne de données.
+     *
+     * @param  array $row La ligne de données contenant les informations de l'article.
+     * @return Post L'instance de Post créée.
+     */
+    private function buildPostFromRow(array $row): Post
+    {
         return new Post(
             postId: (int) $row['post_id'],
             title: $row['title'],
@@ -227,22 +256,7 @@ class PostsRepository
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null
         );
 
-    }//end createPostFromResult()
-
-
-    /**
-     * Vérifie si un champ est vide (non défini ou vide).
-     *
-     * @param  array  $row   Le tableau de
-     *                       données.
-     * @param  string $field Le nom du champ à vérifier.
-     * @return bool Retourne true si le champ est vide, sinon false.
-     */
-    private function isFieldEmpty(array $row, string $field): bool
-    {
-        return !isset($row[$field]) || $row[$field] === '';
-
-    }//end isFieldEmpty()
+    }//end buildPostFromRow()
 
 
 }//end class
