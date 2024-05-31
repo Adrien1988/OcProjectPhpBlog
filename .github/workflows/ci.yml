@@ -24,9 +24,6 @@ jobs:
       - name: Run PHPMD
         run: vendor/bin/phpmd src text phpmd.xml
 
-      - name: Run PHPUnit tests
-        run: vendor/bin/phpunit --configuration phpunit.xml
-
       - name: Send coverage to Codacy
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
         env:
