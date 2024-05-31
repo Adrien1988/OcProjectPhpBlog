@@ -13,7 +13,7 @@ class User
     /**
      * The unique identifier of the user.
      *
-     * @var int
+     * @var integer
      */
     private int $userId;
 
@@ -80,6 +80,7 @@ class User
      */
     private DateTime $expireAt;
 
+
     /**
      * Gets the unique identifier of the user.
      *
@@ -88,12 +89,14 @@ class User
     public function getUserId(): int
     {
         return $this->userId;
+
     }
+
 
     /**
      * Sets the unique identifier of the user.
      *
-     * @param int $userId
+     * @param int $userId The unique identifier of the user.
      * @return void
      */
     public function setUserId(int $userId): void
@@ -114,7 +117,7 @@ class User
     /**
      * Sets the last name of the user.
      *
-     * @param string $lastName
+     * @param string $lastName The last name of the user.
      * @return void
      */
     public function setLastName(string $lastName): void
@@ -135,7 +138,7 @@ class User
     /**
      * Sets the first name of the user.
      *
-     * @param string $firstName
+     * @param string $firstName The first name of the user.
      * @return void
      */
     public function setFirstName(string $firstName): void
@@ -156,7 +159,7 @@ class User
     /**
      * Sets the email address of the user.
      *
-     * @param string $email
+     * @param string $email The email address of the user.
      * @return void
      */
     public function setEmail(string $email): void
@@ -177,7 +180,7 @@ class User
     /**
      * Sets the hashed password of the user.
      *
-     * @param string $password
+     * @param string $password The hashed password of the user.
      * @return void
      */
     public function setPassword(string $password): void
@@ -198,7 +201,7 @@ class User
     /**
      * Sets the role of the user (e.g., admin, user).
      *
-     * @param string $role
+     * @param string $role The role of the user.
      * @return void
      */
     public function setRole(string $role): void
@@ -219,7 +222,7 @@ class User
     /**
      * Sets the date and time when the user account was created.
      *
-     * @param DateTime $createdAt
+     * @param DateTime $createdAt The date and time when the user account was created.
      * @return void
      */
     public function setCreatedAt(DateTime $createdAt): void
@@ -240,7 +243,7 @@ class User
     /**
      * Sets the date and time when the user account was last updated.
      *
-     * @param ?DateTime $updatedAt
+     * @param ?DateTime $updatedAt The date and time when the user account was last updated.
      * @return void
      */
     public function setUpdatedAt(?DateTime $updatedAt): void
@@ -261,7 +264,7 @@ class User
     /**
      * Sets the authentication token for the user.
      *
-     * @param string $token
+     * @param string $token The authentication token for the user.
      * @return void
      */
     public function setToken(string $token): void
@@ -282,7 +285,7 @@ class User
     /**
      * Sets the date and time when the user's session or token expires.
      *
-     * @param DateTime $expireAt
+     * @param DateTime $expireAt The date and time when the user's session or token expires.
      * @return void
      */
     public function setExpireAt(DateTime $expireAt): void

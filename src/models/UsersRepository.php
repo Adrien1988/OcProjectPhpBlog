@@ -45,6 +45,7 @@ class UsersRepository
         }
 
         return $users;
+
     }
 
 
@@ -200,13 +201,13 @@ class UsersRepository
     private function createUserFromResult(array $row): ?User
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (empty($row['user_id']) 
-            || empty($row['last_name']) 
-            || empty($row['first_name']) 
-            || empty($row['email']) 
-            || empty($row['password']) 
-            || empty($row['role']) 
-            || empty($row['created_at']) 
+        if (empty($row['user_id'])
+            || empty($row['last_name'])
+            || empty($row['first_name'])
+            || empty($row['email'])
+            || empty($row['password'])
+            || empty($row['role'])
+            || empty($row['created_at'])
             || empty($row['expire_at'])
         ) {
             throw new \InvalidArgumentException("All fields except 'updated_at' and 'token' are required.");

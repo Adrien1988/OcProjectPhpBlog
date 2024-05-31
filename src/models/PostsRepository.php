@@ -182,7 +182,7 @@ class PostsRepository
         $stmt->bindValue(':post_id', $postId);
 
         // Exécution de la requête.
-        if (!$this->dbi->execute($stmt, [])) {  // Utilisation de la méthode execute de l'interface
+        if (!$this->dbi->execute($stmt, [])) {
             throw new \Exception("Failed to delete the post from the database.");
         }
 
@@ -204,9 +204,12 @@ class PostsRepository
     private function createPostFromResult(array $row): ?Post
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (
-            empty($row['post_id']) || empty($row['title']) || empty($row['chapo']) ||
-            empty($row['content']) || empty($row['author']) || empty($row['created_at'])
+        if (empty($row['post_id'])
+            || empty($row['title'])
+            || empty($row['chapo'])
+            || empty($row['content'])
+            || empty($row['author'])
+            || empty($row['created_at'])
         ) {
             throw new \InvalidArgumentException("All fields except 'updated_at' are required.");
         }

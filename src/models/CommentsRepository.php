@@ -25,6 +25,7 @@ class CommentsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
+
     }
 
 
@@ -85,7 +86,7 @@ class CommentsRepository
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param int $commentId  L'identifiant du commentaire à mettre à jour.
+     * @param int  $commentId  L'identifiant du commentaire à mettre à jour.
      * @param bool $isValidated Le nouveau statut de validation.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
@@ -95,9 +96,9 @@ class CommentsRepository
         $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
         $stmt = $this->dbi->prepare($sql);
         $params = [
-            ':is_validated' => $isValidated,
-            ':comment_id' => $commentId
-        ];
+                   ':is_validated' => $isValidated,
+                   ':comment_id' => $commentId
+                  ];
         if (!$this->dbi->execute($stmt, $params) === false) {
             throw new \Exception("Failed to update the comment status in the database.");
         }
@@ -117,11 +118,11 @@ class CommentsRepository
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (empty($row['comment_id']) 
-            || empty($row['content']) 
-            || empty($row['created_at']) 
-            || !isset($row['is_validated']) 
-            || empty($row['post_id']) 
+        if (empty($row['comment_id'])
+            || empty($row['content'])
+            || empty($row['created_at'])
+            || !isset($row['is_validated'])
+            || empty($row['post_id'])
             || empty($row['author'])
         ) {
             throw new \InvalidArgumentException("All fields are required.");
