@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
-$config = require(__DIR__.'/../config/config.php');
+$config = require __DIR__ . '/../config/config.php';
 
 if ($config === false || !isset($config['database'])) {
     throw new Exception('Configuration de la base de données introuvable.');
@@ -41,7 +41,7 @@ $twig = new Environment(
 );
 
 // Charger les routes.
-$routes = include_once __DIR__.'/../config/routes.php';
+$routes = include_once __DIR__ . '/../config/routes.php';
 
 // Initialiser le contexte de la requête.
 $context = new RequestContext();
