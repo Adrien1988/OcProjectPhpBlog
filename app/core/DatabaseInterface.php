@@ -19,8 +19,8 @@ interface DatabaseInterface
     /**
      * Exécute une requête SQL avec les paramètres donnés et retourne un itérateur de résultats.
      *
-     * @param string  $sql     La requête SQL à exécuter.
-     * @param array   $params  Les paramètres à lier à la requête SQL.
+     * @param string $sql     La requête SQL à exécuter.
+     * @param array  $params  Les paramètres à lier à la requête SQL.
      * @return Iterator        Un itérateur pour les résultats de la requête.
      */
     public function query(string $sql, array $params=[]): Iterator;
