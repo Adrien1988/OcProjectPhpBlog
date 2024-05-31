@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use App\Models\Post;
 use App\Models\User;
@@ -41,7 +41,7 @@ $twig = new Environment(
 );
 
 // Charger les routes.
-$routes = include_once __DIR__ . '/../config/routes.php';
+$routes = include __DIR__ . '/../config/routes.php';
 
 // Initialiser le contexte de la requête.
 $context = new RequestContext();
