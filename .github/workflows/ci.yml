@@ -19,10 +19,10 @@ jobs:
         run: composer install
 
       - name: Run PHP_CodeSniffer
-        run: vendor/bin/phpcs --standard=phpcs.xml src
+        run: phpcs --standard=phpcs.xml public src 
 
       - name: Run PHPMD
-        run: vendor/bin/phpmd src text phpmd.xml
+        run: php vendor\bin\phpmd src text phpmd.xml
 
       - name: Send coverage to Codacy
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
