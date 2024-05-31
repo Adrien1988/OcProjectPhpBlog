@@ -40,8 +40,8 @@ interface DatabaseInterface
     /**
      * Exécute une déclaration PDO avec les paramètres donnés.
      *
-     * @param \PDOStatement  $stmt   La déclaration PDO à exécuter.
-     * @param array          $params Les paramètres à lier à la déclaration.
+     * @param \PDOStatement $stmt   La déclaration PDO à exécuter.
+     * @param array         $params Les paramètres à lier à la déclaration.
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
     public function execute(\PDOStatement $stmt, array $params=[]): bool;
