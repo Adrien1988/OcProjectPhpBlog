@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Point d'entrée principal de l'application.
+ *
+ * Ce fichier initialise les composants essentiels de l'application tels que le conteneur de dépendances,
+ * les modèles, le moteur de template Twig, les routes, et gère les requêtes entrantes.
+ */
+
 require __DIR__.'/../vendor/autoload.php';
 
 use App\Models\Post;
@@ -14,20 +21,51 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
-$config = include __DIR__.'/../config/config.php';
 
-if ($config === false || !isset($config['database'])) {
-    throw new Exception('Configuration de la base de données introuvable.');
-}
+/**
+ * Charge la configuration de l'application.
+ *
+ * @return array La configuration de l'application.
+ * @throws Exception Si la configuration de la base de données est introuvable.
+ */
+function loadConfig(): array
+{
+    $config = include __DIR__.'/../config/config.php';
 
-// Initialiser le conteneur d'injection de dépendance avec les paramètres de la base de données.
-$container = new DependencyContainer(
-    [
-        'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
-        'db_user'     => $config['database']['user'],
-        'db_password' => $config['database']['password'],
-    ]
-);
+    if ($config === false || isset($config['database']) === false) {
+        throw new Exception('Configuration de la base de données introuvable.');
+    }
+
+    return $config;
+
+}//end loadConfig()
+
+
+// Charger la configuration.
+$config = loadConfig();
+
+
+/**
+ * Initialise le conteneur d'injection de dépendances.
+ *
+ * @param  array $config La configuration de l'application.
+ * @return DependencyContainer Le conteneur de dépendances initialisé.
+ */
+function initializeContainer(array $config): DependencyContainer
+{
+    return new DependencyContainer(
+        [
+            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
+            'db_user'     => $config['database']['user'],
+            'db_password' => $config['database']['password'],
+        ]
+    );
+
+}//end initializeContainer()
+
+
+// Initialiser le conteneur de dépendances.
+$container = initializeContainer($config);
 
 // Création des modèles et injection de l'instance de base de données à partir du conteneur.
 $postModel    = new Post($container->getDatabase());
@@ -69,6 +107,7 @@ try {
     // Supprimer les clés réservées de paramètres comme '_controller'.
     unset($parameters['_controller']);
 
+    // Appeler la méthode du contrôleur avec les paramètres extraits.
     $response = $controllerInstance->$method(...array_values($parameters));
 
     // Envoyer la réponse.

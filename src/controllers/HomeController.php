@@ -5,13 +5,16 @@ namespace App\Controllers;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
+/**
+ * Contrôleur pour la page d'accueil.
+ */
 class HomeController
 {
 
     /**
      * Instance de l'environnement Twig pour le rendu des templates.
      *
-     * @var \Twig\Environment
+     * @var Environment
      */
     private $twig;
 
@@ -38,7 +41,7 @@ class HomeController
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index()
+    public function index(): Response
     {
         $content = $this->twig->render('home/index.html.twig', ['message' => 'Welcome to the home page!']);
 

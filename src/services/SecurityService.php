@@ -4,6 +4,9 @@ namespace App\Services;
 
 use voku\helper\AntiXSS;
 
+/**
+ * Service de sécurité pour la protection contre les attaques XSS.
+ */
 class SecurityService
 {
 
