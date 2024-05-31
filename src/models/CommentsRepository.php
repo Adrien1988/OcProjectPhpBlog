@@ -10,6 +10,7 @@ use App\Core\Database\DatabaseInterface;
 
 class CommentsRepository
 {
+
     /**
      * @var DatabaseInterface $dbi
      *
@@ -26,7 +27,8 @@ class CommentsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-    }
+
+    }//end __construct()
 
 
     /**
@@ -58,7 +60,8 @@ class CommentsRepository
         $comment->setCommentId((int) $this->dbi->lastInsertId());
 
         return $comment;
-    }
+
+    }//end createComment()
 
 
     /**
@@ -80,31 +83,34 @@ class CommentsRepository
         }
 
         return $comments;
-    }
+
+    }//end findAll()
 
 
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param int  $commentId  L'identifiant du commentaire à mettre à jour.
-     * @param bool $isValidated Le nouveau statut de validation.
+     * @param  int  $commentId   L'identifiant du commentaire à mettre à
+     *                           jour.
+     * @param  bool $isValidated Le nouveau statut de validation.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updateCommentStatus(int $commentId, bool $isValidated): bool
     {
-        $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
-        $stmt = $this->dbi->prepare($sql);
+        $sql    = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
+        $stmt   = $this->dbi->prepare($sql);
         $params = [
-                   ':is_validated' => $isValidated,
-                   ':comment_id' => $commentId
-                  ];
+            ':is_validated' => $isValidated,
+            ':comment_id'   => $commentId,
+        ];
         if (!$this->dbi->execute($stmt, $params) === false) {
             throw new Exception("Failed to update the comment status in the database.");
         }
 
         return true;
-    }
+
+    }//end updateCommentStatus()
 
 
     /**
@@ -112,14 +118,13 @@ class CommentsRepository
      * Cette méthode vérifie que toutes les données requises sont présentes
      * et utilise des paramètres nommés pour plus de clarté lors de la création de l'objet Comment.
      *
-     * @param array $row Les données du commentaire extraites de la base de données.
+     * @param  array $row Les données du commentaire extraites de la base de données.
      * @return Comment L'instance de Comment créée, ou null si les données essentielles manquent.
      * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (
-            empty($row['comment_id'])
+        if (empty($row['comment_id'])
             || empty($row['content'])
             || empty($row['created_at'])
             || !isset($row['is_validated'])
@@ -137,5 +142,8 @@ class CommentsRepository
             postId: (int) $row['post_id'],
             author: (int) $row['author']
         );
-    }
-}
+
+    }//end createCommentFromResult()
+
+
+}//end class

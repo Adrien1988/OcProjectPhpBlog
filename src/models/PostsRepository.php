@@ -13,6 +13,7 @@ use App\Core\Database\DatabaseInterface;
  */
 class PostsRepository
 {
+
     /**
      * @var DatabaseInterface $dbi
      *
@@ -29,7 +30,8 @@ class PostsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-    }
+
+    }//end __construct()
 
 
     /**
@@ -51,13 +53,14 @@ class PostsRepository
         }
 
         return $posts;
-    }
+
+    }//end findAll()
 
 
     /**
      * Récupère un article par son identifiant.
      *
-     * @param int $postId L'identifiant de l'article à récupérer.
+     * @param  int $postId L'identifiant de l'article à récupérer.
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
     public function findById(int $postId): ?Post
@@ -73,7 +76,8 @@ class PostsRepository
 
         // Retourne null si aucun enregistrement n'est trouvé.
         return null;
-    }
+
+    }//end findById()
 
 
     /**
@@ -83,7 +87,7 @@ class PostsRepository
      * lie les valeurs de l'article à la requête pour éviter les injections SQL, et exécute la requête.
      * Après l'insertion, elle récupère l'ID de la ligne insérée et le définit sur l'objet Post.
      *
-     * @param Post $post L'objet Post à insérer dans la base de données.
+     * @param  Post $post L'objet Post à insérer dans la base de données.
      * @return Post Retourne l'objet Post avec l'identifiant attribué après l'insertion.
      * @throws Exception Si l'insertion échoue pour une raison quelconque.
      */
@@ -113,7 +117,8 @@ class PostsRepository
         $post->setPostId((int) $this->dbi->lastInsertId());
 
         return $post;
-    }
+
+    }//end createPost()
 
 
     /**
@@ -123,7 +128,7 @@ class PostsRepository
      * lie les valeurs de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle met à jour toutes les propriétés modifiables de l'article.
      *
-     * @param Post $post L'objet Post à mettre à jour dans la base de données.
+     * @param  Post $post L'objet Post à mettre à jour dans la base de données.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
@@ -152,7 +157,8 @@ class PostsRepository
         }
 
         return true;
-    }
+
+    }//end updatePost()
 
 
     /**
@@ -162,7 +168,7 @@ class PostsRepository
      * lie l'identifiant de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $postId L'identifiant de l'article à supprimer.
+     * @param  int $postId L'identifiant de l'article à supprimer.
      * @return bool Retourne true si la suppression a réussi, sinon false.
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
@@ -183,7 +189,8 @@ class PostsRepository
         }
 
         return true;
-    }
+
+    }//end deletePost()
 
 
     /**
@@ -192,15 +199,14 @@ class PostsRepository
      * un objet Post avec ces données. Elle vérifie que toutes les données obligatoires sont
      * présentes et lève une exception si des données essentielles manquent.
      *
-     * @param array $row Une ligne de résultat sous forme de tableau associatif contenant les données de l'article.
+     * @param  array $row Une ligne de résultat sous forme de tableau associatif contenant les données de l'article.
      * @return Post|null L'objet Post initialisé à partir des données de la ligne, ou null si des données essentielles manquent.
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function createPostFromResult(array $row): ?Post
     {
         // Vérification de la présence de tous les champs requis dans la ligne de données.
-        if (
-            empty($row['post_id'])
+        if (empty($row['post_id'])
             || empty($row['title'])
             || empty($row['chapo'])
             || empty($row['content'])
@@ -220,5 +226,8 @@ class PostsRepository
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null
         );
-    }
-}
+
+    }//end createPostFromResult()
+
+
+}//end class

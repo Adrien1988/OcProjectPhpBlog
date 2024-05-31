@@ -7,6 +7,7 @@ use Twig\Environment;
 
 class HomeController
 {
+
     /**
      * Instance de l'environnement Twig pour le rendu des templates.
      *
@@ -25,7 +26,8 @@ class HomeController
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
-    }
+
+    }//end __construct()
 
 
     /**
@@ -41,5 +43,8 @@ class HomeController
         $content = $this->twig->render('home/index.html.twig', ['message' => 'Welcome to the home page!']);
 
         return new Response($content);
-    }
-}
+
+    }//end index()
+
+
+}//end class

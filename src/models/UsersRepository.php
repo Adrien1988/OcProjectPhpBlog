@@ -10,6 +10,7 @@ use App\Core\Database\DatabaseInterface;
 
 class UsersRepository
 {
+
     /**
      * @var DatabaseInterface $dbi
      *
@@ -26,7 +27,8 @@ class UsersRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-    }
+
+    }//end __construct()
 
 
     /**
@@ -45,13 +47,14 @@ class UsersRepository
         }
 
         return $users;
-    }
+
+    }//end findAll()
 
 
     /**
      * Récupère un utilisateur par son identifiant.
      *
-     * @param int $userId L'identifiant de l'utilisateur à récupérer.
+     * @param  int $userId L'identifiant de l'utilisateur à récupérer.
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
     public function findById(int $userId): ?User
@@ -63,13 +66,14 @@ class UsersRepository
         }
 
         return null;
-    }
+
+    }//end findById()
 
 
     /**
      * Récupère un utilisateur par son adresse email utilisant une requête itérative.
      *
-     * @param string $email L'adresse email de l'utilisateur à récupérer.
+     * @param  string $email L'adresse email de l'utilisateur à récupérer.
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
     public function findByEmail(string $email): ?User
@@ -83,7 +87,8 @@ class UsersRepository
         }
 
         return null;
-    }
+
+    }//end findByEmail()
 
 
     /**
@@ -93,7 +98,7 @@ class UsersRepository
      * lie les valeurs de l'utilisateur à la requête pour éviter les injections SQL, et exécute la requête.
      * Après l'insertion, elle récupère l'ID de la ligne insérée et le définit sur l'objet User.
      *
-     * @param User $user L'objet User à insérer dans la base de données.
+     * @param  User $user L'objet User à insérer dans la base de données.
      * @return User Retourne l'objet User avec l'identifiant attribué après l'insertion.
      * @throws Exception Si l'insertion échoue pour une raison quelconque.
      */
@@ -120,7 +125,8 @@ class UsersRepository
         $user->setUserId((int) $this->dbi->lastInsertId());
 
         return $user;
-    }
+
+    }//end createUser()
 
 
     /**
@@ -130,7 +136,7 @@ class UsersRepository
      * lie les valeurs de l'utilisateur à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle met à jour toutes les propriétés modifiables de l'utilisateur.
      *
-     * @param User $user L'objet User à mettre à jour dans la base de données.
+     * @param  User $user L'objet User à mettre à jour dans la base de données.
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
@@ -158,7 +164,8 @@ class UsersRepository
         }
 
         return true;
-    }
+
+    }//end updateUser()
 
 
     /**
@@ -168,7 +175,7 @@ class UsersRepository
      * lie l'identifiant de l'utilisateur à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $userId L'identifiant de l'utilisateur à supprimer.
+     * @param  int $userId L'identifiant de l'utilisateur à supprimer.
      * @return bool Retourne true si la suppression a réussi, sinon false.
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
@@ -185,13 +192,14 @@ class UsersRepository
         }
 
         return true;
-    }
+
+    }//end deleteUser()
 
 
     /**
      * Crée un utilisateur à partir d'une ligne de données.
      *
-     * @param array $row La ligne de données contenant les informations de l'utilisateur.
+     * @param  array $row La ligne de données contenant les informations de l'utilisateur.
      * @return User|null L'instance de User créée ou null en cas d'erreur.
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
@@ -200,28 +208,41 @@ class UsersRepository
         $this->validateRow($row);
 
         return $this->buildUserFromRow($row);
-    }
+
+    }//end createUserFromResult()
+
 
     /**
      * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
      *
-     * @param array $row La ligne de données à valider.
+     * @param  array $row La ligne de données à valider.
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function validateRow(array $row): void
     {
-        $requiredFields = ['user_id', 'last_name', 'first_name', 'email', 'password', 'role', 'created_at', 'expire_at'];
+        $requiredFields = [
+            'user_id',
+            'last_name',
+            'first_name',
+            'email',
+            'password',
+            'role',
+            'created_at',
+            'expire_at',
+        ];
         foreach ($requiredFields as $field) {
             if (empty($row[$field])) {
                 throw new InvalidArgumentException("Tous les champs sauf 'updated_at' et 'token' sont requis.");
             }
         }
-    }
+
+    }//end validateRow()
+
 
     /**
      * Construit une instance de User à partir de la ligne de données.
      *
-     * @param array $row La ligne de données contenant les informations de l'utilisateur.
+     * @param  array $row La ligne de données contenant les informations de l'utilisateur.
      * @return User L'instance de User créée.
      */
     private function buildUserFromRow(array $row): User
@@ -235,8 +256,11 @@ class UsersRepository
             role: $row['role'],
             createdAt: new DateTime($row['created_at']),
             updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null,
-            token: $row['token'] ?? '',
+            token: ($row['token'] ?? ''),
             expireAt: new DateTime($row['expire_at'])
         );
-    }
-}
+
+    }//end buildUserFromRow()
+
+
+}//end class

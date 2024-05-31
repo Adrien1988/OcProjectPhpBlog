@@ -3,7 +3,6 @@
     xsi:noNamespaceSchemaLocation="phpcs.xsd">
     <description>The coding standard for PHP_CodeSniffer itself.</description>
 
-    
     <file>public</file>
     <file>src</file>
     <file>views</file>
@@ -72,6 +71,9 @@
     <rule ref="PSR2.Files.EndFileNewline" />
     <rule ref="PSR12.Files.OpenTag" />
     <rule ref="Zend.Files.ClosingTag" />
+    
+    <!-- Include the whole PSR1 standard -->
+    <rule ref="PSR1" />
 
     <!-- We use custom indent rules for arrays -->
     <rule ref="Generic.Arrays.ArrayIndent" />
