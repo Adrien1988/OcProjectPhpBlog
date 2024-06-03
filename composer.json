@@ -1,0 +1,17 @@
+{
+    "require": {
+        "twig/twig": "^3.0",
+        "voku/anti-xss": "^4.1",
+        "paragonie/anti-csrf": "^2.3",
+        "phpmailer/phpmailer": "^6.9",
+        "symfony/http-foundation": "^6.4",
+        "symfony/security-http": "^6.4",
+        "symfony/routing": "^6.4",
+        "twbs/bootstrap": "^5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

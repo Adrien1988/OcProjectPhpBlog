@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Assurez-vous que l'accès au dossier "public" se fait directement
+    RewriteBase /public
+
+    # Réécriture pour empêcher l'accès direct aux fichiers et dossiers sensibles
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirige toutes les autres requêtes vers index.php
+    RewriteRule . /index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    ErrorDocument 404 /index.php
+</IfModule>
