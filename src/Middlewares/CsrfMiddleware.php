@@ -39,8 +39,9 @@ class CsrfMiddleware
      * Cette méthode vérifie la validité du token CSRF pour les requêtes POST
      * et insère un nouveau token pour les requêtes GET.
      *
-     * @param  Request  $request La requête entrante.
-     * @param  callable $next    Le prochain middleware ou contrôleur à exécuter.
+     * @param Request  $request La requête entrante.
+     * @param callable $next    Le prochain middleware ou contrôleur à exécuter.
+     *
      * @return Response La réponse générée après le traitement de la requête.
      * @throws AccessDeniedHttpException Si le token CSRF est invalide pour une requête POST.
      */

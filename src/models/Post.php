@@ -75,7 +75,8 @@ class Post
     /**
      * Sets the unique identifier of the post.
      *
-     * @param  int $postId the unique identifier of the post.
+     * @param int $postId the unique identifier of the post.
+     *
      * @return void
      */
     public function setPostId(int $postId): void
@@ -100,7 +101,8 @@ class Post
     /**
      * Sets the title of the post.
      *
-     * @param  string $title the title of the post.
+     * @param string $title the title of the post.
+     *
      * @return void
      */
     public function setTitle(string $title): void
@@ -125,7 +127,8 @@ class Post
     /**
      * Sets the introductory paragraph of the post.
      *
-     * @param  string $chapo the introductory paragraph of the post.
+     * @param string $chapo the introductory paragraph of the post.
+     *
      * @return void
      */
     public function setChapo(string $chapo): void
@@ -150,7 +153,8 @@ class Post
     /**
      * Sets the main content of the post.
      *
-     * @param  string $content the main content of the post.
+     * @param string $content the main content of the post.
+     *
      * @return void
      */
     public function setContent(string $content): void
@@ -175,7 +179,8 @@ class Post
     /**
      * Sets the identifier of the author who wrote the post.
      *
-     * @param  int $author the identifier of the author who wrote the post.
+     * @param int $author the identifier of the author who wrote the post.
+     *
      * @return void
      */
     public function setAuthor(int $author): void
@@ -200,7 +205,8 @@ class Post
     /**
      * Sets the date and time when the post was created.
      *
-     * @param  DateTime $createdAt the date and time when the post was created.
+     * @param DateTime $createdAt the date and time when the post was created.
+     *
      * @return void
      */
     public function setCreatedAt(DateTime $createdAt): void
@@ -225,7 +231,8 @@ class Post
     /**
      * Sets the date and time when the post was last updated.
      *
-     * @param  ?DateTime $updatedAt the date and time when the post was last updated.
+     * @param ?DateTime $updatedAt the date and time when the post was last updated.
+     *
      * @return void
      */
     public function setUpdatedAt(?DateTime $updatedAt): void

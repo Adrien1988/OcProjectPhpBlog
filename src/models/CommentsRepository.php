@@ -12,9 +12,11 @@ class CommentsRepository
 {
 
     /**
-     * @var DatabaseInterface $dbi
+     * The database interface.
      *
      * The database interface for interacting with the database.
+     *
+     * @var DatabaseInterface $dbi
      */
     private DatabaseInterface $dbi;
 
@@ -90,10 +92,11 @@ class CommentsRepository
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param  int  $commentId   L'identifiant du commentaire à mettre à
-     *                           jour.
-     * @param  bool $isValidated Le nouveau statut de validation.
+     * @param int  $commentId   L'identifiant du commentaire à mettre à jour.
+     * @param bool $isValidated Le nouveau statut de validation.
+     *
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
+     *
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updateCommentStatus(int $commentId, bool $isValidated): bool
@@ -104,7 +107,7 @@ class CommentsRepository
             ':is_validated' => $isValidated,
             ':comment_id'   => $commentId,
         ];
-        if (!$this->dbi->execute($stmt, $params) === false) {
+        if ($this->dbi->execute($stmt, $params) === false) {
             throw new Exception("Failed to update the comment status in the database.");
         }
 
@@ -118,8 +121,10 @@ class CommentsRepository
      * Cette méthode vérifie que toutes les données requises sont présentes
      * et utilise des paramètres nommés pour plus de clarté lors de la création de l'objet Comment.
      *
-     * @param  array $row Les données du commentaire extraites de la base de données.
+     * @param array $row Les données du commentaire extraites de la base de données.
+     *
      * @return Comment|null L'instance de Comment créée, ou null si les données essentielles manquent.
+     *
      * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
      */
     private function createCommentFromResult(array $row): ?Comment
@@ -134,7 +139,10 @@ class CommentsRepository
     /**
      * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
      *
-     * @param  array $row La ligne de données à valider.
+     * @param array $row La ligne de données à valider.
+     *
+     * @return void
+     *
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function validateRow(array $row): void
@@ -164,7 +172,8 @@ class CommentsRepository
     /**
      * Construit une instance de Comment à partir de la ligne de données.
      *
-     * @param  array $row La ligne de données contenant les informations du commentaire.
+     * @param array $row La ligne de données contenant les informations du commentaire.
+     *
      * @return Comment L'instance de Comment créée.
      */
     private function buildCommentFromRow(array $row): Comment

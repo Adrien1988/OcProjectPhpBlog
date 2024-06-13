@@ -15,9 +15,11 @@ class PostsRepository
 {
 
     /**
-     * @var DatabaseInterface $dbi
+     * The database interface.
      *
      * The database interface for interacting with the database.
+     *
+     * @var DatabaseInterface $dbi
      */
     private DatabaseInterface $dbi;
 
@@ -60,7 +62,8 @@ class PostsRepository
     /**
      * Récupère un article par son identifiant.
      *
-     * @param  int $postId L'identifiant de l'article à récupérer.
+     * @param int $postId L'identifiant de l'article à récupérer.
+     *
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
     public function findById(int $postId): ?Post
@@ -69,7 +72,7 @@ class PostsRepository
         $result = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
 
         // Vérifie si le résultat contient au moins un enregistrement.
-        if (!empty($result)) {
+        if (empty($result) === false) {
             // Utilise createPostFromResult pour transformer le premier enregistrement trouvé en objet Post.
             return $this->createPostFromResult($result[0]);
         }
@@ -87,8 +90,10 @@ class PostsRepository
      * lie les valeurs de l'article à la requête pour éviter les injections SQL, et exécute la requête.
      * Après l'insertion, elle récupère l'ID de la ligne insérée et le définit sur l'objet Post.
      *
-     * @param  Post $post L'objet Post à insérer dans la base de données.
+     * @param Post $post L'objet Post à insérer dans la base de données.
+     *
      * @return Post Retourne l'objet Post avec l'identifiant attribué après l'insertion.
+     *
      * @throws Exception Si l'insertion échoue pour une raison quelconque.
      */
     public function createPost(Post $post): Post
@@ -106,10 +111,10 @@ class PostsRepository
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
         $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $post->getUpdatedAt() ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
+        $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
-        // Exécution de la requête
-        if (!$this->dbi->execute($stmt, [])) {
+        // Exécution de la requête.
+        if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to insert the post into the database.");
         }
 
@@ -128,8 +133,10 @@ class PostsRepository
      * lie les valeurs de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle met à jour toutes les propriétés modifiables de l'article.
      *
-     * @param  Post $post L'objet Post à mettre à jour dans la base de données.
+     * @param Post $post L'objet Post à mettre à jour dans la base de données.
+     *
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
+     *
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updatePost(Post $post): bool
@@ -148,11 +155,11 @@ class PostsRepository
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
         $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $post->getUpdatedAt() ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
+        $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
         $stmt->bindValue(':post_id', $post->getPostId());
 
         // Exécution de la requête.
-        if (!$this->dbi->execute($stmt, [])) {
+        if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to update the post in the database.");
         }
 
@@ -168,8 +175,10 @@ class PostsRepository
      * lie l'identifiant de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param  int $postId L'identifiant de l'article à supprimer.
+     * @param int $postId L'identifiant de l'article à supprimer.
+     *
      * @return bool Retourne true si la suppression a réussi, sinon false.
+     *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
     public function deletePost(int $postId): bool
@@ -184,7 +193,7 @@ class PostsRepository
         $stmt->bindValue(':post_id', $postId);
 
         // Exécution de la requête.
-        if (!$this->dbi->execute($stmt, [])) {
+        if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to delete the post from the database.");
         }
 
@@ -199,8 +208,10 @@ class PostsRepository
      * un objet Post avec ces données. Elle vérifie que toutes les données obligatoires sont
      * présentes et lève une exception si des données essentielles manquent.
      *
-     * @param  array $row Une ligne de résultat sous forme de tableau associatif contenant les données de l'article.
+     * @param array $row Une ligne de résultat sous forme de tableau associatif contenant les données de l'article.
+     *
      * @return Post|null L'objet Post initialisé à partir des données de la ligne, ou null si des données essentielles manquent.
+     *
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function createPostFromResult(array $row): ?Post
@@ -215,7 +226,10 @@ class PostsRepository
     /**
      * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
      *
-     * @param  array $row La ligne de données à valider.
+     * @param array $row La ligne de données à valider.
+     *
+     * @return void
+     *
      * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
      */
     private function validateRow(array $row): void
@@ -241,7 +255,8 @@ class PostsRepository
     /**
      * Construit une instance de Post à partir de la ligne de données.
      *
-     * @param  array $row La ligne de données contenant les informations de l'article.
+     * @param array $row La ligne de données contenant les informations de l'article.
+     *
      * @return Post L'instance de Post créée.
      */
     private function buildPostFromRow(array $row): Post
@@ -253,7 +268,7 @@ class PostsRepository
             content: $row['content'],
             author: (int) $row['author'],
             createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null
+            updatedAt: isset($row['updated_at']) !== null ? new DateTime($row['updated_at']) : null
         );
 
     }//end buildPostFromRow()

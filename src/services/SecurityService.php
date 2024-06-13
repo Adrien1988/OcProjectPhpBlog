@@ -35,7 +35,8 @@ class SecurityService
      *
      * Cette méthode utilise l'instance AntiXSS pour nettoyer l'entrée fournie.
      *
-     * @param  string $input L'entrée utilisateur à nettoyer.
+     * @param string $input L'entrée utilisateur à nettoyer.
+     *
      * @return string La chaîne nettoyée.
      */
     public function cleanInput(string $input): string

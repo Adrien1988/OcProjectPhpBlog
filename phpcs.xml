@@ -5,12 +5,8 @@
 
     <file>public</file>
     <file>src</file>
-    <file>views</file>
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*/src/Standards/*/Tests/*\.(inc|css|js)$</exclude-pattern>
-    <exclude-pattern>*/tests/Core/*/*\.(inc|css|js)$</exclude-pattern>
-    <exclude-pattern>*/tests/Core/*/Fixtures/*\.php$</exclude-pattern>
 
     <arg name="basepath" value="." />
     <arg name="colors" />
@@ -22,58 +18,24 @@
         <exclude name="PEAR.NamingConventions.ValidFunctionName" />
         <exclude name="PEAR.NamingConventions.ValidVariableName" />
         <exclude name="PEAR.Commenting.ClassComment" />
-        <exclude name="PEAR.Commenting.FileComment.MissingCategoryTag" />
-        <exclude name="PEAR.Commenting.FileComment.MissingPackageTag" />
-        <exclude name="PEAR.Commenting.FileComment.MissingLinkTag" />
-        <exclude name="PEAR.Commenting.FileComment.MissingVersion" />
+        <exclude name="PEAR.Commenting.FileComment" />
         <exclude name="PEAR.Commenting.InlineComment" />
         <exclude name="Generic.Files.LineLength" />
     </rule>
+    <!--
+       You can hard-code custom php.ini settings into your custom standard.
+       The following tag sets the memory limit to 64M.
+    <ini name="memory_limit" value="64M"/>-->
 
-    <!-- Include some sniffs from other standards that don't conflict with PEAR -->
-    <rule ref="Squiz.Arrays.ArrayBracketSpacing" />
-    <rule ref="Squiz.Arrays.ArrayDeclaration" />
-    <rule ref="Squiz.Commenting.ClosingDeclarationComment" />
-    <rule ref="Squiz.ControlStructures.ControlSignature" />
-    <rule ref="Squiz.ControlStructures.ElseIfDeclaration" />
-    <rule ref="Squiz.Commenting.BlockComment" />
-    <rule ref="Squiz.Commenting.DocCommentAlignment" />
-    <rule ref="Squiz.Commenting.EmptyCatchComment" />
-    <rule ref="Squiz.Commenting.InlineComment" />
-    <rule ref="Squiz.Commenting.LongConditionClosingComment" />
-    <rule ref="Squiz.Commenting.PostStatementComment" />
-    <rule ref="Squiz.Commenting.VariableComment" />
-    <rule ref="Squiz.Formatting.OperatorBracket" />
-    <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
-    <rule ref="Squiz.Operators.ComparisonOperatorUsage" />
-    <rule ref="Squiz.PHP.DisallowInlineIf" />
-    <rule ref="Squiz.Scope.MethodScope" />
-    <rule ref="Squiz.Strings.ConcatenationSpacing" />
-    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing" />
-    <rule ref="Squiz.WhiteSpace.FunctionClosingBraceSpace" />
-    <rule ref="Squiz.WhiteSpace.FunctionSpacing" />
-    <rule ref="Squiz.WhiteSpace.MemberVarSpacing" />
-    <rule ref="Squiz.WhiteSpace.OperatorSpacing" />
-    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace" />
-    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
-    <rule ref="Generic.Commenting.Todo" />
-    <rule ref="Generic.ControlStructures.DisallowYodaConditions" />
-    <rule ref="Generic.ControlStructures.InlineControlStructure" />
-    <rule ref="Generic.Formatting.DisallowMultipleStatements" />
-    <rule ref="Generic.Formatting.SpaceAfterCast" />
-    <rule ref="Generic.NamingConventions.ConstructorName" />
-    <rule ref="Generic.PHP.DeprecatedFunctions" />
-    <rule ref="Generic.PHP.LowerCaseKeyword" />
-    <rule ref="Generic.Strings.UnnecessaryStringConcat" />
-    <rule ref="Generic.WhiteSpace.IncrementDecrementSpacing" />
-    <rule ref="PSR2.Classes.PropertyDeclaration" />
-    <rule ref="PSR2.Methods.MethodDeclaration" />
-    <rule ref="PSR2.Files.EndFileNewline" />
-    <rule ref="PSR12.Files.OpenTag" />
-    <rule ref="Zend.Files.ClosingTag" />
-    
-    <!-- Include the whole PSR1 standard -->
-    <rule ref="PSR1" />
+    <!-- 2. Files -->
+
+    <!-- 2.1. PHP Tags -->
+
+    <!-- PHP code MUST use the long <?php ?> tags or the short-echo <?= ?> tags; it MUST NOT use the
+    other tag variations. -->
+    <rule ref="Generic.PHP.DisallowShortOpenTag.EchoFound">
+        <severity>0</severity>
+    </rule>
 
     <!-- We use custom indent rules for arrays -->
     <rule ref="Generic.Arrays.ArrayIndent" />
@@ -87,19 +49,6 @@
         <severity>0</severity>
     </rule>
     <rule ref="Squiz.Arrays.ArrayDeclaration.CloseBraceNewLine">
-        <severity>0</severity>
-    </rule>
-
-    <!-- Don't enforce single line arrays for single item arrays in test files. Readability over
-    brevity -->
-    <rule ref="Squiz.Arrays.ArrayDeclaration.MultiLineNotAllowed">
-        <exclude-pattern>tests/*\.php$</exclude-pattern>
-        <exclude-pattern>Standards/*/Tests/*/*UnitTest\.php$</exclude-pattern>
-    </rule>
-
-    <!-- Check var names, but we don't want leading underscores for private vars -->
-    <rule ref="Squiz.NamingConventions.ValidVariableName" />
-    <rule ref="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore">
         <severity>0</severity>
     </rule>
 
@@ -130,30 +79,84 @@
         </properties>
     </rule>
 
-    <!-- Do not allow unreachable code. -->
-    <rule ref="Squiz.PHP.NonExecutableCode" />
-
     <!-- Do not allow ambiguous conditions. -->
     <rule ref="Generic.CodeAnalysis.RequireExplicitBooleanOperatorPrecedence" />
 
-    <!-- The testing bootstrap file uses string concats to stop IDEs seeing the class aliases -->
-    <rule ref="Generic.Strings.UnnecessaryStringConcat">
-        <exclude-pattern>tests/bootstrap\.php</exclude-pattern>
-    </rule>
+    <!-- Do not allow unreachable code. -->
+    <rule ref="Squiz.PHP.NonExecutableCode" />
 
-    <!-- This test file specifically *needs* Windows line endings for testing purposes. -->
-    <rule ref="Generic.Files.LineEndings.InvalidEOLChar">
-        <exclude-pattern>tests/Core/Tokenizer/PHP/StableCommentWhitespaceWinTest\.php</exclude-pattern>
-    </rule>
+    <!-- 2.2. Character Encoding -->
 
-    <!-- Avoid false positive with this sniff detecting itself -->
-    <rule ref="Generic.Commenting.Todo">
-        <exclude-pattern>src/Standards/Generic/Sniffs/Commenting/TodoSniff\.php</exclude-pattern>
-        <exclude-pattern>src/Standards/Generic/Tests/Commenting/TodoUnitTest\.php</exclude-pattern>
-    </rule>
+    <!-- PHP code MUST use only UTF-8 without BOM. -->
+    <rule ref="Generic.Files.ByteOrderMark" />
 
-    <!-- @see https://github.com/PHPCSStandards/PHP_CodeSniffer/pull/122#discussion_r1414167897 -->
-    <rule ref="Squiz.Commenting.VariableComment">
-        <exclude-pattern>src/Util/Tokens\.php</exclude-pattern>
-    </rule>
+    <rule ref="Generic.PHP.DisallowShortOpenTag" />
+    <rule ref="Generic.Commenting.Todo" />
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions" />
+    <rule ref="Generic.ControlStructures.InlineControlStructure" />
+
+    <!-- There MUST NOT be more than one statement per line. -->
+    <rule ref="Generic.Formatting.DisallowMultipleStatements" />
+    <rule ref="Generic.Formatting.SpaceAfterCast" />
+    <rule ref="Generic.NamingConventions.ConstructorName" />
+    <rule ref="Generic.PHP.DeprecatedFunctions" />
+    <rule ref="Generic.PHP.LowerCaseKeyword" />
+    <rule ref="Generic.Strings.UnnecessaryStringConcat" />
+    <rule ref="Generic.WhiteSpace.IncrementDecrementSpacing" />
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+
+    <!-- These rules enforce PSR-2 and PSR-12 standards for class and file formatting. -->
+    <rule ref="PSR2.Classes.PropertyDeclaration" />
+    <rule ref="PSR2.Methods.MethodDeclaration" />
+    <rule ref="PSR2.Files.EndFileNewline" />
+    <rule ref="PSR12.Files.OpenTag" />
+
+    <!-- Include the whole PSR1 standard -->
+    <rule ref="PSR1" />
+
+    <!-- Class constants MUST be declared in all upper case with underscore separators. -->
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName" />
+
+    <!-- These rules ensure that arrays are declared and formatted correctly. -->
+    <rule ref="Squiz.Arrays.ArrayBracketSpacing" />
+    <rule ref="Squiz.Arrays.ArrayDeclaration" />
+
+    <!-- These rules ensure proper structure and formatting of control structures. -->
+    <rule ref="Squiz.ControlStructures.ControlSignature" />
+    <rule ref="Squiz.ControlStructures.ElseIfDeclaration" />
+
+    <!-- These rules ensure proper formatting and spacing for various code elements. -->
+    <rule ref="Squiz.Formatting.OperatorBracket" />
+    <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing" />
+    <rule ref="Squiz.Operators.ComparisonOperatorUsage" />
+    <rule ref="Squiz.Scope.MethodScope" />
+    <rule ref="Squiz.Strings.ConcatenationSpacing" />
+
+
+    <!-- These rules ensure proper whitespace usage throughout the codebase. -->
+    <rule ref="Squiz.WhiteSpace.ControlStructureSpacing" />
+    <rule ref="Squiz.WhiteSpace.FunctionClosingBraceSpace" />
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing" />
+    <rule ref="Squiz.WhiteSpace.MemberVarSpacing" />
+    <rule ref="Squiz.WhiteSpace.OperatorSpacing" />
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace" />
+
+    <!-- Class names MUST be declared in StudlyCaps. -->
+    <rule ref="Squiz.Classes.ValidClassName" />
+
+    <!-- These rules ensure proper commenting practices are followed throughout the codebase. -->
+    <rule ref="Squiz.Commenting.BlockComment" />
+    <rule ref="Squiz.Commenting.DocCommentAlignment" />
+    <rule ref="Squiz.Commenting.EmptyCatchComment" />
+    <rule ref="Squiz.Commenting.InlineComment" />
+    <rule ref="Squiz.Commenting.LongConditionClosingComment" />
+    <rule ref="Squiz.Commenting.PostStatementComment" />
+    <rule ref="Squiz.Commenting.VariableComment" />
+    <rule ref="Squiz.Commenting.ClosingDeclarationComment" />
+
+    <!-- Method arguments with default values MUST go at the end of the argument list. -->
+    <rule ref="PEAR.Functions.ValidDefaultValue" />
+
+    <!-- The closing ?> tag MUST be omitted from files containing only PHP. -->
+    <rule ref="Zend.Files.ClosingTag" />
 </ruleset>

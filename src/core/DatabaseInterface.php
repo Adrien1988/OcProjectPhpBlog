@@ -19,11 +19,11 @@ interface DatabaseInterface
     /**
      * Exécute une requête SQL avec les paramètres donnés et retourne un itérateur de résultats.
      *
-     * @param  string $sql    La requête SQL à
-     *                        exécuter.
-     * @param  array  $params Les paramètres à lier à la requête
-     *                        SQL.
-     * @return Iterator        Un itérateur pour les résultats de la requête.
+     * @param string $sql    La requête SQL à
+     *                       exécuter.
+     * @param array  $params Les paramètres à lier à la requête SQL.
+     *
+     * @return Iterator Un itérateur pour les résultats de la requête.
      */
     public function query(string $sql, array $params=[]): Iterator;
 
@@ -32,7 +32,8 @@ interface DatabaseInterface
      * Prépare une requête SQL avec des paramètres et retourne un objet pour exécuter cette requête.
      * Peut lever une exception si la préparation échoue.
      *
-     * @param  string $sql La chaîne de la requête SQL à préparer.
+     * @param string $sql La chaîne de la requête SQL à préparer.
+     *
      * @return PDOStatement Un objet représentant la requête préparée.
      */
     public function prepare(string $sql): \PDOStatement;
@@ -41,8 +42,9 @@ interface DatabaseInterface
     /**
      * Exécute une déclaration PDO avec les paramètres donnés.
      *
-     * @param  \PDOStatement $stmt   La déclaration PDO à exécuter.
-     * @param  array         $params Les paramètres à lier à la déclaration.
+     * @param \PDOStatement $stmt   La déclaration PDO à exécuter.
+     * @param array         $params Les paramètres à lier à la déclaration.
+     *
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
     public function execute(\PDOStatement $stmt, array $params=[]): bool;

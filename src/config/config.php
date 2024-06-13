@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Fichier de configuration de la base de données.
- *
- * Ce fichier contient la définition de la configuration de la base de données
- * et retourne ces configurations lorsqu'il est inclus.
- */
-
 
 /**
  * Retourne un tableau de configuration pour la base de données.
@@ -25,7 +18,3 @@ function getDatabaseConfig(): array
     ];
 
 }//end getDatabaseConfig()
-
-
-// Appelle la fonction pour retourner la configuration de la base de données.
-return getDatabaseConfig();
