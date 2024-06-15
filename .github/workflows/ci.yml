@@ -30,6 +30,9 @@ jobs:
       - name: Run PHPMD
         run: phpcbf --standard=phpcs.xml public src
 
+      - name: Create empty coverage file
+        run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage></coverage>' > coverage.xml
+
       - name: Send coverage to Codacy
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
         env:
