@@ -30,10 +30,10 @@ jobs:
       - name: Run PHPMD
         run: phpcbf --standard=phpcs.xml public src
 
-      - name: Create structured empty coverage file
-        run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
+    #   - name: Create structured empty coverage file
+    #     run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
 
-      - name: Send coverage to Codacy
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    #   - name: Send coverage to Codacy
+    #     run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
+    #     env:
+    #       CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
