@@ -23,15 +23,15 @@ jobs:
 
       - name: Add Composer bin to PATH
         run: echo "$HOME/.composer/vendor/bin" >> $GITHUB_PATH
-      
+
       - name: Run PHP_CodeSniffer
-        run: phpcs --standard=phpcs.xml public src 
+        run: phpcs --standard=phpcs.xml public src
 
       - name: Run PHPMD
         run: phpcbf --standard=phpcs.xml public src
 
-      - name: Create empty coverage file
-        run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage></coverage>' > coverage.xml
+      - name: Create structured empty coverage file
+        run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
 
       - name: Send coverage to Codacy
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
