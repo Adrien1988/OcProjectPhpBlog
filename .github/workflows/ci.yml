@@ -28,7 +28,7 @@ jobs:
         run: phpcs --standard=phpcs.xml public src 
 
       - name: Run PHPMD
-        run: php vendor\bin\phpmd src text phpmd.xml
+        run: phpcbf --standard=phpcs.xml public src
 
       - name: Send coverage to Codacy
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
