@@ -112,7 +112,9 @@
     <rule ref="PSR12.Files.OpenTag" />
 
     <!-- Include the whole PSR1 standard -->
-    <rule ref="PSR1" />
+    <rule ref="PSR1">
+        <exclude name="PSR1.Files.SideEffects" />
+    </rule>
 
     <!-- Class constants MUST be declared in all upper case with underscore separators. -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName" />
