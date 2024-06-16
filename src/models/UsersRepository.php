@@ -4,6 +4,7 @@ namespace Models;
 
 use DateTime;
 use Exception;
+use PDOStatement;
 use App\Models\User;
 use InvalidArgumentException;
 use App\Core\Database\DatabaseInterface;
@@ -112,17 +113,7 @@ class UsersRepository
     {
         $sql = "INSERT INTO users (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
 
-        $stmt = $this->dbi->prepare($sql);
-
-        $stmt->bindValue(':last_name', $user->getLastName());
-        $stmt->bindValue(':first_name', $user->getFirstName());
-        $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());
-        $stmt->bindValue(':role', $user->getRole());
-        $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':token', $user->getToken());
-        $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+        $stmt = $this->prepareAndBind($sql, $user);
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to insert the user into the database.");
@@ -154,17 +145,7 @@ class UsersRepository
          password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
          token = :token, expire_at = :expire_at WHERE user_id = :user_id";
 
-        $stmt = $this->dbi->prepare($sql);
-
-        $stmt->bindValue(':last_name', $user->getLastName());
-        $stmt->bindValue(':first_name', $user->getFirstName());
-        $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());
-        $stmt->bindValue(':role', $user->getRole());
-        $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':token', $user->getToken());
-        $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+        $stmt = $this->prepareAndBind($sql, $user);
         $stmt->bindValue(':user_id', $user->getUserId());
 
         if ($this->dbi->execute($stmt, []) === false) {
@@ -277,6 +258,34 @@ class UsersRepository
         );
 
     }//end buildUserFromRow()
+
+
+    /**
+     * Prépare une requête SQL et lie les valeurs de l'utilisateur.
+     *
+     * @param string $sql  La requête SQL à
+     *                     préparer.
+     * @param User   $user L'objet User contenant les valeurs à
+     *                     lier.
+     *
+     * @return PDOStatement La requête préparée avec les valeurs liées.
+     */
+    private function prepareAndBind(string $sql, User $user): PDOStatement
+    {
+        $stmt = $this->dbi->prepare($sql);
+        $stmt->bindValue(':last_name', $user->getLastName());
+        $stmt->bindValue(':first_name', $user->getFirstName());
+        $stmt->bindValue(':email', $user->getEmail());
+        $stmt->bindValue(':password', $user->getPassword());
+        $stmt->bindValue(':role', $user->getRole());
+        $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
+        $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
+        $stmt->bindValue(':token', $user->getToken());
+        $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+
+        return $stmt;
+
+    }//end prepareAndBind()
 
 
 }//end class
