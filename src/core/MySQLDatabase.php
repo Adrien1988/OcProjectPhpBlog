@@ -29,7 +29,7 @@ class MySQLDatabase implements DatabaseInterface
     {
         $this->pdo = $pdo;
 
-    }
+    }//end __construct()
 
 
     /**
@@ -37,43 +37,48 @@ class MySQLDatabase implements DatabaseInterface
      *
      * @param string $sql    La requête SQL à exécuter.
      * @param array  $params Les paramètres à associer à la requête SQL, sous forme de tableau associatif.
+     *
      * @return Iterator      Les résultats de la requête sous forme d'Iterator.
      */
-    public function query(string $sql, array $params = []): Iterator
+    public function query(string $sql, array $params=[]): Iterator
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC) === true) {
             yield $row;
         }
-    }
+
+    }//end query()
 
 
     /**
      * Prépare une requête SQL à exécuter avec des paramètres.
      *
      * @param string $sql La requête SQL à préparer.
+     *
      * @return PDOStatement L'objet PDOStatement préparé.
      */
     public function prepare(string $sql): PDOStatement
     {
         return $this->pdo->prepare($sql);
 
-    }
+    }//end prepare()
 
 
     /**
      * Exécute un PDOStatement préparé avec des paramètres.
      *
-     * @param PDOStatement $stmt  Le PDOStatement à exécuter.
+     * @param PDOStatement $stmt   Le PDOStatement à
+     *                             exécuter.
      * @param array        $params Les paramètres à associer.
+     *
      * @return bool        Le succès de l'exécution.
      */
-    public function execute(PDOStatement $stmt, array $params = []): bool
+    public function execute(PDOStatement $stmt, array $params=[]): bool
     {
         return $stmt->execute($params);
 
-    }
+    }//end execute()
 
 
     /**
@@ -85,5 +90,7 @@ class MySQLDatabase implements DatabaseInterface
     {
         return $this->pdo->lastInsertId();
 
-    }
-}
+    }//end lastInsertId()
+
+
+}//end class

@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+/**
+ * Middleware pour la protection contre les attaques CSRF.
+ */
 class CsrfMiddleware
 {
 
@@ -27,7 +30,7 @@ class CsrfMiddleware
     {
         $this->antiCSRF = new AntiCSRF();
 
-    } //end_construct().
+    }//end __construct()
 
 
     /**
@@ -36,15 +39,16 @@ class CsrfMiddleware
      * Cette méthode vérifie la validité du token CSRF pour les requêtes POST
      * et insère un nouveau token pour les requêtes GET.
      *
-     * @param Request   $request La requête entrante.
-     * @param callable  $next    Le prochain middleware ou contrôleur à exécuter.
+     * @param Request  $request La requête entrante.
+     * @param callable $next    Le prochain middleware ou contrôleur à exécuter.
+     *
      * @return Response La réponse générée après le traitement de la requête.
      * @throws AccessDeniedHttpException Si le token CSRF est invalide pour une requête POST.
      */
     public function handle(Request $request, callable $next): Response
     {
         if ($request->isMethod('POST') === true) {
-            if (!$this->antiCSRF->validateRequest()) {
+            if ($this->antiCSRF->validateRequest() === false) {
                 throw new AccessDeniedHttpException('Invalid CSRF token.');
             }
         }
@@ -54,5 +58,8 @@ class CsrfMiddleware
         }
 
         return $next($request);
-    }
-}
+
+    }//end handle()
+
+
+}//end class

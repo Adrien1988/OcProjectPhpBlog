@@ -10,6 +10,8 @@ use PDO;
  * Classe DependencyContainer
  *
  * Cette classe gère les dépendances de l'application, notamment la base de données.
+ *
+ * @package App\Core
  */
 class DependencyContainer
 {
@@ -38,7 +40,7 @@ class DependencyContainer
     {
         $this->configurations = $configurations;
 
-    }
+    }//end __construct()
 
 
     /**
@@ -48,7 +50,7 @@ class DependencyContainer
      */
     public function getDatabase(): DatabaseInterface
     {
-        if (!isset($this->instances['database'])) {
+        if (isset($this->instances['database']) === false) {
             $pdo = new PDO(
                 $this->configurations['dsn'],
                 $this->configurations['db_user'],
@@ -59,5 +61,7 @@ class DependencyContainer
 
         return $this->instances['database'];
 
-    }
-}
+    }//end getDatabase()
+
+
+}//end class

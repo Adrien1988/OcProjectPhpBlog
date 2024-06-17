@@ -2,17 +2,21 @@
 
 namespace Models;
 
-use App\Models\Comment;
-use App\Core\Database\DatabaseInterface;
 use DateTime;
+use Exception;
+use App\Models\Comment;
+use InvalidArgumentException;
+use App\Core\Database\DatabaseInterface;
 
 class CommentsRepository
 {
 
     /**
-     * @var DatabaseInterface $dbi
+     * The database interface.
      *
      * The database interface for interacting with the database.
+     *
+     * @var DatabaseInterface $dbi
      */
     private DatabaseInterface $dbi;
 
@@ -26,7 +30,7 @@ class CommentsRepository
     {
         $this->dbi = $dbi;
 
-    }
+    }//end __construct()
 
 
     /**
@@ -36,7 +40,7 @@ class CommentsRepository
      *
      * @return Comment L'objet commentaire avec l'ID nouvellement assigné.
      *
-     * @throws \Exception Si l'insertion échoue.
+     * @throws Exception Si l'insertion échoue.
      */
     public function createComment(Comment $comment): Comment
     {
@@ -46,19 +50,20 @@ class CommentsRepository
 
         $stmt->bindValue(':content', $comment->getContent());
         $stmt->bindValue(':created_at', $comment->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':is_validated', $comment->getIsValidated(), \PDO::PARAM_BOOL);
+        $stmt->bindValue(':is_validated', $comment->isValidated(), \PDO::PARAM_BOOL);
         $stmt->bindValue(':post_id', $comment->getPostId());
         $stmt->bindValue(':author', $comment->getAuthor());
         $stmt->bindValue(':comment_id', $comment->getCommentId());
 
         if ($this->dbi->execute($stmt, []) === false) {
-            throw new \Exception("Failed to insert the comment into the database.");
+            throw new Exception("Failed to insert the comment into the database.");
         }
 
         $comment->setCommentId((int) $this->dbi->lastInsertId());
 
         return $comment;
-    }
+
+    }//end createComment()
 
 
     /**
@@ -80,31 +85,35 @@ class CommentsRepository
         }
 
         return $comments;
-    }
+
+    }//end findAll()
 
 
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param int  $commentId  L'identifiant du commentaire à mettre à jour.
+     * @param int  $commentId   L'identifiant du commentaire à mettre à jour.
      * @param bool $isValidated Le nouveau statut de validation.
+     *
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
-     * @throws \Exception Si la mise à jour échoue pour une raison quelconque.
+     *
+     * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
     public function updateCommentStatus(int $commentId, bool $isValidated): bool
     {
-        $sql = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
-        $stmt = $this->dbi->prepare($sql);
+        $sql    = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
+        $stmt   = $this->dbi->prepare($sql);
         $params = [
-                   ':is_validated' => $isValidated,
-                   ':comment_id' => $commentId
-                  ];
-        if (!$this->dbi->execute($stmt, $params) === false) {
-            throw new \Exception("Failed to update the comment status in the database.");
+            ':is_validated' => $isValidated,
+            ':comment_id'   => $commentId,
+        ];
+        if ($this->dbi->execute($stmt, $params) === false) {
+            throw new Exception("Failed to update the comment status in the database.");
         }
 
         return true;
-    }
+
+    }//end updateCommentStatus()
 
 
     /**
@@ -113,21 +122,62 @@ class CommentsRepository
      * et utilise des paramètres nommés pour plus de clarté lors de la création de l'objet Comment.
      *
      * @param array $row Les données du commentaire extraites de la base de données.
-     * @return Comment L'instance de Comment créée, ou null si les données essentielles manquent.
-     * @throws \InvalidArgumentException Si des données obligatoires sont manquantes.
+     *
+     * @return Comment|null L'instance de Comment créée, ou null si les données essentielles manquent.
+     *
+     * @throws InvalidArgumentException Si des données obligatoires sont manquantes.
      */
     private function createCommentFromResult(array $row): ?Comment
     {
-        if (empty($row['comment_id'])
-            || empty($row['content'])
-            || empty($row['created_at'])
-            || !isset($row['is_validated'])
-            || empty($row['post_id'])
-            || empty($row['author'])
-        ) {
-            throw new \InvalidArgumentException("All fields are required.");
+        $this->validateRow($row);
+
+        return $this->buildCommentFromRow($row);
+
+    }//end createCommentFromResult()
+
+
+    /**
+     * Valide la ligne de données pour s'assurer que tous les champs obligatoires sont présents.
+     *
+     * @param array $row La ligne de données à valider.
+     *
+     * @return void
+     *
+     * @throws InvalidArgumentException Si des champs obligatoires sont manquants.
+     */
+    private function validateRow(array $row): void
+    {
+        $requiredFields = [
+            'comment_id',
+            'content',
+            'created_at',
+            'is_validated',
+            'post_id',
+            'author',
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (array_key_exists($field, $row) === false || $row[$field] === '') {
+                if ($field === 'is_validated' && array_key_exists($field, $row) === false) {
+                    throw new InvalidArgumentException("Le champ 'is_validated' est requis.");
+                } else if ($field !== 'is_validated') {
+                    throw new InvalidArgumentException("Tous les champs sont requis.");
+                }
+            }
         }
 
+    }//end validateRow()
+
+
+    /**
+     * Construit une instance de Comment à partir de la ligne de données.
+     *
+     * @param array $row La ligne de données contenant les informations du commentaire.
+     *
+     * @return Comment L'instance de Comment créée.
+     */
+    private function buildCommentFromRow(array $row): Comment
+    {
         return new Comment(
             commentId: (int) $row['comment_id'],
             content: $row['content'],
@@ -137,7 +187,7 @@ class CommentsRepository
             author: (int) $row['author']
         );
 
-    }
+    }//end buildCommentFromRow()
 
 
-}
+}//end class
