@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="Blog Application Ruleset"
+         xmlns="http://pmd.sf.net/ruleset/1.0.0">
+
+    <description>
+        Ruleset for a PHP blog application with MVC architecture following PSR-12 coding standard.
+    </description>
+
+    <priority>3</priority>
+
+    <!-- Include standard rulesets -->
+    <rule ref="rulesets/codesize.xml">
+        <exclude name="ExcessiveClassLength" />
+        <exclude name="ExcessiveMethodLength" />
+    </rule>
+    <rule ref="rulesets/controversial.xml" />
+    <rule ref="rulesets/design.xml">
+        <exclude name="ExitExpression" />
+        <exclude name="GotoStatement" />
+    </rule>
+    <rule ref="rulesets/naming.xml" />
+    <rule ref="rulesets/unusedcode.xml" />
+    <rule ref="rulesets/cleancode.xml" />
+
+    <!-- Exclude specific files or directories -->
+    <exclude-pattern>src/Legacy/*</exclude-pattern>
+    <exclude-pattern>tests/*</exclude-pattern>
+    <exclude-pattern>vendor/*</exclude-pattern>
+
+    <!-- Include specific MVC directories -->
+    <file>src/config</file>
+    <file>src/controllers</file>
+    <file>src/core</file>
+    <file>src/Middlewares</file>
+    <file>src/models</file>
+    <file>src/services</file>
+    <file>src/views</file>
+</ruleset>

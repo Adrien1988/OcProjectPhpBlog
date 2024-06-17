@@ -4,6 +4,9 @@ namespace App\Services;
 
 use voku\helper\AntiXSS;
 
+/**
+ * Service de sécurité pour la protection contre les attaques XSS.
+ */
 class SecurityService
 {
 
@@ -24,7 +27,7 @@ class SecurityService
     {
         $this->antiXSS = new AntiXSS();
 
-    }
+    }//end __construct()
 
 
     /**
@@ -33,13 +36,14 @@ class SecurityService
      * Cette méthode utilise l'instance AntiXSS pour nettoyer l'entrée fournie.
      *
      * @param string $input L'entrée utilisateur à nettoyer.
+     *
      * @return string La chaîne nettoyée.
      */
     public function cleanInput(string $input): string
     {
         return $this->antiXSS->xss_clean($input);
 
-    }
+    }//end cleanInput()
 
 
-}
+}//end class

@@ -19,9 +19,11 @@ interface DatabaseInterface
     /**
      * Exécute une requête SQL avec les paramètres donnés et retourne un itérateur de résultats.
      *
-     * @param string $sql     La requête SQL à exécuter.
-     * @param array  $params  Les paramètres à lier à la requête SQL.
-     * @return Iterator        Un itérateur pour les résultats de la requête.
+     * @param string $sql    La requête SQL à
+     *                       exécuter.
+     * @param array  $params Les paramètres à lier à la requête SQL.
+     *
+     * @return Iterator Un itérateur pour les résultats de la requête.
      */
     public function query(string $sql, array $params=[]): Iterator;
 
@@ -30,9 +32,9 @@ interface DatabaseInterface
      * Prépare une requête SQL avec des paramètres et retourne un objet pour exécuter cette requête.
      * Peut lever une exception si la préparation échoue.
      *
-     * @param string  $sql     La chaîne de la requête SQL à préparer.
-     * @param array   $params  Les paramètres à lier à la requête préparée.
-     * @return PDOStatement    Un objet représentant la requête préparée.
+     * @param string $sql La chaîne de la requête SQL à préparer.
+     *
+     * @return PDOStatement Un objet représentant la requête préparée.
      */
     public function prepare(string $sql): \PDOStatement;
 
@@ -42,6 +44,7 @@ interface DatabaseInterface
      *
      * @param \PDOStatement $stmt   La déclaration PDO à exécuter.
      * @param array         $params Les paramètres à lier à la déclaration.
+     *
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
     public function execute(\PDOStatement $stmt, array $params=[]): bool;
@@ -56,4 +59,4 @@ interface DatabaseInterface
     public function lastInsertId(): string;
 
 
-}
+}//end interface
