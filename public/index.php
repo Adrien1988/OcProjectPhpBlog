@@ -13,12 +13,13 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
-// Afficher toutes les erreurs de PHP (recommandé pour le développement)
+// Afficher toutes les erreurs de PHP (recommandé pour le développement).
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 echo "Début du fichier index.php<br>";
+
 
 /**
  * Charge la configuration de l'application.
@@ -29,10 +30,10 @@ echo "Début du fichier index.php<br>";
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__ . '/../src/config/config.php';
+    $configPath = __DIR__.'/../src/config/config.php';
     echo "Chemin du fichier de configuration : $configPath<br>";
 
-    if (!file_exists($configPath)) {
+    if (file_exists($configPath) === false) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
     }
 
@@ -43,12 +44,14 @@ function loadConfig(): array
     echo "Contenu de la configuration : ";
     var_dump($config);
 
-    if ($config === false || !isset($config['database'])) {
+    if ($config === false || isset($config['database']) === false) {
         throw new Exception('Configuration de la base de données introuvable.');
     }
 
     return $config;
-}
+
+}//end loadConfig()
+
 
 /**
  * Initialise le conteneur d'injection de dépendances.
@@ -61,15 +64,17 @@ function initializeContainer(array $config): DependencyContainer
 {
     return new DependencyContainer(
         [
-            'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
+            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
             'db_user'     => $config['database']['user'],
             'db_password' => $config['database']['password'],
         ]
     );
-}
+
+}//end initializeContainer()
+
 
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 // Logique d'exécution après les déclarations et inclusions.
 try {
@@ -93,15 +98,18 @@ try {
     echo "Modèles créés<br>";
 
     // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__ . '/../templates');
-    $twig   = new Environment($loader, [
-        'cache' => __DIR__ . '/../cache',
-    ]);
+    $loader = new FilesystemLoader(__DIR__.'/../templates');
+    $twig   = new Environment(
+        $loader,
+        [
+            'cache' => __DIR__.'/../cache',
+        ]
+    );
 
     echo "Twig configuré<br>";
 
     // Charger les routes.
-    $routes = include __DIR__ . '/../src/config/routes.php';
+    $routes = include __DIR__.'/../src/config/routes.php';
 
     echo "Routes chargées<br>";
 
@@ -142,10 +150,9 @@ try {
     $response->send();
 } catch (Exception $e) {
     // Gestion des erreurs (par exemple, route non trouvée).
-    echo "Erreur attrapée : " . $e->getMessage() . "<br>";
+    echo "Erreur attrapée : ".$e->getMessage()."<br>";
     $response = new Response('Not Found', 404);
     $response->send();
-}
+}//end try
 
 echo "Fin du fichier index.php<br>";
-?>
