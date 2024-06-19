@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
@@ -29,8 +30,7 @@ class HomeController
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -46,8 +46,7 @@ class HomeController
         $content = $this->twig->render('home/index.html.twig', ['message' => 'Welcome to the home page!']);
 
         return new Response($content);
-
-    }//end index()
+    } //end index()
 
 
 }//end class
