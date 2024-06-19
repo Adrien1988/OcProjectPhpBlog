@@ -12,7 +12,7 @@ use Symfony\Component\Routing\RouteCollection;
 function createRoutes(): RouteCollection
 {
     $routes = new RouteCollection();
-    $routes->add('home', new Route('/home', ['_controller' => 'App\Controllers\HomeController::index']));
+    $routes->add('home', new Route('/', ['_controller' => 'App\Controllers\HomeController::index']));
 
     return $routes;
 
