@@ -30,6 +30,17 @@ jobs:
       - name: Run PHPMD
         run: phpcbf --standard=phpcs.xml public src
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
+      - name: Install ESLint
+        run: npm install eslint
+  
+      - name: Run ESLint
+        run: npx eslint public/js/**/*.js
+
     #   - name: Create structured empty coverage file
     #     run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
 
