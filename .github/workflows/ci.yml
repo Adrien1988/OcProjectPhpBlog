@@ -37,6 +37,9 @@ jobs:
           
       - name: Install ESLint and dependencies
         run: npm install eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-prettier eslint-config-prettier prettier --save-dev
+
+      - name: Ensure ESLint is executable
+        run: chmod +x ./node_modules/.bin/eslint
   
       - name: Run ESLint
         run: npm run lint
