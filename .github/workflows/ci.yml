@@ -37,6 +37,9 @@ jobs:
           
       - name: Install ESLint
         run: npm install eslint
+
+      - name: Ensure ESLint is executable
+        run: chmod +x ./node_modules/.bin/eslint
   
       - name: Run ESLint
         run: npx eslint public/js/**/*.js
