@@ -41,7 +41,7 @@ jobs:
       - name: Ensure ESLint is executable
         run: chmod +x ./node_modules/.bin/eslint
   
-      - name: Run ESLint
+      - name: Run ESLint with fix
         run: npm run lint
 
     #   - name: Create structured empty coverage file
