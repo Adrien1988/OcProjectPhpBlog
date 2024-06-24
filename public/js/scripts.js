@@ -3,13 +3,12 @@
 * Copyright 2013-2023 Start Bootstrap
 * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-freelancer/blob/master/LICENSE)
 */
-//
-// Scripts
-// 
 
-window.addEventListener('DOMContentLoaded', event => {
+/* global bootstrap */
 
-    // Navbar shrink function
+window.addEventListener('DOMContentLoaded', () => {
+
+    // Navbar shrink function.
     var navbarShrink = function () {
         const navbarCollapsible = document.body.querySelector('#mainNav');
         if (!navbarCollapsible) {
@@ -23,13 +22,13 @@ window.addEventListener('DOMContentLoaded', event => {
 
     };
 
-    // Shrink the navbar 
+    // Shrink the navbar.
     navbarShrink();
 
-    // Shrink the navbar when page is scrolled
+    // Shrink the navbar when page is scrolled.
     document.addEventListener('scroll', navbarShrink);
 
-    // Activate Bootstrap scrollspy on the main nav element
+    // Activate Bootstrap scrollspy on the main nav element.
     const mainNav = document.body.querySelector('#mainNav');
     if (mainNav) {
         new bootstrap.ScrollSpy(document.body, {
@@ -38,7 +37,7 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     };
 
-    // Collapse responsive navbar when toggler is visible
+    // Collapse responsive navbar when toggler is visible.
     const navbarToggler = document.body.querySelector('.navbar-toggler');
     const responsiveNavItems = [].slice.call(
         document.querySelectorAll('#navbarResponsive .nav-link')

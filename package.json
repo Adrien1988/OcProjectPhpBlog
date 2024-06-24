@@ -1,0 +1,17 @@
+{
+  "name": "ocprojectphpblog",
+  "version": "1.0.0",
+  "description": "Project of a professionnal blog in php for my training as a php/symfony web developer for OpenClassrooms.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.3.2"
+  }
+}

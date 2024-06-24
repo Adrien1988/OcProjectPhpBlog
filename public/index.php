@@ -89,7 +89,9 @@ try {
     $twig   = new Environment(
         $loader,
         [
-            'cache' => __DIR__.'/../cache',
+            'cache' => false,
+            'auto_reload' => true,
+            // Optionnel : pour recharger les templates modifiés.
         ]
     );
 
