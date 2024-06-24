@@ -9,7 +9,7 @@
 window.addEventListener('DOMContentLoaded', function handleDOMContentLoaded() {
 
     // Navbar shrink function.
-    var navbarShrink = function () {
+    function navbarShrink() {
         const navbarCollapsible = document.body.querySelector('#mainNav');
         if (!navbarCollapsible) {
             return;
@@ -32,7 +32,7 @@ window.addEventListener('DOMContentLoaded', function handleDOMContentLoaded() {
     if (mainNav) {
         // Initialise ScrollSpy
         // eslint-disable-next-line no-unused-vars
-        new bootstrap.ScrollSpy(document.body, {
+        const scrollSpy = new bootstrap.ScrollSpy(document.body, {
             target: '#mainNav',
             rootMargin: '0px 0px -40%',
         });
