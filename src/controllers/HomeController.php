@@ -22,7 +22,6 @@ class HomeController
 
     /**
      * Constructeur de la classe.
-     *
      * Initialise l'instance Twig pour le rendu des templates.
      *
      * @param Environment $twig Instance de l'environnement Twig.
@@ -36,15 +35,71 @@ class HomeController
 
     /**
      * Affiche la page d'accueil.
-     *
-     * Cette méthode rend le template 'home/index.html.twig' avec un message
-     * de bienvenue et retourne la réponse HTTP correspondante.
+     * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
+     * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
     public function index(): Response
     {
-        $content = $this->twig->render('home/index.html.twig', ['message' => 'Welcome to the home page!']);
+        // Définition des éléments du portfolio.
+        $portfolio_items = [
+            ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/cabin.png'],
+            ['modal_id' => 'portfolioModal2', 'image' => 'assets/img/portfolio/cake.png'],
+            ['modal_id' => 'portfolioModal3', 'image' => 'assets/img/portfolio/circus.png'],
+            ['modal_id' => 'portfolioModal4', 'image' => 'assets/img/portfolio/game.png'],
+            ['modal_id' => 'portfolioModal5', 'image' => 'assets/img/portfolio/safe.png'],
+            ['modal_id' => 'portfolioModal6', 'image' => 'assets/img/portfolio/submarine.png'],
+        ];
+
+        // Définition des modals associés.
+        $modals = [
+            [
+                'id'          => 'portfolioModal1',
+                'title'       => 'Log Cabin',
+                'image'       => 'assets/img/portfolio/cabin.png',
+                'description' => 'Description for Log Cabin...'
+            ],
+            [
+                'id'          => 'portfolioModal2',
+                'title'       => 'Tasty Cake',
+                'image'       => 'assets/img/portfolio/cake.png',
+                'description' => 'Description for Tasty Cake...'
+            ],
+            [
+                'id'          => 'portfolioModal3',
+                'title'       => 'Circus Tent',
+                'image'       => 'assets/img/portfolio/circus.png',
+                'description' => 'Description for Circus Tent...'
+            ],
+            [
+                'id'          => 'portfolioModal4',
+                'title'       => 'Controller',
+                'image'       => 'assets/img/portfolio/game.png',
+                'description' => 'Description for Controller...'
+            ],
+            [
+                'id'          => 'portfolioModal5',
+                'title'       => 'Locked Safe',
+                'image'       => 'assets/img/portfolio/safe.png',
+                'description' => 'Description for Locked Safe...'
+            ],
+            [
+                'id'          => 'portfolioModal6',
+                'title'       => 'Submarine',
+                'image'       => 'assets/img/portfolio/submarine.png',
+                'description' => 'Description for Submarine...'
+            ],
+        ];
+
+        // Rendu du template avec les données.
+        $content = $this->twig->render(
+            'home/index.html.twig',
+            [
+                'portfolio_items' => $portfolio_items,
+                'modals'           => $modals,
+            ]
+        );
 
         return new Response($content);
 
