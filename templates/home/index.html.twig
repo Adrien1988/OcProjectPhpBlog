@@ -37,7 +37,7 @@
 		<div
 			class="container">
 			<!-- About Section Heading-->
-			<h2 class="page-section-heading text-center text-uppercase text-white">About</h2>
+			<h2 class="page-section-heading text-center text-uppercase text-white">A propos de moi</h2>
 			<!-- Icon Divider-->
 			<div class="divider-custom divider-light">
 				<div class="divider-custom-line"></div>
@@ -49,17 +49,18 @@
 			<!-- About Section Content-->
 			<div class="row">
 				<div class="col-lg-4 ms-auto">
-					<p class="lead">Freelancer is a free bootstrap theme created by Start Bootstrap. The download includes the complete source files including HTML, CSS, and JavaScript as well as optional SASS stylesheets for easy customization.</p>
+					<p class="lead">Avec 12 ans d'expérience dans la restauration collective, j'ai développé des compétences exceptionnelles en gestion d'équipe, service client, et optimisation des processus. Cette période m'a permis d'affiner mon sens de l'organisation et de la rigueur, essentiels pour garantir un service de qualité.</p>
 				</div>
 				<div class="col-lg-4 me-auto">
-					<p class="lead">You can create your own custom avatar for the masthead, change the icon in the dividers, and add your email address to the contact form to make it fully functional!</p>
+					<p class="lead">Passionné par les nouvelles technologies, j'ai entrepris une reconversion en 2021 pour devenir développeur web. Après avoir suivi deux formations spécialisées en développement web et en gestion de projet web, j'ai acquis une solide expertise en PHP/Symfony. Actuellement, je perfectionne mes compétences en alternance, où j'apporte des solutions innovantes et efficaces aux projets de mon entreprise.</p>
 				</div>
 			</div>
-			<!-- About Section Button-->
+
+			<!-- CV Download Button-->
 			<div class="text-center mt-4">
-				<a class="btn btn-xl btn-outline-light" href="https://startbootstrap.com/theme/freelancer/">
+				<a class="btn btn-xl btn-outline-light" href="/download-cv">
 					<i class="fas fa-download me-2"></i>
-					Free Download!
+					Télécharger mon CV
 				</a>
 			</div>
 		</div>
@@ -69,7 +70,7 @@
 		<div
 			class="container">
 			<!-- Contact Section Heading-->
-			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Contact Me</h2>
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Me Contacter</h2>
 			<!-- Icon Divider-->
 			<div class="divider-custom">
 				<div class="divider-custom-line"></div>
@@ -80,59 +81,42 @@
 			</div>
 			<!-- Contact Section Form-->
 			<div class="row justify-content-center">
-				<div class="col-lg-8 col-xl-7">
-					<!-- * * * * * * * * * * * * * * *-->
-					<!-- * * SB Forms Contact Form * *-->
-					<!-- * * * * * * * * * * * * * * *-->
-					<!-- This form is pre-integrated with SB Forms.-->
-					<!-- To make this form functional, sign up at-->
-					<!-- https://startbootstrap.com/solution/contact-forms-->
-					<!-- to get an API token!-->
-						<form
-						id="contactForm" data-sb-form-api-token="API_TOKEN"> <!-- Name input-->
+				<div
+					class="col-lg-8 col-xl-7">
+					<!-- Contact Form -->
+					<form
+						id="contactForm" data-sb-form-api-token="API_TOKEN">
+						<!-- Nom/Prénom input-->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="name" type="text" placeholder="Enter your name..." data-sb-validations="required"/>
-							<label for="name">Full name</label>
-							<div class="invalid-feedback" data-sb-feedback="name:required">A name is required.</div>
+							<input class="form-control" id="name" type="text" placeholder="Entrez votre nom et prénom..." data-sb-validations="required"/>
+							<label for="name">Nom/Prénom</label>
+							<div class="invalid-feedback" data-sb-feedback="name:required">Un nom/prénom est requis.</div>
 						</div>
-						<!-- Email address input-->
+						<!-- E-mail input-->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="email" type="email" placeholder="name@example.com" data-sb-validations="required,email"/>
-							<label for="email">Email address</label>
-							<div class="invalid-feedback" data-sb-feedback="email:required">An email is required.</div>
-							<div class="invalid-feedback" data-sb-feedback="email:email">Email is not valid.</div>
-						</div>
-						<!-- Phone number input-->
-						<div class="form-floating mb-3">
-							<input class="form-control" id="phone" type="tel" placeholder="(123) 456-7890" data-sb-validations="required"/>
-							<label for="phone">Phone number</label>
-							<div class="invalid-feedback" data-sb-feedback="phone:required">A phone number is required.</div>
+							<input class="form-control" id="email" type="email" placeholder="nom@example.com" data-sb-validations="required,email"/>
+							<label for="email">E-mail de contact</label>
+							<div class="invalid-feedback" data-sb-feedback="email:required">Un e-mail est requis.</div>
+							<div class="invalid-feedback" data-sb-feedback="email:email">E-mail non valide.</div>
 						</div>
 						<!-- Message input-->
 						<div class="form-floating mb-3">
-							<textarea class="form-control" id="message" type="text" placeholder="Enter your message here..." style="height: 10rem" data-sb-validations="required"></textarea>
+							<textarea class="form-control" id="message" type="text" placeholder="Entrez votre message ici..." style="height: 10rem" data-sb-validations="required"></textarea>
 							<label for="message">Message</label>
-							<div class="invalid-feedback" data-sb-feedback="message:required">A message is required.</div>
+							<div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
 						</div>
 						<!-- Submit success message-->
-						<!---->
-						<!-- This is what your users will see when the form-->
-						<!-- has successfully submitted-->
-							<div class="d-none" id="submitSuccessMessage"> <div class="text-center mb-3">
-								<div class="fw-bolder">Form submission successful!</div>
-								To activate this form, sign up at
-								<br/>
-								<a href="https://startbootstrap.com/solution/contact-forms">https://startbootstrap.com/solution/contact-forms</a>
+						<div class="d-none" id="submitSuccessMessage">
+							<div class="text-center mb-3">
+								<div class="fw-bolder">Envoi du formulaire réussi !</div>
 							</div>
 						</div>
 						<!-- Submit error message-->
-						<!---->
-						<!-- This is what your users will see when there is-->
-						<!-- an error submitting the form-->
-							<div class="d-none" id="submitErrorMessage"> <div class="text-center text-danger mb-3">Error sending message!</div>
+						<div class="d-none" id="submitErrorMessage">
+							<div class="text-center text-danger mb-3">Erreur lors de l'envoi du message !</div>
 						</div>
 						<!-- Submit Button-->
-						<button class="btn btn-primary btn-xl disabled" id="submitButton" type="submit">Send</button>
+						<button class="btn btn-primary btn-xl disabled" id="submitButton" type="submit">Envoyer</button>
 					</form>
 				</div>
 			</div>

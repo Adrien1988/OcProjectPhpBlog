@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Twig\Environment;
 
 /**
@@ -104,6 +105,27 @@ class HomeController
         return new Response($content);
 
     }//end index()
+
+
+    /**
+     * Télécharge le CV en tant que fichier PDF.
+     *
+     * @return Response La réponse HTTP contenant le fichier PDF.
+     */
+    public function downloadCv(): Response
+    {
+        $file = __DIR__.'/../../public/assets/img/CV_Fauquembergue_Adrien.pdf';
+
+        return new Response(
+            file_get_contents($file),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="CV_Fauquembergue_Adrien.pdf"',
+            ]
+        );
+
+    }//end downloadCv()
 
 
 }//end class

@@ -13,6 +13,7 @@ function createRoutes(): RouteCollection
 {
     $routes = new RouteCollection();
     $routes->add('home', new Route('/', ['_controller' => 'App\Controllers\HomeController::index']));
+    $routes->add('download_cv', new Route('/download-cv', ['_controller' => 'App\Controllers\HomeController::downloadCv']));
 
     return $routes;
 
