@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
+
 {% block content %}
+	{% include 'partials/_header.html.twig' %}
 	<!-- Portfolio Section-->
 	<section class="page-section portfolio" id="portfolio">
 		<div
@@ -58,7 +60,7 @@
 
 			<!-- CV Download Button-->
 			<div class="text-center mt-4">
-				<a class="btn btn-xl btn-outline-light" href="/download-cv">
+				<a class="btn btn-xl btn-outline-light" href="/downloadCv">
 					<i class="fas fa-download me-2"></i>
 					Télécharger mon CV
 				</a>

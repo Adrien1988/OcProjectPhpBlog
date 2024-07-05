@@ -13,8 +13,9 @@ function createRoutes(): RouteCollection
 {
     $routes = new RouteCollection();
     $routes->add('home', new Route('/', ['_controller' => 'App\Controllers\HomeController::index']));
-    $routes->add('download_cv', new Route('/download-cv', ['_controller' => 'App\Controllers\HomeController::downloadCv']));
-
+    $routes->add('download_cv', new Route('/downloadCv', ['_controller' => 'App\Controllers\HomeController::downloadCv']));
+    $routes->add('terms', new Route('/termsOfService', ['_controller' => 'App\Controllers\HomeController::showTerms']));
+    $routes->add('privacy', new Route('/privacyPolicy', ['_controller' => 'App\Controllers\HomeController::showPrivacyPolicy']));
     return $routes;
 
 }//end createRoutes()

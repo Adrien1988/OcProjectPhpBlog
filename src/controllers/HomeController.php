@@ -2,9 +2,8 @@
 
 namespace App\Controllers;
 
-use Symfony\Component\HttpFoundation\Request;
+
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Twig\Environment;
 
 /**
@@ -105,6 +104,33 @@ class HomeController
         return new Response($content);
 
     }//end index()
+
+
+    /**
+     * Affiche la page des conditions d'utilisation.
+     *
+     * @return Response La réponse HTTP contenant le contenu rendu du template.
+     */
+    public function showTerms(): Response
+    {
+        $content = $this->twig->render('legal/termsOfService.html.twig');
+
+        return new Response($content);
+
+    }//end showTerms()
+
+
+    /**
+     * Affiche la page de politique de confidentialité.
+     *
+     * @return Response La réponse HTTP contenant le contenu rendu du template.
+     */
+    public function showPrivacyPolicy(): Response
+    {
+        $content = $this->twig->render('legal/privacyPolicy.html.twig');
+        return new Response($content);
+
+    }//end showPrivacyPolicy()
 
 
     /**
