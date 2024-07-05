@@ -44,9 +44,9 @@ class HomeController
     {
         // Définition des éléments du portfolio.
         $portfolio_items = [
-            ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/cabin.png'],
-            ['modal_id' => 'portfolioModal2', 'image' => 'assets/img/portfolio/cake.png'],
-            ['modal_id' => 'portfolioModal3', 'image' => 'assets/img/portfolio/circus.png'],
+            ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/pageAcceuilWordpress.png'],
+            ['modal_id' => 'portfolioModal2', 'image' => 'assets/img/portfolio/pageAccueilFilmsPleinAir.png'],
+            ['modal_id' => 'portfolioModal3', 'image' => 'assets/img/portfolio/ExpressFood_Delivery_Cyclist.png'],
             ['modal_id' => 'portfolioModal4', 'image' => 'assets/img/portfolio/game.png'],
             ['modal_id' => 'portfolioModal5', 'image' => 'assets/img/portfolio/safe.png'],
             ['modal_id' => 'portfolioModal6', 'image' => 'assets/img/portfolio/submarine.png'],
@@ -56,20 +56,20 @@ class HomeController
         $modals = [
             [
                 'id'          => 'portfolioModal1',
-                'title'       => 'Log Cabin',
-                'image'       => 'assets/img/portfolio/cabin.png',
-                'description' => 'Description for Log Cabin...'
+                'title'       => 'Intégrez un thème Wordpress',
+                'image'       => 'assets/img/portfolio/pageAcceuilWordpress.png',
+                'description' => 'Projet fictif de réalisation d\'un site web en utilisant le CMS Wordpress. <a href="https://www.chaletscaviar.fr" target="_blank">Visitez le site</a>'
             ],
             [
                 'id'          => 'portfolioModal2',
-                'title'       => 'Tasty Cake',
-                'image'       => 'assets/img/portfolio/cake.png',
-                'description' => 'Description for Tasty Cake...'
+                'title'       => 'Analyser les besoins de votre client pour son festival de films',
+                'image'       => 'assets/img/portfolio/pageAccueilFilmsPleinAir.png',
+                'description' => 'Projet fictif de réalisation d\'une solution digitale de communication pour une association. <a href="https://www.films-de-plein-air.org" target="_blank">Visitez le site</a>'
             ],
             [
                 'id'          => 'portfolioModal3',
                 'title'       => 'Circus Tent',
-                'image'       => 'assets/img/portfolio/circus.png',
+                'image'       => 'assets/img/portfolio/ExpressFood_Delivery_Cyclist.png',
                 'description' => 'Description for Circus Tent...'
             ],
             [
