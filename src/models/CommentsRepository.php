@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use App\Models\Comment;
 use InvalidArgumentException;
-use App\Core\Database\DatabaseInterface;
+use App\Core\DatabaseInterface;
 
 class CommentsRepository
 {

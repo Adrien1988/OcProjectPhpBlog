@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-
+use Models\PostsRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
@@ -38,18 +38,17 @@ class HomeController
      * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
      * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
+     * @param PostsRepository $postsRepository Le repository des posts pour récupérer les derniers articles.
+     *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(): Response
+    public function index(PostsRepository $postsRepository): Response
     {
         // Définition des éléments du portfolio.
         $portfolio_items = [
             ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/pageAcceuilWordpress.png'],
             ['modal_id' => 'portfolioModal2', 'image' => 'assets/img/portfolio/pageAccueilFilmsPleinAir.png'],
             ['modal_id' => 'portfolioModal3', 'image' => 'assets/img/portfolio/ExpressFood_Delivery_Cyclist.png'],
-            ['modal_id' => 'portfolioModal4', 'image' => 'assets/img/portfolio/game.png'],
-            ['modal_id' => 'portfolioModal5', 'image' => 'assets/img/portfolio/safe.png'],
-            ['modal_id' => 'portfolioModal6', 'image' => 'assets/img/portfolio/submarine.png'],
         ];
 
         // Définition des modals associés.
@@ -68,29 +67,13 @@ class HomeController
             ],
             [
                 'id'          => 'portfolioModal3',
-                'title'       => 'Circus Tent',
+                'title'       => 'Concevoir la solution technique d\'une application de restauration en ligne',
                 'image'       => 'assets/img/portfolio/ExpressFood_Delivery_Cyclist.png',
-                'description' => 'Description for Circus Tent...'
-            ],
-            [
-                'id'          => 'portfolioModal4',
-                'title'       => 'Controller',
-                'image'       => 'assets/img/portfolio/game.png',
-                'description' => 'Description for Controller...'
-            ],
-            [
-                'id'          => 'portfolioModal5',
-                'title'       => 'Locked Safe',
-                'image'       => 'assets/img/portfolio/safe.png',
-                'description' => 'Description for Locked Safe...'
-            ],
-            [
-                'id'          => 'portfolioModal6',
-                'title'       => 'Submarine',
-                'image'       => 'assets/img/portfolio/submarine.png',
-                'description' => 'Description for Submarine...'
+                'description' => 'Projet fictif de réalisation d\'une solution technique pour une application de livraison de plats à domicile. Vous pouvez consulter les fichiers et diagrammes du projet via ce lien : <a href="https://drive.google.com/drive/folders/1r3lekSG3pgmx838T0LIU5xyGnhYQuPfl?usp=sharing">Consulter le dossier</a>'
             ],
         ];
+
+        $posts = $postsRepository->findLatest();
 
         // Rendu du template avec les données.
         $content = $this->twig->render(
@@ -98,6 +81,7 @@ class HomeController
             [
                 'portfolio_items' => $portfolio_items,
                 'modals'           => $modals,
+                'posts' => $posts,
             ]
         );
 

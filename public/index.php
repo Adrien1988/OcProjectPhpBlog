@@ -4,6 +4,7 @@ use App\Models\Post;
 use App\Models\User;
 use Twig\Environment;
 use App\Models\Comment;
+use Models\PostsRepository;
 use App\Core\DependencyContainer;
 use Twig\Loader\FilesystemLoader;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,7 +83,8 @@ try {
     $userModel    = new User($container->getDatabase());
     $commentModel = new Comment($container->getDatabase());
 
-
+    // Création de l'instance de PostsRepository
+    $postsRepository = new PostsRepository($container->getDatabase());
 
     // Configurer Twig.
     $loader = new FilesystemLoader(__DIR__.'/../templates');
@@ -128,7 +130,7 @@ try {
     unset($parameters['_controller']);
 
     // Appeler la méthode du contrôleur avec les paramètres extraits.
-    $response = $controllerInstance->$method(...array_values($parameters));
+    $response = $controllerInstance->$method($postsRepository,...array_values($parameters));
 
     // Envoyer la réponse.
     $response->send();

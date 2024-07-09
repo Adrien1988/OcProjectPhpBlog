@@ -7,7 +7,7 @@ use Exception;
 use PDOStatement;
 use App\Models\User;
 use InvalidArgumentException;
-use App\Core\Database\DatabaseInterface;
+use App\Core\DatabaseInterface;
 
 class UsersRepository
 {
