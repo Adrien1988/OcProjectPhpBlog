@@ -45,7 +45,7 @@ class HomeController
     public function index(PostsRepository $postsRepository): Response
     {
         // Définition des éléments du portfolio.
-        $portfolio_items = [
+        $portfolioItems = [
             ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/pageAcceuilWordpress.png'],
             ['modal_id' => 'portfolioModal2', 'image' => 'assets/img/portfolio/pageAccueilFilmsPleinAir.png'],
             ['modal_id' => 'portfolioModal3', 'image' => 'assets/img/portfolio/ExpressFood_Delivery_Cyclist.png'],
@@ -79,7 +79,7 @@ class HomeController
         $content = $this->twig->render(
             'home/index.html.twig',
             [
-                'portfolio_items' => $portfolio_items,
+                'portfolioItems' => $portfolioItems,
                 'modals'           => $modals,
                 'posts' => $posts,
             ]
