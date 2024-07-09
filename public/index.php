@@ -83,7 +83,7 @@ try {
     $userModel    = new User($container->getDatabase());
     $commentModel = new Comment($container->getDatabase());
 
-    // Création de l'instance de PostsRepository
+    // Création de l'instance de PostsRepository.
     $postsRepository = new PostsRepository($container->getDatabase());
 
     // Configurer Twig.
@@ -130,7 +130,7 @@ try {
     unset($parameters['_controller']);
 
     // Appeler la méthode du contrôleur avec les paramètres extraits.
-    $response = $controllerInstance->$method($postsRepository,...array_values($parameters));
+    $response = $controllerInstance->$method($postsRepository, ...array_values($parameters));
 
     // Envoyer la réponse.
     $response->send();
