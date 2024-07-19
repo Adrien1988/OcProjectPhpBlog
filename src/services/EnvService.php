@@ -17,6 +17,13 @@ class EnvService
      */
     private Dotenv $dotenv;
 
+    /**
+     * Les variables d'environnement chargées.
+     *
+     * @var array
+     */
+    private array $envVariables = [];
+
 
     /**
      * Constructeur de la classe.
@@ -26,6 +33,7 @@ class EnvService
     public function __construct(Dotenv $dotenv)
     {
         $this->dotenv = $dotenv;
+        $this->loadEnv();
 
     }//end __construct()
 
@@ -38,6 +46,7 @@ class EnvService
     public function loadEnv(): void
     {
         $this->dotenv->load();
+        $this->envVariables = $_ENV;
 
     }//end loadEnv()
 
@@ -45,15 +54,14 @@ class EnvService
     /**
      * Récupère la valeur d'une variable d'environnement.
      *
-     * @param string $key     La clé de la variable
-     *                        d'environnement.
+     * @param string $key     La clé de la variable d'environnement.
      * @param mixed  $default La valeur par défaut si la clé n'existe pas.
      *
      * @return mixed La valeur de la variable d'environnement ou la valeur par défaut.
      */
     public function getEnv(string $key, $default=null)
     {
-        return ($_ENV[$key] ?? $default);
+        return ($this->envVariables[$key] ?? $default);
 
     }//end getEnv()
 
