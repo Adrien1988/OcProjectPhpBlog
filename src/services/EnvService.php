@@ -63,7 +63,7 @@ class EnvService
      */
     public function getEnv(string $key, $default=null)
     {
-        return $this->envVariables[$key] ?? $default;
+        return ($this->envVariables[$key] ?? $default);
 
     }//end getEnv()
 
