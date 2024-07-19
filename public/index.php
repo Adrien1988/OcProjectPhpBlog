@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Middlewares\CsrfMiddleware;
-
+use Dotenv\Dotenv;
 
 /**
  * Charge la configuration de l'application.
@@ -134,8 +134,9 @@ try {
     // Créez une instance de SecurityService.
     $securityService = new SecurityService();
 
-    // Créez une instance de EnvService.
-    $envService = new EnvService();
+    // Créez une instance de Dotenv et EnvService.
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $envService = new EnvService($dotenv);
 
     // Créer les instances des contrôleurs spécifiques.
     $formsController = new FormsController($securityService, $envService);
