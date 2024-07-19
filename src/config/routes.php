@@ -16,6 +16,7 @@ function createRoutes(): RouteCollection
     $routes->add('download_cv', new Route('/downloadCv', ['_controller' => 'App\Controllers\HomeController::downloadCv']));
     $routes->add('terms', new Route('/termsOfService', ['_controller' => 'App\Controllers\HomeController::showTerms']));
     $routes->add('privacy', new Route('/privacyPolicy', ['_controller' => 'App\Controllers\HomeController::showPrivacyPolicy']));
+    $routes->add('contact_submit', new Route('/contact/submit', ['_controller' => 'App\Controllers\FormsController::submitContact'], [], [], '', [], ['POST']));
     return $routes;
 
 }//end createRoutes()

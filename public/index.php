@@ -6,13 +6,16 @@ use Twig\Environment;
 use App\Models\Comment;
 use Models\PostsRepository;
 use App\Core\DependencyContainer;
+use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
+use App\Controllers\FormsController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use App\Middlewares\CsrfMiddleware;
 
 
 /**
@@ -63,6 +66,35 @@ function initializeContainer(array $config): DependencyContainer
 }//end initializeContainer()
 
 
+/**
+ * Fonction pour gérer les middlewares.
+ *
+ * @param Request  $request          La
+ *                                   requête
+ * @param array    $middlewares      Les middlewares
+ *                                   à
+ * @param callable $controllerAction L'action du contrôleur à exécuter.
+ *
+ * @return Response La réponse générée.
+ */
+function handleMiddlewares(Request $request, array $middlewares, callable $controllerAction): Response
+{
+    $middleware = array_shift($middlewares);
+
+    if ($middleware === null) {
+        return $controllerAction($request);
+    }
+
+    return (new $middleware())->handle(
+        $request,
+        function (Request $request) use ($middlewares, $controllerAction) {
+            return handleMiddlewares($request, $middlewares, $controllerAction);
+        }
+    );
+
+}//end handleMiddlewares()
+
+
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
 require __DIR__.'/../vendor/autoload.php';
 
@@ -97,6 +129,11 @@ try {
         ]
     );
 
+    // Créez une instance de SecurityService.
+    $securityService = new SecurityService();
+
+    // Créer les instances des contrôleurs spécifiques.
+    $formsController = new FormsController($securityService);
 
 
     // Charger les routes.
@@ -124,18 +161,37 @@ try {
 
 
     // Instancier le contrôleur et appeler l'action.
-    $controllerInstance = new $class($twig);
+    switch ($class) {
+    case 'App\Controllers\FormsController':
+        $controllerInstance = $formsController;
+        break;
+
+    default:
+        $controllerInstance = new $class($twig);
+        break;
+    }
 
     // Supprimer les clés réservées de paramètres comme '_controller'.
     unset($parameters['_controller']);
 
-    // Appeler la méthode du contrôleur avec les paramètres extraits.
-    $response = $controllerInstance->$method($postsRepository, ...array_values($parameters));
+    // Middleware à exécuter.
+    $middlewares = [
+        CsrfMiddleware::class
+    ];
+
+    // Appeler la méthode du contrôleur avec les middlewares.
+    $response = handleMiddlewares(
+        $request,
+        $middlewares,
+        function (Request $request) use ($controllerInstance, $method, $postsRepository, $parameters) {
+            return $controllerInstance->$method($postsRepository, ...array_values($parameters));
+        }
+    );
 
     // Envoyer la réponse.
     $response->send();
 } catch (Exception $e) {
     // Gestion des erreurs (par exemple, route non trouvée).
-    $response = new Response('Not Found', 404);
+    $response = new Response('Not Found: '.$e->getMessage(), 404);
     $response->send();
 }//end try
