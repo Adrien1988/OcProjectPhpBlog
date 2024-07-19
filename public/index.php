@@ -1,15 +1,24 @@
 <?php
 session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    die('Session could not be started');
+}
 
+// Ajoutez cette ligne pour vérifier que la session a démarré correctement.
+error_log('Session started: ' . session_id());
+
+use Dotenv\Dotenv;
 use App\Models\Post;
 use App\Models\User;
 use Twig\Environment;
 use App\Models\Comment;
+use App\Twig\CsrfExtension;
 use Models\PostsRepository;
+use App\Services\EnvService;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
-use App\Services\EnvService;
 use Twig\Loader\FilesystemLoader;
+use App\Middlewares\CsrfMiddleware;
 use App\Controllers\FormsController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
@@ -17,8 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use App\Middlewares\CsrfMiddleware;
-use Dotenv\Dotenv;
 
 
 /**
@@ -131,6 +138,9 @@ try {
             // Optionnel : pour recharger les templates modifiés.
         ]
     );
+
+     // Enregistrer l'extension CsrfExtension.
+     $twig->addExtension(new CsrfExtension());
 
     // Créez une instance de SecurityService.
     $securityService = new SecurityService();

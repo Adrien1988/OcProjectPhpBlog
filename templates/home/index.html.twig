@@ -118,26 +118,26 @@
 				<div
 					class="col-lg-8 col-xl-7">
 					<!-- Contact Form -->
-					<form
-						id="contactForm" action="/contact/submit" method="POST">
+					<form id="contactForm" action="/contact/submit" method="POST">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 						<!-- Nom/Prénom input-->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="name" type="text" placeholder="Entrez votre nom et prénom..." data-sb-validations="required"/>
+							<input class="form-control" id="name" name="name" type="text" placeholder="Entrez votre nom et prénom..." required/>
 							<label for="name">Nom/Prénom</label>
-							<div class="invalid-feedback" data-sb-feedback="name:required">Un nom/prénom est requis.</div>
+							<div class="invalid-feedback">Un nom/prénom est requis.</div>
 						</div>
 						<!-- E-mail input-->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="email" type="email" placeholder="nom@example.com" data-sb-validations="required,email"/>
+							<input class="form-control" id="email" name="email" type="email" placeholder="nom@example.com" required/>
 							<label for="email">E-mail de contact</label>
-							<div class="invalid-feedback" data-sb-feedback="email:required">Un e-mail est requis.</div>
-							<div class="invalid-feedback" data-sb-feedback="email:email">E-mail non valide.</div>
+							<div class="invalid-feedback">Un e-mail est requis.</div>
+							<div class="invalid-feedback">E-mail non valide.</div>
 						</div>
 						<!-- Message input-->
 						<div class="form-floating mb-3">
-							<textarea class="form-control" id="message" type="text" placeholder="Entrez votre message ici..." style="height: 10rem" data-sb-validations="required"></textarea>
+							<textarea class="form-control" id="message" name="message" placeholder="Entrez votre message ici..." style="height: 10rem" required></textarea>
 							<label for="message">Message</label>
-							<div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
+							<div class="invalid-feedback">Un message est requis.</div>
 						</div>
 						<!-- Submit success message-->
 						<div class="d-none" id="submitSuccessMessage">
@@ -150,7 +150,7 @@
 							<div class="text-center text-danger mb-3">Erreur lors de l'envoi du message !</div>
 						</div>
 						<!-- Submit Button-->
-						<button class="btn btn-primary btn-xl disabled" id="submitButton" type="submit">Envoyer</button>
+						<button class="btn btn-primary btn-xl" id="submitButton" type="submit">Envoyer</button>
 					</form>
 				</div>
 			</div>

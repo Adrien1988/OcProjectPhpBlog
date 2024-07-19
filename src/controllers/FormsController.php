@@ -37,8 +37,7 @@ class FormsController
     {
         $this->securityService = $securityService;
         $this->envService      = $envService;
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -54,7 +53,7 @@ class FormsController
     public function submitContact(Request $request): Response
     {
         // Charger les variables d'environnement.
-        $this->envService->loadEnv();
+        $this->envService->loadEnv(__DIR__ . '/../../');
 
         // Récupérer les données du formulaire.
         $name    = $this->securityService->cleanInput($request->request->get('name'));
@@ -90,16 +89,16 @@ class FormsController
             // Contenu de l'email.
             $mail->isHTML(true);
             $mail->Subject = 'Nouveau message de contact';
-            $mail->Body    = '<b>Nom:</b> '.$name.'<br><b>Email:</b> '.$email.'<br><b>Message:</b><br>'.nl2br($message);
+            $mail->Body    = '<b>Nom:</b> ' . $name . '<br><b>Email:</b> ' . $email . '<br><b>Message:</b><br>' . nl2br($message);
 
             $mail->send();
 
             return new Response('Message envoyé avec succès!', 200);
         } catch (Exception $e) {
-            return new Response('Erreur lors de l\'envoi du message: '.$mail->ErrorInfo, 500);
-        }//end try
+            return new Response('Erreur lors de l\'envoi du message: ' . $mail->ErrorInfo, 500);
+        } //end try
 
-    }//end submitContact()
+    } //end submitContact()
 
 
 }//end class

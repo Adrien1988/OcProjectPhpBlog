@@ -28,9 +28,13 @@ class CsrfMiddleware
      */
     public function __construct()
     {
+        // Démarrer la session si elle n'est pas déjà démarrée
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         $this->antiCSRF = new AntiCSRF();
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -47,19 +51,32 @@ class CsrfMiddleware
      */
     public function handle(Request $request, callable $next): Response
     {
-        if ($request->isMethod('POST') === true) {
-            if ($this->antiCSRF->validateRequest() === false) {
+        if ($request->isMethod('POST')) {
+            error_log('Validating CSRF token for POST request...');
+            error_log('Session ID: ' . session_id());
+            error_log('CSRF token in session: ' . ($_SESSION['csrf'] ?? 'not set'));
+            error_log('CSRF token in request: ' . $request->request->get('csrf_token'));
+
+            if (!$this->antiCSRF->validateRequest()) {
+                error_log('Invalid CSRF token detected.');
                 throw new AccessDeniedHttpException('Invalid CSRF token.');
+            }
+            error_log('CSRF token valid.');
+        } elseif ($request->isMethod('GET')) {
+            error_log('Inserting CSRF token for GET request...');
+            $this->antiCSRF->insertToken();
+            error_log('CSRF token inserted: ' . ($_SESSION['csrf'] ?? 'not set'));
+
+            // Vérifiez explicitement que le jeton est bien dans la session
+            if (!isset($_SESSION['csrf'])) {
+                error_log('CSRF token was not set in the session.');
+            } else {
+                error_log('CSRF token successfully set in the session: ' . $_SESSION['csrf']);
             }
         }
 
-        if ($request->isMethod('GET') === true) {
-            $this->antiCSRF->insertToken();
-        }
-
         return $next($request);
-
-    }//end handle()
+    } //end handle()
 
 
 }//end class
