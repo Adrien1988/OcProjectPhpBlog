@@ -46,7 +46,9 @@ class EnvService
     public function loadEnv(): void
     {
         $this->dotenv->load();
-        $this->envVariables = $_ENV;
+
+        // Stocker les variables d'environnement dans une propriété privée.
+        $this->envVariables = getenv();
 
     }//end loadEnv()
 
@@ -61,7 +63,7 @@ class EnvService
      */
     public function getEnv(string $key, $default=null)
     {
-        return ($this->envVariables[$key] ?? $default);
+        return $this->envVariables[$key] ?? $default;
 
     }//end getEnv()
 

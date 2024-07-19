@@ -136,7 +136,7 @@ try {
     $securityService = new SecurityService();
 
     // Créez une instance de Dotenv et EnvService.
-    $dotenv     = Dotenv::createImmutable(__DIR__);
+    $dotenv     = Dotenv::createImmutable(__DIR__.'/../');
     $envService = new EnvService($dotenv);
 
     // Créer les instances des contrôleurs spécifiques.
