@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use Dotenv\Dotenv;
+use App\Services\EnvService;
 use App\Services\SecurityService;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -19,15 +19,24 @@ class FormsController
      */
     private $securityService;
 
+    /**
+     * Service pour charger les variables d'environnement.
+     *
+     * @var EnvService
+     */
+    private EnvService $envService;
+
 
     /**
      * Constructeur de la classe.
      *
      * @param SecurityService $securityService Le service de sécurité pour la protection contre les attaques XSS.
+     * @param EnvService      $envService      Instance du service de gestion des variables d'environnement.
      */
-    public function __construct(SecurityService $securityService)
+    public function __construct(SecurityService $securityService, EnvService $envService)
     {
         $this->securityService = $securityService;
+        $this->envService      = $envService;
 
     }//end __construct()
 
@@ -44,6 +53,9 @@ class FormsController
      */
     public function submitContact(Request $request): Response
     {
+        // Charger les variables d'environnement.
+        $this->envService->loadEnv(__DIR__);
+
         // Récupérer les données du formulaire.
         $name    = $this->securityService->cleanInput($request->request->get('name'));
         $email   = $this->securityService->cleanInput($request->request->get('email'));
@@ -57,10 +69,6 @@ class FormsController
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             return new Response('Email non valide.', 400);
         }
-
-        // Charger les variables d'environnement.
-        $dotenv = Dotenv::createImmutable(__DIR__);
-        $dotenv->load();
 
         // Envoyer l'email.
         $mail = new PHPMailer(true);

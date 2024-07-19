@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 use App\Models\Post;
 use App\Models\User;
@@ -7,6 +8,7 @@ use App\Models\Comment;
 use Models\PostsRepository;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
+use App\Services\EnvService;
 use Twig\Loader\FilesystemLoader;
 use App\Controllers\FormsController;
 use Symfony\Component\HttpFoundation\Request;
@@ -132,8 +134,11 @@ try {
     // Créez une instance de SecurityService.
     $securityService = new SecurityService();
 
+    // Créez une instance de EnvService.
+    $envService = new EnvService();
+
     // Créer les instances des contrôleurs spécifiques.
-    $formsController = new FormsController($securityService);
+    $formsController = new FormsController($securityService, $envService);
 
 
     // Charger les routes.
