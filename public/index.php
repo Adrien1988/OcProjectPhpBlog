@@ -20,6 +20,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use App\Middlewares\CsrfMiddleware;
 use Dotenv\Dotenv;
 
+
 /**
  * Charge la configuration de l'application.
  *
@@ -135,7 +136,7 @@ try {
     $securityService = new SecurityService();
 
     // Créez une instance de Dotenv et EnvService.
-    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv     = Dotenv::createImmutable(__DIR__);
     $envService = new EnvService($dotenv);
 
     // Créer les instances des contrôleurs spécifiques.
