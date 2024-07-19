@@ -42,4 +42,20 @@ class EnvService
     }//end loadEnv()
 
 
+    /**
+     * Récupère la valeur d'une variable d'environnement.
+     *
+     * @param string $key     La clé de la variable
+     *                        d'environnement.
+     * @param mixed  $default La valeur par défaut si la clé n'existe pas.
+     *
+     * @return mixed La valeur de la variable d'environnement ou la valeur par défaut.
+     */
+    public function getEnv(string $key, $default=null)
+    {
+        return ($_ENV[$key] ?? $default);
+
+    }//end getEnv()
+
+
 }//end class

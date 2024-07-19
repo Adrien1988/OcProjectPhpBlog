@@ -54,7 +54,7 @@ class FormsController
     public function submitContact(Request $request): Response
     {
         // Charger les variables d'environnement.
-        $this->envService->loadEnv(__DIR__);
+        $this->envService->loadEnv();
 
         // Récupérer les données du formulaire.
         $name    = $this->securityService->cleanInput($request->request->get('name'));
@@ -78,14 +78,14 @@ class FormsController
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = $_ENV['SMTP_USERNAME'];
-            $mail->Password   = $_ENV['SMTP_PASSWORD'];
+            $mail->Username   = $this->envService->getEnv('SMTP_USERNAME');
+            $mail->Password   = $this->envService->getEnv('SMTP_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
             // Destinataires.
             $mail->setFrom($email, $name);
-            $mail->addAddress($_ENV['SMTP_USERNAME']);
+            $mail->addAddress($this->envService->getEnv('SMTP_USERNAME'));
 
             // Contenu de l'email.
             $mail->isHTML(true);
