@@ -1,11 +1,6 @@
 <?php
-session_start();
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    die('Session could not be started');
-}
 
-// Ajoutez cette ligne pour vérifier que la session a démarré correctement.
-error_log('Session started: ' . session_id());
+session_start();
 
 use Dotenv\Dotenv;
 use App\Models\Post;
@@ -17,6 +12,7 @@ use Models\PostsRepository;
 use App\Services\EnvService;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
+use App\Services\CsrfService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\FormsController;
@@ -26,6 +22,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Security\Csrf\CsrfTokenManager;
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 
 /**
@@ -37,7 +38,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__.'/../src/config/config.php';
+    $configPath = __DIR__ . '/../src/config/config.php';
 
     if (file_exists($configPath) === false) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
@@ -52,9 +53,7 @@ function loadConfig(): array
     }
 
     return $config;
-
-}//end loadConfig()
-
+}
 
 /**
  * Initialise le conteneur d'injection de dépendances.
@@ -65,29 +64,24 @@ function loadConfig(): array
  */
 function initializeContainer(array $config): DependencyContainer
 {
-    return new DependencyContainer(
-        [
-            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
-            'db_user'     => $config['database']['user'],
-            'db_password' => $config['database']['password'],
-        ]
-    );
-
-}//end initializeContainer()
-
+    return new DependencyContainer([
+        'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
+        'db_user'     => $config['database']['user'],
+        'db_password' => $config['database']['password'],
+    ]);
+}
 
 /**
  * Fonction pour gérer les middlewares.
  *
- * @param Request  $request          La
- *                                   requête
- * @param array    $middlewares      Les middlewares
- *                                   à
+ * @param Request  $request          La requête.
+ * @param array    $middlewares      Les middlewares à exécuter.
  * @param callable $controllerAction L'action du contrôleur à exécuter.
+ * @param array    $dependencies     Les dépendances à passer aux middlewares.
  *
  * @return Response La réponse générée.
  */
-function handleMiddlewares(Request $request, array $middlewares, callable $controllerAction): Response
+function handleMiddlewares(Request $request, array $middlewares, callable $controllerAction, array $dependencies): Response
 {
     $middleware = array_shift($middlewares);
 
@@ -95,30 +89,23 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
         return $controllerAction($request);
     }
 
-    return (new $middleware())->handle(
+    return $middleware->handle(
         $request,
-        function (Request $request) use ($middlewares, $controllerAction) {
-            return handleMiddlewares($request, $middlewares, $controllerAction);
+        function (Request $request) use ($middlewares, $controllerAction, $dependencies) {
+            return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
         }
     );
-
-}//end handleMiddlewares()
-
+}
 
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-// Logique d'exécution après les déclarations et inclusions.
 try {
     // Charger la configuration.
     $config = loadConfig();
 
-
-
     // Initialiser le conteneur de dépendances.
     $container = initializeContainer($config);
-
-
 
     // Création des modèles et injection de l'instance de base de données à partir du conteneur.
     $postModel    = new Post($container->getDatabase());
@@ -129,86 +116,87 @@ try {
     $postsRepository = new PostsRepository($container->getDatabase());
 
     // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__.'/../templates');
+    $loader = new FilesystemLoader(__DIR__ . '/../templates');
     $twig   = new Environment(
         $loader,
         [
             'cache' => false,
             'auto_reload' => true,
-            // Optionnel : pour recharger les templates modifiés.
         ]
     );
 
-     // Enregistrer l'extension CsrfExtension.
-     $twig->addExtension(new CsrfExtension());
+    // Enregistrer l'extension CsrfExtension.
+    $csrfService = new CsrfService();
+    $twig->addExtension(new CsrfExtension($csrfService));
 
     // Créez une instance de SecurityService.
     $securityService = new SecurityService();
 
     // Créez une instance de Dotenv et EnvService.
-    $dotenv     = Dotenv::createImmutable(__DIR__.'/../');
-    $envService = new EnvService($dotenv);
+    $securityService = new SecurityService();
+    $envService = new EnvService(__DIR__ . '/../');
 
     // Créer les instances des contrôleurs spécifiques.
-    $formsController = new FormsController($securityService, $envService);
-
+    $formsController = new FormsController($securityService, $envService, $csrfService);
 
     // Charger les routes.
-    $routes = include __DIR__.'/../src/config/routes.php';
-
+    $routes = include __DIR__ . '/../src/config/routes.php';
 
     // Initialiser le contexte de la requête.
     $context = new RequestContext();
     $request = Request::createFromGlobals();
     $context->fromRequest($request);
 
-
     // Initialiser le matcher et le générateur d'URL.
     $matcher   = new UrlMatcher($routes, $context);
     $generator = new UrlGenerator($routes, $context);
 
-
     // Matcher la requête à une route.
     $parameters = $matcher->match($request->getPathInfo());
-
 
     // Extraire le contrôleur et l'action.
     $controller           = $parameters['_controller'];
     list($class, $method) = explode('::', $controller);
 
-
     // Instancier le contrôleur et appeler l'action.
     switch ($class) {
-    case 'App\Controllers\FormsController':
-        $controllerInstance = $formsController;
-        break;
+        case 'App\Controllers\FormsController':
+            $controllerInstance = $formsController;
+            break;
 
-    default:
-        $controllerInstance = new $class($twig);
-        break;
+        default:
+            $controllerInstance = new $class($twig);
+            break;
     }
 
     // Supprimer les clés réservées de paramètres comme '_controller'.
     unset($parameters['_controller']);
 
+    // Dépendances pour les middlewares.
+    $dependencies = [
+        'csrfService' => $csrfService,
+    ];
+
     // Middleware à exécuter.
     $middlewares = [
-        CsrfMiddleware::class
+        new CsrfMiddleware($csrfService),
     ];
+
 
     // Appeler la méthode du contrôleur avec les middlewares.
     $response = handleMiddlewares(
         $request,
         $middlewares,
         function (Request $request) use ($controllerInstance, $method, $postsRepository, $parameters) {
-            return $controllerInstance->$method($postsRepository, ...array_values($parameters));
-        }
+            return $controllerInstance->$method($request, $postsRepository, ...array_values($parameters));
+        },
+        $dependencies
     );
 
     // Envoyer la réponse.
     $response->send();
 } catch (Exception $e) {
     // Gestion des erreurs (par exemple, route non trouvée).
-    $response = new Response('Not Found: '.$e->getMessage(), 404);
+    $response = new Response('Not Found: ' . $e->getMessage(), 404);
     $response->send();
-}//end try
+}

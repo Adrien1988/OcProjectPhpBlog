@@ -2,9 +2,10 @@
 
 namespace App\Controllers;
 
-use Models\PostsRepository;
-use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
+use Models\PostsRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Contrôleur pour la page d'accueil.
@@ -42,7 +43,7 @@ class HomeController
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(PostsRepository $postsRepository): Response
+    public function index(Request $request, PostsRepository $postsRepository): Response
     {
         // Définition des éléments du portfolio.
         $portfolioItems = [

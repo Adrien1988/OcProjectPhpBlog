@@ -2,45 +2,24 @@
 
 namespace App\Twig;
 
-use ParagonIE\AntiCSRF\AntiCSRF;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use App\Services\CsrfService;
 
-/**
- * Extension Twig pour générer des tokens CSRF.
- */
 class CsrfExtension extends AbstractExtension
 {
 
-    /**
-     * Instance de AntiCSRF.
-     *
-     * @var AntiCSRF
-     */
-    private AntiCSRF $antiCSRF;
+    private $csrfService;
 
 
-    /**
-     * Constructeur de la classe.
-     */
-    public function __construct()
+    public function __construct(CsrfService $csrfService)
     {
-        // Assurez-vous que la session est démarrée
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $this->antiCSRF = new AntiCSRF();
+        $this->csrfService = $csrfService;
 
     }//end __construct()
 
 
-    /**
-     * Retourne la liste des fonctions Twig définies par cette extension.
-     *
-     * @return array
-     */
-    public function getFunctions(): array
+    public function getFunctions()
     {
         return [
             new TwigFunction('csrf_token', [$this, 'getCsrfToken']),
@@ -49,16 +28,9 @@ class CsrfExtension extends AbstractExtension
     }//end getFunctions()
 
 
-    /**
-     * Génère un token CSRF.
-     *
-     * @return string
-     */
-    public function getCsrfToken(): string
+    public function getCsrfToken(string $tokenId): string
     {
-        $token = $this->antiCSRF->insertToken();
-        error_log('CSRF token generated and inserted into session: ' . $_SESSION['csrf']);
-        return $token;
+        return $this->csrfService->generateToken($tokenId);
 
     }//end getCsrfToken()
 

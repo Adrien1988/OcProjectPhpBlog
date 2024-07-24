@@ -30,9 +30,9 @@ class EnvService
      *
      * @param Dotenv $dotenv Instance de Dotenv.
      */
-    public function __construct(Dotenv $dotenv)
+    public function __construct(string $path)
     {
-        $this->dotenv = $dotenv;
+        $this->dotenv = Dotenv::createImmutable($path);
         $this->loadEnv();
 
     }//end __construct()
@@ -48,7 +48,7 @@ class EnvService
         $this->dotenv->load();
 
         // Stocker les variables d'environnement dans une propriété privée.
-        $this->envVariables = getenv();
+        $this->envVariables = $_ENV;
 
     }//end loadEnv()
 
