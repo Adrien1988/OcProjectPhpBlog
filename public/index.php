@@ -38,7 +38,7 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__ . '/../src/config/config.php';
+    $configPath = __DIR__.'/../src/config/config.php';
 
     if (file_exists($configPath) === false) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
@@ -53,7 +53,9 @@ function loadConfig(): array
     }
 
     return $config;
-}
+
+}//end loadConfig()
+
 
 /**
  * Initialise le conteneur d'injection de dépendances.
@@ -64,12 +66,16 @@ function loadConfig(): array
  */
 function initializeContainer(array $config): DependencyContainer
 {
-    return new DependencyContainer([
-        'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
-        'db_user'     => $config['database']['user'],
-        'db_password' => $config['database']['password'],
-    ]);
-}
+    return new DependencyContainer(
+        [
+            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
+            'db_user'     => $config['database']['user'],
+            'db_password' => $config['database']['password'],
+        ]
+    );
+
+}//end initializeContainer()
+
 
 /**
  * Fonction pour gérer les middlewares.
@@ -95,10 +101,12 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
             return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
         }
     );
-}
+
+}//end handleMiddlewares()
+
 
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 try {
     // Charger la configuration.
@@ -116,7 +124,7 @@ try {
     $postsRepository = new PostsRepository($container->getDatabase());
 
     // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__ . '/../templates');
+    $loader = new FilesystemLoader(__DIR__.'/../templates');
     $twig   = new Environment(
         $loader,
         [
@@ -134,13 +142,13 @@ try {
 
     // Créez une instance de Dotenv et EnvService.
     $securityService = new SecurityService();
-    $envService = new EnvService(__DIR__ . '/../');
+    $envService      = new EnvService(__DIR__.'/../');
 
     // Créer les instances des contrôleurs spécifiques.
     $formsController = new FormsController($securityService, $envService, $csrfService);
 
     // Charger les routes.
-    $routes = include __DIR__ . '/../src/config/routes.php';
+    $routes = include __DIR__.'/../src/config/routes.php';
 
     // Initialiser le contexte de la requête.
     $context = new RequestContext();
@@ -160,13 +168,13 @@ try {
 
     // Instancier le contrôleur et appeler l'action.
     switch ($class) {
-        case 'App\Controllers\FormsController':
-            $controllerInstance = $formsController;
-            break;
+    case 'App\Controllers\FormsController':
+        $controllerInstance = $formsController;
+        break;
 
-        default:
-            $controllerInstance = new $class($twig);
-            break;
+    default:
+        $controllerInstance = new $class($twig);
+        break;
     }
 
     // Supprimer les clés réservées de paramètres comme '_controller'.
@@ -197,6 +205,6 @@ try {
     $response->send();
 } catch (Exception $e) {
     // Gestion des erreurs (par exemple, route non trouvée).
-    $response = new Response('Not Found: ' . $e->getMessage(), 404);
+    $response = new Response('Not Found: '.$e->getMessage(), 404);
     $response->send();
-}
+}//end try

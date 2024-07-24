@@ -78,7 +78,7 @@ class FormsController
         $message = $this->securityService->cleanInput($request->request->get('message', ''));
 
         // Valider les données.
-        if (empty($name) || empty($email) || empty($message)) {
+        if (empty($name) === true || empty($email) === true || empty($message) === true) {
             return new Response('Tous les champs sont requis.', 400);
         }
 

@@ -28,7 +28,9 @@ class EnvService
     /**
      * Constructeur de la classe.
      *
-     * @param Dotenv $dotenv Instance de Dotenv.
+     * Initialise Dotenv avec le chemin spécifié et charge les variables d'environnement.
+     *
+     * @param string $path Le chemin vers le fichier .env.
      */
     public function __construct(string $path)
     {
