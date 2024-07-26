@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use Dotenv\Dotenv;
+
 use Twig\Environment;
 use Models\PostsRepository;
 use Symfony\Component\HttpFoundation\Request;
