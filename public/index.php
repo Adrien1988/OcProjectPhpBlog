@@ -2,6 +2,7 @@
 
 session_start();
 
+use Dotenv\Dotenv;
 use App\Models\Post;
 use App\Models\User;
 use Twig\Environment;
@@ -140,8 +141,11 @@ try {
     // Créez une instance de SecurityService.
     $securityService = new SecurityService();
 
-    // Créez une instance de Dotenv et EnvService.
-    $envService = new EnvService(__DIR__.'/../');
+    // Créez une instance de Dotenv.
+    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
+
+    // Créez une instance de EnvService.
+    $envService = new EnvService($dotenv);
 
     // Créer les instances des contrôleurs spécifiques.
     $formsController = new FormsController($securityService, $envService, $csrfService);

@@ -9,14 +9,6 @@ use Dotenv\Dotenv;
  */
 class EnvService
 {
-
-    /**
-     * Instance de Dotenv pour gérer les variables d'environnement.
-     *
-     * @var Dotenv
-     */
-    private Dotenv $dotenv;
-
     /**
      * Les variables d'environnement chargées.
      *
@@ -28,14 +20,11 @@ class EnvService
     /**
      * Constructeur de la classe.
      *
-     * Initialise Dotenv avec le chemin spécifié et charge les variables d'environnement.
-     *
-     * @param string $path Le chemin vers le fichier .env.
+     * @param Dotenv $dotenv Instance de Dotenv pour charger les variables d'environnement.
      */
-    public function __construct(string $path)
+    public function __construct(Dotenv $dotenv)
     {
-        $this->dotenv       = Dotenv::createImmutable($path);
-        $this->envVariables = $this->dotenv->load();
+        $this->envVariables = $dotenv->load();
 
     }//end __construct()
 
