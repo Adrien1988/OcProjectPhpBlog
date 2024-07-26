@@ -35,26 +35,11 @@ class EnvService
     public function __construct(string $path)
     {
         $this->dotenv = Dotenv::createImmutable($path);
-        $this->loadEnv();
+        $this->envVariables = $this->dotenv->load();
 
     }//end __construct()
 
-
-    /**
-     * Charge les variables d'environnement à partir du fichier .env.
-     *
-     * @return void
-     */
-    public function loadEnv(): void
-    {
-        $this->dotenv->load();
-
-        // Stocker les variables d'environnement dans une propriété privée.
-        $this->envVariables = $_ENV;
-
-    }//end loadEnv()
-
-
+    
     /**
      * Récupère la valeur d'une variable d'environnement.
      *

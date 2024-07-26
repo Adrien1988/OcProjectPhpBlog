@@ -63,8 +63,6 @@ class FormsController
      */
     public function submitContact(Request $request): Response
     {
-        // Charger les variables d'environnement.
-        $this->envService->loadEnv(__DIR__.'/../../');
 
         // Vérifier le token CSRF.
         $submittedToken = $request->request->get('_csrf_token');
