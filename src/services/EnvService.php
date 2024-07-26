@@ -34,12 +34,12 @@ class EnvService
      */
     public function __construct(string $path)
     {
-        $this->dotenv = Dotenv::createImmutable($path);
+        $this->dotenv       = Dotenv::createImmutable($path);
         $this->envVariables = $this->dotenv->load();
 
     }//end __construct()
 
-    
+
     /**
      * Récupère la valeur d'une variable d'environnement.
      *

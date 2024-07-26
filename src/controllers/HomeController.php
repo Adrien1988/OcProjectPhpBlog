@@ -31,7 +31,8 @@ class HomeController
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
-    } //end __construct()
+
+    }//end __construct()
 
 
     /**
@@ -39,9 +40,7 @@ class HomeController
      * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
      * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
-     * @param Request         $request         La requête
-     *                                         HTTP courante.
-
+     * @param Request         $request         La requête HTTP courante.
      * @param PostsRepository $postsRepository Le repository des posts pour récupérer les derniers articles.
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
@@ -90,7 +89,8 @@ class HomeController
         );
 
         return new Response($content);
-    } //end index()
+
+    }//end index()
 
 
     /**
@@ -103,7 +103,8 @@ class HomeController
         $content = $this->twig->render('legal/termsOfService.html.twig');
 
         return new Response($content);
-    } //end showTerms()
+
+    }//end showTerms()
 
 
     /**
@@ -115,7 +116,8 @@ class HomeController
     {
         $content = $this->twig->render('legal/privacyPolicy.html.twig');
         return new Response($content);
-    } //end showPrivacyPolicy()
+
+    }//end showPrivacyPolicy()
 
 
     /**
@@ -125,7 +127,7 @@ class HomeController
      */
     public function downloadCv(): Response
     {
-        $file = __DIR__ . '/../../public/assets/img/CV_Fauquembergue_Adrien.pdf';
+        $file = __DIR__.'/../../public/assets/img/CV_Fauquembergue_Adrien.pdf';
 
         return new Response(
             file_get_contents($file),
@@ -135,7 +137,8 @@ class HomeController
                 'Content-Disposition' => 'attachment; filename="CV_Fauquembergue_Adrien.pdf"',
             ]
         );
-    } //end downloadCv()
+
+    }//end downloadCv()
 
 
 }//end class

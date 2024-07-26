@@ -30,7 +30,8 @@ class ErrorController
     public function __construct(Environment $twig)
     {
         $this->twig = $twig;
-    } //end __construct()
+
+    }//end __construct()
 
 
     /**
@@ -38,18 +39,13 @@ class ErrorController
      * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
      * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
-     * @param Request         $request         La requête
-     *                                         HTTP courante.
-
-     * @param PostsRepository $postsRepository Le repository des posts pour récupérer les derniers articles.
-     *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
     public function index(): Response
     {
         return new Response("test");
-    } //end index()
 
+    }//end index()
 
 
 }//end class
