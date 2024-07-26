@@ -119,7 +119,8 @@
 					class="col-lg-8 col-xl-7">
 					<!-- Contact Form -->
 					<form id="contactForm" action="/contact/submit" method="POST">
-						<input type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}"/>
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}"/>
 						<!-- Nom/Prénom input-->
 						<div class="form-floating mb-3">
 							<input class="form-control" id="name" name="name" type="text" placeholder="Entrez votre nom et prénom..." data-sb-validations="required"/>
@@ -139,22 +140,13 @@
 							<label for="message">Message</label>
 							<div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
 						</div>
-						<!-- Submit success message-->
-						<div class="d-none" id="submitSuccessMessage">
-							<div class="text-center mb-3">
-								<div class="fw-bolder">Envoi du formulaire réussi !</div>
-							</div>
-						</div>
-						<!-- Submit error message-->
-						<div class="d-none" id="submitErrorMessage">
-							<div class="text-center text-danger mb-3">Erreur lors de l'envoi du message !</div>
-						</div>
 						<!-- Submit Button-->
-						<button class="btn btn-primary btn-xl" id="submitButton" type="submit">Envoyer</button>
+						<button class="btn btn-primary btn-xl" id="submitButton" type="button">Envoyer</button>
 					</form>
 				</div>
 			</div>
 		</div>
 	</section>
-	{% include 'partials/_modals.html.twig' with {'modals': modals} %}
+	{% include 'partials/_portfolio_modal.html.twig' with {'modals': modals} %}
+    {% include 'partials/_feedback_modal.html.twig' %}
 {% endblock %}
