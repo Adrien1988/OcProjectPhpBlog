@@ -48,9 +48,9 @@ class HomeController
     public function index(Request $request, PostsRepository $postsRepository): Response
     {
 
-        // Évitez les avertissements en utilisant le paramètre.
-        $unused = isset($request);
-
+        // Utiliser $request de manière inoffensive pour éviter l'avertissement.
+        $request->getMethod();
+        // Consomme la variable sans rien en faire.
         // Définition des éléments du portfolio.
         $portfolioItems = [
             ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/pageAcceuilWordpress.png'],
