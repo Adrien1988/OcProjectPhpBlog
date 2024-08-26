@@ -45,7 +45,7 @@ class HomeController
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(Request $request, PostsRepository $postsRepository): Response
+    public function index(Request $_request, PostsRepository $postsRepository): Response
     {
         // Définition des éléments du portfolio.
         $portfolioItems = [
