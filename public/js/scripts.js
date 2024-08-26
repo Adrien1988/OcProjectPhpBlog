@@ -30,8 +30,7 @@ const handleDOMContentLoaded = () => {
     const mainNav = document.body.querySelector('#mainNav');
     if (mainNav) {
         // Initialise ScrollSpy.
-        // eslint-disable-next-line no-unused-vars.
-        const scrollSpy = new bootstrap.ScrollSpy(document.body, {
+        new bootstrap.ScrollSpy(document.body, {
             target: '#mainNav',
             rootMargin: '0px 0px -40%',
         });
