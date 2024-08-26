@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Politique de confidentialité
+{% endblock %}
+
+{% block content %}
+
+	<!-- Privacy Policy Section -->
+	<section class="page-section mt-5" id="privacy-policy">
+		<div
+			class="container">
+			<!-- Section Heading -->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Politique de confidentialité</h2>
+			<!-- Icon Divider -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+			<!-- Privacy Policy Content -->
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">1. Introduction</h2>
+				<p class="lead">Nous nous engageons à protéger votre vie privée. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations personnelles.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">2. Informations collectées</h2>
+				<p class="lead">Nous collectons diverses informations lorsque vous utilisez notre site, y compris les informations que vous fournissez directement et celles collectées automatiquement.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">3. Utilisation des informations</h2>
+				<p class="lead">Les informations collectées sont utilisées pour améliorer nos services, personnaliser votre expérience et communiquer avec vous.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">4. Partage des informations</h2>
+				<p class="lead">Nous ne partageons pas vos informations personnelles avec des tiers, sauf dans les cas où la loi l'exige ou pour fournir les services que vous avez demandés.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">5. Sécurité des informations</h2>
+				<p class="lead">Nous mettons en œuvre des mesures de sécurité pour protéger vos informations personnelles contre l'accès non autorisé et l'utilisation abusive.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">6. Modifications de la politique</h2>
+				<p class="lead">Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. Les modifications seront publiées sur cette page.</p>
+			</section>
+			<section>
+				<h2 class="text-uppercase text-secondary mt-4">7. Contact</h2>
+				<p class="lead">Pour toute question concernant cette politique de confidentialité, veuillez nous contacter à
+					<a href="mailto:contact@votreblog.com">contact@votreblog.com</a>.</p>
+			</section>
+		</div>
+	</section>
+
+	{% include 'partials/_modals.html.twig' %}
+{% endblock %}

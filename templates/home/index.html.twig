@@ -1,9 +1,152 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Home Page</title>
-</head>
-<body>
-    <h1>{{ message }}</h1>
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+
+{% block content %}
+	{% include 'partials/_header.html.twig' %}
+	<!-- Portfolio Section-->
+	<section class="page-section portfolio" id="portfolio">
+		<div
+			class="container">
+			<!-- Portfolio Section Heading-->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Portfolio</h2>
+			<!-- Icon Divider-->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+			<!-- Portfolio Grid Items-->
+			<div class="row justify-content-center">
+				{% for item in portfolioItems %}
+					<div class="col-md-6 col-lg-4 mb-5">
+						<div class="portfolio-item mx-auto" data-bs-toggle="modal" data-bs-target="#{{ item.modal_id }}">
+							<div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
+								<div class="portfolio-item-caption-content text-center text-white">
+									<i class="fas fa-plus fa-3x"></i>
+								</div>
+							</div>
+							<img class="img-fluid" src="{{ item.image }}" alt="...">
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+	</section>
+	<!-- Posts Section -->
+	<section class="page-section bg-light" id="posts">
+		<div
+			class="container">
+			<!-- Section Heading-->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Derniers Posts</h2>
+			<!-- Icon Divider-->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+			<!-- Posts Grid Items-->
+			<div class="row justify-content-center">
+				{% if posts is empty %}
+					<p class="text-center">Aucun post disponible pour le moment.</p>
+				{% else %}
+					{% for post in posts %}
+						<div class="col-md-6 col-lg-4 mb-5">
+							<div class="post-item mx-auto">
+								<h3>{{ post.title }}</h3>
+								<p>{{ post.chapo }}</p>
+								<a href="/post/show/{{ post.post_id }}" class="btn btn-primary">Lire la suite</a>
+							</div>
+						</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
+	</section>
+	<!-- About Section-->
+	<section class="page-section bg-primary text-white mb-0" id="about">
+		<div
+			class="container">
+			<!-- About Section Heading-->
+			<h2 class="page-section-heading text-center text-uppercase text-white">A propos de moi</h2>
+			<!-- Icon Divider-->
+			<div class="divider-custom divider-light">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+			<!-- About Section Content-->
+			<div class="row">
+				<div class="col-lg-4 ms-auto">
+					<p class="lead">Avec 12 ans d'expérience dans la restauration collective, j'ai développé des compétences exceptionnelles en gestion d'équipe, service client, et optimisation des processus. Cette période m'a permis d'affiner mon sens de l'organisation et de la rigueur, essentiels pour garantir un service de qualité.</p>
+				</div>
+				<div class="col-lg-4 me-auto">
+					<p class="lead">Passionné par les nouvelles technologies, j'ai entrepris une reconversion en 2021 pour devenir développeur web. Après avoir suivi deux formations spécialisées en développement web et en gestion de projet web, j'ai acquis une solide expertise en PHP/Symfony. Actuellement, je perfectionne mes compétences en alternance, où j'apporte des solutions innovantes et efficaces aux projets de mon entreprise.</p>
+				</div>
+			</div>
+
+			<!-- CV Download Button-->
+			<div class="text-center mt-4">
+				<a class="btn btn-xl btn-outline-light" href="/download-cv">
+					<i class="fas fa-download me-2"></i>
+					Télécharger mon CV
+				</a>
+			</div>
+		</div>
+	</section>
+	<!-- Contact Section-->
+	<section class="page-section" id="contact">
+		<div
+			class="container">
+			<!-- Contact Section Heading-->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Me Contacter</h2>
+			<!-- Icon Divider-->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+			<!-- Contact Section Form-->
+			<div class="row justify-content-center">
+				<div
+					class="col-lg-8 col-xl-7">
+					<!-- Contact Form -->
+					<form id="contactForm" action="/contact/submit" method="POST">
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token('contact_form') }}"/>
+						<!-- Nom/Prénom input-->
+						<div class="form-floating mb-3">
+							<input class="form-control" id="name" name="name" type="text" placeholder="Entrez votre nom et prénom..." data-sb-validations="required"/>
+							<label for="name">Nom/Prénom</label>
+							<div class="invalid-feedback" data-sb-feedback="name:required">Un nom/prénom est requis.</div>
+						</div>
+						<!-- E-mail input-->
+						<div class="form-floating mb-3">
+							<input class="form-control" id="email" name="email" type="email" placeholder="nom@example.com" data-sb-validations="required,email"/>
+							<label for="email">E-mail de contact</label>
+							<div class="invalid-feedback" data-sb-feedback="email:required">Un e-mail est requis.</div>
+							<div class="invalid-feedback" data-sb-feedback="email:email">E-mail non valide.</div>
+						</div>
+						<!-- Message input-->
+						<div class="form-floating mb-3">
+							<textarea class="form-control" id="message" name="message" type="text" placeholder="Entrez votre message ici..." style="height: 10rem" data-sb-validations="required"></textarea>
+							<label for="message">Message</label>
+							<div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
+						</div>
+						<!-- Submit Button-->
+						<button class="btn btn-primary btn-xl" id="submitButton" type="button">Envoyer</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+	{% include 'partials/_portfolio_modal.html.twig' with {'modals': modals} %}
+    {% include 'partials/_feedback_modal.html.twig' %}
+{% endblock %}

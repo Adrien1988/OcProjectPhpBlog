@@ -12,8 +12,11 @@ use Symfony\Component\Routing\RouteCollection;
 function createRoutes(): RouteCollection
 {
     $routes = new RouteCollection();
-    $routes->add('home', new Route('/home', ['_controller' => 'App\Controllers\HomeController::index']));
-
+    $routes->add('home', new Route('/', ['_controller' => 'App\Controllers\HomeController::index']));
+    $routes->add('download_cv', new Route('/download-cv', ['_controller' => 'App\Controllers\HomeController::downloadCv']));
+    $routes->add('terms', new Route('/terms-of-service', ['_controller' => 'App\Controllers\HomeController::showTerms']));
+    $routes->add('privacy', new Route('/privacy-policy', ['_controller' => 'App\Controllers\HomeController::showPrivacyPolicy']));
+    $routes->add('contact_submit', new Route('/contact/submit', ['_controller' => 'App\Controllers\FormsController::submitContact'], [], [], '', [], ['POST']));
     return $routes;
 
 }//end createRoutes()

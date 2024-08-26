@@ -2,8 +2,8 @@
 
 namespace App\Core;
 
-use App\Core\Database\MySQLDatabase;
-use App\Core\Database\DatabaseInterface;
+use App\Core\MySQLDatabase;
+use App\Core\DatabaseInterface;
 use PDO;
 
 /**

@@ -2,10 +2,9 @@
 
 namespace App\Middlewares;
 
-use ParagonIE\AntiCSRF\AntiCSRF;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use App\Services\CsrfService;
 
 /**
  * Middleware pour la protection contre les attaques CSRF.
@@ -14,47 +13,49 @@ class CsrfMiddleware
 {
 
     /**
-     * Instance pour gérer la protection contre les attaques CSRF.
+     * Service CSRF.
      *
-     * @var AntiCSRF
+     * Le service CSRF utilisé pour la validation des jetons CSRF.
+     *
+     * @var CsrfService
      */
-    private AntiCSRF $antiCSRF;
+    private $csrfService;
 
 
     /**
      * Constructeur de la classe.
      *
-     * Initialise l'instance AntiCSRF pour la protection contre les attaques CSRF.
+     * Initialise le service CSRF.
+     *
+     * @param CsrfService $csrfService Le service CSRF pour la validation des jetons CSRF.
      */
-    public function __construct()
+    public function __construct(CsrfService $csrfService)
     {
-        $this->antiCSRF = new AntiCSRF();
+        $this->csrfService = $csrfService;
 
     }//end __construct()
 
 
     /**
-     * Gère les requêtes entrantes et applique la protection CSRF.
+     * Gère la requête HTTP.
      *
-     * Cette méthode vérifie la validité du token CSRF pour les requêtes POST
-     * et insère un nouveau token pour les requêtes GET.
+     * Vérifie si la méthode de la requête est POST et valide le jeton CSRF.
+     * Si le jeton CSRF est invalide, retourne une réponse HTTP 400.
      *
-     * @param Request  $request La requête entrante.
-     * @param callable $next    Le prochain middleware ou contrôleur à exécuter.
+     * @param Request  $request La requête HTTP
+     *                          courante.
+     * @param callable $next    Le prochain middleware ou la prochaine action à
+     *                          exécuter.
      *
-     * @return Response La réponse générée après le traitement de la requête.
-     * @throws AccessDeniedHttpException Si le token CSRF est invalide pour une requête POST.
+     * @return Response La réponse HTTP, soit la suivante, soit une erreur si le jeton CSRF est invalide.
      */
-    public function handle(Request $request, callable $next): Response
+    public function handle(Request $request, callable $next)
     {
         if ($request->isMethod('POST') === true) {
-            if ($this->antiCSRF->validateRequest() === false) {
-                throw new AccessDeniedHttpException('Invalid CSRF token.');
+            $submittedToken = $request->request->get('_csrf_token');
+            if ($this->csrfService->isTokenValid('contact_form', $submittedToken) === false) {
+                return new Response('Invalid CSRF token.', 400);
             }
-        }
-
-        if ($request->isMethod('GET') === true) {
-            $this->antiCSRF->insertToken();
         }
 
         return $next($request);
