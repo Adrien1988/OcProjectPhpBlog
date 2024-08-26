@@ -45,8 +45,11 @@ class HomeController
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(Request $_request, PostsRepository $postsRepository): Response
+    public function index(Request $request, PostsRepository $postsRepository): Response
     {
+
+        // Le paramètre $request est là pour de futures améliorations.
+
         // Définition des éléments du portfolio.
         $portfolioItems = [
             ['modal_id' => 'portfolioModal1', 'image' => 'assets/img/portfolio/pageAcceuilWordpress.png'],
