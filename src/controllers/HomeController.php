@@ -48,8 +48,8 @@ class HomeController
     public function index(Request $request, PostsRepository $postsRepository): Response
     {
 
-        // @codingStandardsIgnoreLine.
-        // Le paramètre $request est laissé intentionnellement non utilisé.
+        // Évitez les avertissements en utilisant le paramètre.
+        $unused = isset($request);
 
         // Définition des éléments du portfolio.
         $portfolioItems = [
