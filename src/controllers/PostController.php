@@ -49,7 +49,7 @@ class PostController
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      */
-    public function listPosts(Request $request): Response
+    public function listPosts(): Response
     {
         // Récupère tous les posts via le repository.
         $posts = $this->postsRepository->findAll();
