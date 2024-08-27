@@ -108,7 +108,7 @@ class HomeController
 
         return new Response($content);
 
-    }
+    }//end showTerms()
 
 
-}
+}//end class

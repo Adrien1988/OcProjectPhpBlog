@@ -185,6 +185,11 @@ try {
         $controllerInstance = $formsController;
         break;
 
+    case 'App\Controllers\PostController':
+        // Passer toutes les dépendances nécessaires au constructeur.
+        $controllerInstance = new $class($twig, $postsRepository);
+        break;
+
     default:
         $controllerInstance = new $class($twig);
         break;
