@@ -45,8 +45,6 @@ class PostController
     /**
      * Affiche la liste des articles de blog.
      *
-     * @param Request $request La requête HTTP courante.
-     *
      * @return Response La réponse HTTP avec le contenu rendu.
      */
     public function listPosts(): Response
