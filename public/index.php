@@ -187,7 +187,7 @@ try {
 
     case 'App\Controllers\PostController':
         // Passer toutes les dépendances nécessaires au constructeur.
-        $controllerInstance = new $class($twig, $postsRepository);
+        $controllerInstance = new $class($twig, $postsRepository, $securityService);
         break;
 
     default:
@@ -213,8 +213,8 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function (Request $request) use ($controllerInstance, $method, $postsRepository, $parameters) {
-            return $controllerInstance->$method($request, $postsRepository, ...array_values($parameters));
+        function (Request $request) use ($controllerInstance, $method, $postsRepository, $securityService, $parameters) {
+            return $controllerInstance->$method($request, $postsRepository, $securityService, ...array_values($parameters));
         },
         $dependencies
     );
