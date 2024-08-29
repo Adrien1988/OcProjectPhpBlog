@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Database;
+namespace App\Core;
 
 use PDOStatement;
 use Iterator;
@@ -47,7 +47,7 @@ interface DatabaseInterface
      *
      * @return bool         Retourne true si l'exécution a réussi, sinon false.
      */
-    public function execute(\PDOStatement $stmt, array $params=[]): bool;
+    public function execute(PDOStatement $stmt, array $params=[]): bool;
 
 
     /**

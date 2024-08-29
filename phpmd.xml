@@ -23,8 +23,6 @@
     <rule ref="rulesets/cleancode.xml" />
 
     <!-- Exclude specific files or directories -->
-    <exclude-pattern>src/Legacy/*</exclude-pattern>
-    <exclude-pattern>tests/*</exclude-pattern>
     <exclude-pattern>vendor/*</exclude-pattern>
 
     <!-- Include specific MVC directories -->
@@ -34,5 +32,4 @@
     <file>src/Middlewares</file>
     <file>src/models</file>
     <file>src/services</file>
-    <file>src/views</file>
 </ruleset>

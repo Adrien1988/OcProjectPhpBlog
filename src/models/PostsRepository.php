@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use App\Models\Post;
 use InvalidArgumentException;
-use App\Core\Database\DatabaseInterface;
+use App\Core\DatabaseInterface;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
@@ -200,6 +200,28 @@ class PostsRepository
         return true;
 
     }//end deletePost()
+
+
+    /**
+     * Récupère les derniers articles par date de création.
+     *
+     * @param int $limit Le nombre maximum d'articles à retourner.
+     *
+     * @return Post[] Un tableau d'objets Post.
+     */
+    public function findLatest(int $limit=5): array
+    {
+        $sql     = "SELECT * FROM post ORDER BY created_at DESC LIMIT ".intval($limit);
+        $results = $this->dbi->query($sql);
+
+        $posts = [];
+        foreach ($results as $row) {
+            $posts[] = $this->createPostFromResult($row);
+        }
+
+        return $posts;
+
+    }//end findLatest()
 
 
     /**
