@@ -109,6 +109,7 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
 require __DIR__.'/../vendor/autoload.php';
 
+// Logique d'exécution après les déclarations et inclusions.
 try {
     // Charger la configuration.
     $config = loadConfig();
@@ -162,6 +163,7 @@ try {
     // Initialiser le matcher et le générateur d'URL.
     $matcher   = new UrlMatcher($routes, $context);
     $generator = new UrlGenerator($routes, $context);
+
 
     // Try {
     // Matcher la requête à une route.

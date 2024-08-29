@@ -6,6 +6,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Services\CsrfService;
 
+/**
+ * Middleware pour la protection contre les attaques CSRF.
+ */
 class CsrfMiddleware
 {
 
