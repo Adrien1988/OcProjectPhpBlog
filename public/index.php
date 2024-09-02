@@ -16,13 +16,11 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
-use App\Controllers\FormsController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -148,9 +146,6 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
-    // Créer les instances des contrôleurs spécifiques.
-    $formsController = new FormsController($securityService, $envService, $csrfService);
-
     // $errorController = new ErrorController();
     // Charger les routes.
     $routes = include __DIR__.'/../src/config/routes.php';
@@ -183,12 +178,8 @@ try {
     // var_dump($class, $parameters);
     // die();.
     switch ($class) {
-    case 'App\Controllers\FormsController':
-        $controllerInstance = $formsController;
-        break;
-
     default:
-        $controllerInstance = new $class($twig);
+        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
         break;
     }
 
