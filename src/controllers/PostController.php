@@ -80,9 +80,8 @@ class PostController
     /**
      * Affiche le formulaire de création d'un nouveau post et traite la soumission du formulaire.
      *
-     * @param Request         $request         L'objet de la requête HTTP contenant les données du formulaire.
-     * @param PostsRepository $postsRepository Le repository pour interagir avec les articles.
-     * @param SecurityService $securityService Le service de sécurité pour nettoyer les entrées utilisateur.
+     * @param Request $request L'objet de la requête HTTP contenant les données
+     *                         du formulaire.
      *
      * @return Response La réponse HTTP avec le contenu rendu ou un message de succès.
      */
