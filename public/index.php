@@ -52,7 +52,8 @@ function loadConfig(): array
     }
 
     return $config;
-} //end loadConfig()
+
+}//end loadConfig()
 
 
 /**
@@ -66,12 +67,13 @@ function initializeContainer(array $config): DependencyContainer
 {
     return new DependencyContainer(
         [
-            'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
+            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
             'db_user'     => $config['database']['user'],
             'db_password' => $config['database']['password'],
         ]
     );
-} //end initializeContainer()
+
+}//end initializeContainer()
 
 
 /**
@@ -98,6 +100,7 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
             return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
         }
     );
+
 }//end handleMiddlewares()
 
 
@@ -173,15 +176,14 @@ try {
     // var_dump($class, $parameters);
     // die();.
     switch ($class) {
+    case 'App\Controllers\PostController':
+        // Passer toutes les dépendances nécessaires au constructeur.
+        $controllerInstance = new $class($twig, $postsRepository, $securityService);
+        break;
 
-        case 'App\Controllers\PostController':
-            // Passer toutes les dépendances nécessaires au constructeur.
-            $controllerInstance = new $class($twig, $postsRepository, $securityService);
-            break;
-
-        default:
-            $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
-            break;
+    default:
+        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
+        break;
     }
 
     // Supprimer les clés réservées de paramètres comme '_controller'.
