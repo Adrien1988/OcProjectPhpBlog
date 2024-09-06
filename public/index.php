@@ -178,7 +178,7 @@ try {
     switch ($class) {
     case 'App\Controllers\PostController':
         // Passer toutes les dépendances nécessaires au constructeur.
-        $controllerInstance = new $class($twig, $postsRepository, $securityService);
+        $controllerInstance = new $class($twig, $postsRepository, $securityService, $csrfService);
         break;
 
     default:

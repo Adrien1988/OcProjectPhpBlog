@@ -209,13 +209,17 @@ class HomeController
             return new Response('Email non valide.', 400);
         }
 
-        // Vérifiez l'adresse e-mail de destination.
-        $toEmail = $this->envService->getEnv('SMTP_USERNAME');
-
-        // Envoyer l'email.
-        $mail = new PHPMailer(true);
-
         try {
+            // Vérifiez l'adresse e-mail de destination.
+            $toEmail = $this->envService->getEnv('SMTP_USERNAME');
+
+            if (empty($toEmail) === true) {
+                return new Response('Adresse e-mail de destination non configurée.', 500);
+            }
+
+            // Envoyer l'email.
+            $mail = new PHPMailer(true);
+
             // Configurer le serveur SMTP.
             $mail->isSMTP();
             $mail->Host       = $this->envService->getEnv('SMTP_HOST', 'smtp.gmail.com');

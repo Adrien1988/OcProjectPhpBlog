@@ -6,6 +6,7 @@ use App\Models\Post;
 use Twig\Environment;
 use Models\PostsRepository;
 use App\Services\SecurityService;
+use App\Services\CsrfService;
 use PHPMailer\PHPMailer\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +38,13 @@ class PostController
      */
     private $securityService;
 
+    /**
+     * Service pour la gestion des tokens CSRF.
+     *
+     * @var CsrfService
+     */
+    private $csrfService;
+
 
     /**
      * Constructeur de la classe PostController.
@@ -45,12 +53,14 @@ class PostController
      * @param Environment     $twig            Instance de l'environnement Twig pour le rendu des templates.
      * @param PostsRepository $postsRepository Le repository des articles de blog pour récupérer et manipuler les posts.
      * @param SecurityService $securityService Le service de sécurité pour la protection et le nettoyage des entrées utilisateur.
+     * @param CsrfService     $csrfService     Service pour la gestion des tokens CSRF.
      */
-    public function __construct(Environment $twig, PostsRepository $postsRepository, SecurityService $securityService)
+    public function __construct(Environment $twig, PostsRepository $postsRepository, SecurityService $securityService, CsrfService $csrfService)
     {
         $this->twig            = $twig;
         $this->postsRepository = $postsRepository;
         $this->securityService = $securityService;
+        $this->csrfService     = $csrfService;
 
     }//end __construct()
 
@@ -87,7 +97,14 @@ class PostController
      */
     public function createPost(Request $request): Response
     {
+
         if ($request->isMethod('POST') === true) {
+            // Vérifier le token CSRF.
+            $submittedToken = $request->request->get('_csrf_token');
+            if ($this->csrfService->isTokenValid('create_post_form', $submittedToken) === false) {
+                return new Response('Invalid CSRF token.', 403);
+            }
+
             // Nettoyage des entrées utilisateur avec SecurityService.
             $title       = $this->securityService->cleanInput($request->request->get('title'));
             $chapo       = $this->securityService->cleanInput($request->request->get('chapo'));
@@ -105,7 +122,9 @@ class PostController
             try {
                 // Enregistre le post en base de données via le repository.
                 $this->postsRepository->createPost($post);
-                return new Response('Post créé avec succès', 201);
+
+                // Rediriger vers la page de listing des posts après la création.
+                return new Response('', 302, ['Location' => '/posts/list']);
             } catch (Exception $e) {
                 return new Response('Erreur lors de la création du post : '.$e->getMessage(), 500);
             }

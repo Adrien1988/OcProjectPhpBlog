@@ -9,7 +9,7 @@
 		<div
 			class="container">
 			<!-- Titre de la page -->
-			<h2 class="page-section-heading text-center text-uppercase text-secondary">Créer un nouveau post</h2>
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Créer un nouveau post</h2>
 
 			<!-- Ligne de séparation avec icône -->
 			<div class="divider-custom">
@@ -23,8 +23,9 @@
 			<!-- Formulaire -->
 			<div class="row justify-content-center">
 				<div class="col-lg-8 col-xl-7">
-					<form
-						action="/posts/create" method="POST" class="mt-4">
+					<form action="/posts/create" method="POST" class="mt-4">
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token('create_post_form') }}"/>
 						<!-- Titre -->
 						<div class="form-floating mb-3">
 							<input type="text" class="form-control" id="title" name="title" placeholder="Titre du post" required>
@@ -52,4 +53,5 @@
 			</div>
 		</div>
 	</section>
+
 {% endblock %}
