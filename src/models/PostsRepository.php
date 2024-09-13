@@ -71,20 +71,21 @@ class PostsRepository
         $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
 
         // Exécute la requête avec l'ID du post
-        $this->dbi->execute($stmt, [':post_id' => $postId]);
-
+        if ($this->dbi->execute($stmt, [':post_id' => $postId]) === false) {
+            throw new \Exception('Erreur lors de l\'exécution de la requête.');
+        }
 
         // Récupère le premier résultat
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         // Vérifie si le résultat contient au moins un enregistrement.
-        if ($result !== false) {
+        if ($result !== false && $result !== null) {
             return $this->createPostFromResult($result);
         }
 
         // Retourne null si aucun enregistrement n'est trouvé.
         return null;
-    }//end findById()
+    } //end findById()
 
 
     /**
@@ -128,7 +129,7 @@ class PostsRepository
         $post->setPostId((int) $this->dbi->lastInsertId());
 
         return $post;
-    }//end createPost()
+    } //end createPost()
 
 
     /**
@@ -259,7 +260,6 @@ class PostsRepository
     {
 
         $requiredFields = [
-            'post_id',
             'title',
             'chapo',
             'content',

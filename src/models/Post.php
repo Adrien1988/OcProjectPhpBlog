@@ -59,6 +59,24 @@ class Post
      */
     private ?DateTime $updatedAt = null;
 
+    // Constructeur avec paramètres nommés
+    public function __construct(
+        int $postId,
+        string $title,
+        string $chapo,
+        string $content,
+        int $author,
+        DateTime $createdAt,
+        ?DateTime $updatedAt = null
+    ) {
+        $this->postId = $postId;
+        $this->title = $title;
+        $this->chapo = $chapo;
+        $this->content = $content;
+        $this->author = $author;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+    }
 
     /**
      * Gets the unique identifier of the post.
@@ -68,8 +86,7 @@ class Post
     public function getPostId(): int
     {
         return $this->postId;
-
-    }//end getPostId()
+    } //end getPostId()
 
 
     /**
@@ -82,8 +99,7 @@ class Post
     public function setPostId(int $postId): void
     {
         $this->postId = $postId;
-
-    }//end setPostId()
+    } //end setPostId()
 
 
     /**
@@ -94,8 +110,7 @@ class Post
     public function getTitle(): string
     {
         return $this->title;
-
-    }//end getTitle()
+    } //end getTitle()
 
 
     /**
@@ -108,8 +123,7 @@ class Post
     public function setTitle(string $title): void
     {
         $this->title = $title;
-
-    }//end setTitle()
+    } //end setTitle()
 
 
     /**
@@ -120,8 +134,7 @@ class Post
     public function getChapo(): string
     {
         return $this->chapo;
-
-    }//end getChapo()
+    } //end getChapo()
 
 
     /**
@@ -134,8 +147,7 @@ class Post
     public function setChapo(string $chapo): void
     {
         $this->chapo = $chapo;
-
-    }//end setChapo()
+    } //end setChapo()
 
 
     /**
@@ -146,8 +158,7 @@ class Post
     public function getContent(): string
     {
         return $this->content;
-
-    }//end getContent()
+    } //end getContent()
 
 
     /**
@@ -160,8 +171,7 @@ class Post
     public function setContent(string $content): void
     {
         $this->content = $content;
-
-    }//end setContent()
+    } //end setContent()
 
 
     /**
@@ -172,8 +182,7 @@ class Post
     public function getAuthor(): int
     {
         return $this->author;
-
-    }//end getAuthor()
+    } //end getAuthor()
 
 
     /**
@@ -186,8 +195,7 @@ class Post
     public function setAuthor(int $author): void
     {
         $this->author = $author;
-
-    }//end setAuthor()
+    } //end setAuthor()
 
 
     /**
@@ -198,8 +206,7 @@ class Post
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
-
-    }//end getCreatedAt()
+    } //end getCreatedAt()
 
 
     /**
@@ -212,8 +219,7 @@ class Post
     public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
-
-    }//end setCreatedAt()
+    } //end setCreatedAt()
 
 
     /**
@@ -224,8 +230,7 @@ class Post
     public function getUpdatedAt(): ?DateTime
     {
         return $this->updatedAt;
-
-    }//end getUpdatedAt()
+    } //end getUpdatedAt()
 
 
     /**
@@ -238,8 +243,7 @@ class Post
     public function setUpdatedAt(?DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
-
-    }//end setUpdatedAt()
+    } //end setUpdatedAt()
 
 
 }//end class

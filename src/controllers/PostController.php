@@ -85,7 +85,7 @@ class PostController
         );
 
         return new Response($content);
-    }//end listPosts()
+    } //end listPosts()
 
 
     /**
@@ -113,7 +113,15 @@ class PostController
             $postContent = $this->securityService->cleanInput($request->request->get('content'));
 
             // Crée un nouvel objet Post avec les données nettoyées.
-            $post = new Post();
+            $post = new Post(
+                postId: 0,
+                title: $title,
+                chapo: $chapo,
+                content: $postContent,
+                author: 1,
+                createdAt: new \DateTime(),
+                updatedAt: new \DateTime()
+            );
             $post->setTitle($title);
             $post->setChapo($chapo);
             $post->setContent($postContent);
