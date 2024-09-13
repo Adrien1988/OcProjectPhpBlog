@@ -72,20 +72,22 @@ class PostsRepository
         $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
 
         // Exécute la requête avec l'ID du post.
-        if ($this->dbi->execute($stmt, [':post_id' => $postId]) === false) {
+        $success = $this->dbi->execute($stmt, [':post_id' => $postId]);
+
+        if ($success === false) {
             throw new \Exception('Erreur lors de l\'exécution de la requête.');
         }
 
         // Récupère le premier résultat.
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        // Vérifie si le résultat contient au moins un enregistrement.
-        if ($result !== false && $result !== null) {
-            return $this->createPostFromResult($result);
+        // Vérifie si un résultat est trouvé, sinon retourne null.
+        if ($result === false) {
+            return null;
         }
 
-        // Retourne null si aucun enregistrement n'est trouvé.
-        return null;
+        // Retourne l'objet Post créé à partir des résultats.
+        return $this->createPostFromResult($result);
 
     }//end findById()
 

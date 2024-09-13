@@ -71,16 +71,13 @@ class HomeController
      * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
      * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
-     * @param Request         $request         La requête HTTP courante.
      * @param PostsRepository $postsRepository Le repository des posts pour récupérer les derniers articles.
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(Request $request, PostsRepository $postsRepository): Response
+    public function index(PostsRepository $postsRepository): Response
     {
 
-        // Utiliser $request de manière inoffensive pour éviter l'avertissement.
-        $request->getMethod();
         // Consomme la variable sans rien en faire.
         // Définition des éléments du portfolio.
         $portfolioItems = [

@@ -88,6 +88,35 @@ class PostController
 
 
     /**
+     * Affiche le détail d'un article de blog.
+     *
+     * @param int $postId L'identifiant de l'article à afficher.
+     *
+     * @return Response La réponse HTTP avec le contenu rendu.
+     *
+     * @throws \Exception Si l'article n'est pas trouvé.
+     */
+    public function detailPost(int $postId): Response
+    {
+        $post = $this->postsRepository->findById($postId);
+
+        if ($post === null) {
+            throw new \Exception('Post not found');
+        }
+
+        $content = $this->twig->render(
+            'posts/detail.html.twig',
+            [
+                'post' => $post,
+            ]
+        );
+
+        return new Response($content);
+
+    }//end detailPost()
+
+
+    /**
      * Affiche le formulaire de création d'un nouveau post et traite la soumission du formulaire.
      *
      * @param Request $request L'objet de la requête HTTP contenant les données
