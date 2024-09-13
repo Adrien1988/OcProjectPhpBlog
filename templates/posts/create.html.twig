@@ -26,6 +26,7 @@
 					<form action="/posts/create" method="POST" class="mt-4">
 						<input
 						type="hidden" name="_csrf_token" value="{{ csrf_token('create_post_form') }}"/>
+                        <input type="hidden" name="_csrf_token_id" value="create_post_form">
 						<!-- Titre -->
 						<div class="form-floating mb-3">
 							<input type="text" class="form-control" id="title" name="title" placeholder="Titre du post" required>

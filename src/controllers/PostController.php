@@ -61,8 +61,7 @@ class PostController
         $this->postsRepository = $postsRepository;
         $this->securityService = $securityService;
         $this->csrfService     = $csrfService;
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -75,6 +74,9 @@ class PostController
         // Récupère tous les posts via le repository.
         $posts = $this->postsRepository->findAll();
 
+        // var_dump($posts);
+        // die();
+
         $content = $this->twig->render(
             'posts/list.html.twig',
             [
@@ -83,7 +85,6 @@ class PostController
         );
 
         return new Response($content);
-
     }//end listPosts()
 
 
@@ -99,6 +100,7 @@ class PostController
     {
 
         if ($request->isMethod('POST') === true) {
+
             // Vérifier le token CSRF.
             $submittedToken = $request->request->get('_csrf_token');
             if ($this->csrfService->isTokenValid('create_post_form', $submittedToken) === false) {
@@ -124,16 +126,16 @@ class PostController
                 $this->postsRepository->createPost($post);
 
                 // Rediriger vers la page de listing des posts après la création.
-                return new Response('', 302, ['Location' => '/posts/list']);
+                return new Response('', 302, ['Location' => '/posts']);
             } catch (Exception $e) {
-                return new Response('Erreur lors de la création du post : '.$e->getMessage(), 500);
+                return new Response('Erreur lors de la création du post : ' . $e->getMessage(), 500);
             }
-        }//end if
+        } //end if
 
-        $content = $this->twig->render('posts/create.html.twig');
+        $csrfToken = $this->csrfService->generateToken('create_post_form');
+        $content = $this->twig->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
         return new Response($content);
-
-    }//end createPost()
+    } //end createPost()
 
 
 }//end class

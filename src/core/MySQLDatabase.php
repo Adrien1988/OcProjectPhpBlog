@@ -29,6 +29,11 @@ class MySQLDatabase implements DatabaseInterface
     {
         $this->pdo = $pdo;
 
+        try {
+            $this->pdo->query('SELECT 1'); // Test de connexion
+        } catch (\Exception $e) {
+            die('Database connection failed: ' . $e->getMessage());
+        }
     }//end __construct()
 
 
@@ -40,14 +45,13 @@ class MySQLDatabase implements DatabaseInterface
      *
      * @return Iterator      Les résultats de la requête sous forme d'Iterator.
      */
-    public function query(string $sql, array $params=[]): Iterator
+    public function query(string $sql, array $params = []): Iterator
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC) === true) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             yield $row;
         }
-
     }//end query()
 
 
@@ -61,7 +65,6 @@ class MySQLDatabase implements DatabaseInterface
     public function prepare(string $sql): PDOStatement
     {
         return $this->pdo->prepare($sql);
-
     }//end prepare()
 
 
@@ -74,10 +77,20 @@ class MySQLDatabase implements DatabaseInterface
      *
      * @return bool        Le succès de l'exécution.
      */
-    public function execute(PDOStatement $stmt, array $params=[]): bool
+    public function execute(PDOStatement $stmt, array $params = []): bool
     {
-        return $stmt->execute($params);
-
+        try {
+            // Si $params n'est pas vide, utilise-le dans l'exécution de la requête
+            if (!empty($params)) {
+                return $stmt->execute($params);
+            } else {
+                return $stmt->execute();
+            }
+        } catch (\PDOException $e) {
+            // Affiche l'erreur PDO avec plus de détails
+            echo "Erreur lors de l'exécution de la requête : " . $e->getMessage();
+            return false;
+        }
     }//end execute()
 
 
@@ -89,7 +102,6 @@ class MySQLDatabase implements DatabaseInterface
     public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
-
     }//end lastInsertId()
 
 

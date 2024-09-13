@@ -32,8 +32,7 @@ class PostsRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -44,19 +43,19 @@ class PostsRepository
     public function findAll(): array
     {
         // 'query' retourne maintenant un Iterator.
-        $results = $this->dbi->query("SELECT * FROM post");
+        $results = $this->dbi->query("SELECT post_id, title, chapo, content, author, created_at, updated_at FROM post");
 
         // Initialiser un tableau pour stocker les objets Post.
         $posts = [];
 
         // Parcourir chaque ligne retournée par la requête.
         foreach ($results as $row) {
+            var_dump($row);
             $posts[] = $this->createPostFromResult($row);
         }
 
         return $posts;
-
-    }//end findAll()
+    } //end findAll()
 
 
     /**
@@ -68,18 +67,23 @@ class PostsRepository
      */
     public function findById(int $postId): ?Post
     {
-        // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID.
-        $result = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
+        // Prépare la requête SQL.
+        $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
+
+        // Exécute la requête avec l'ID du post
+        $this->dbi->execute($stmt, [':post_id' => $postId]);
+
+
+        // Récupère le premier résultat
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         // Vérifie si le résultat contient au moins un enregistrement.
-        if (empty($result) === false) {
-            // Utilise createPostFromResult pour transformer le premier enregistrement trouvé en objet Post.
-            return $this->createPostFromResult($result[0]);
+        if ($result !== false) {
+            return $this->createPostFromResult($result);
         }
 
         // Retourne null si aucun enregistrement n'est trouvé.
         return null;
-
     }//end findById()
 
 
@@ -99,8 +103,9 @@ class PostsRepository
     public function createPost(Post $post): Post
     {
         // La requête SQL pour insérer un nouvel article.
-        $sql = "INSERT INTO post (title, chapo, content, author, created_at, updated_at) 
-                VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
+        $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`, `updated_at`) 
+        VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
+
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
         $stmt = $this->dbi->prepare($sql);
@@ -113,8 +118,9 @@ class PostsRepository
         $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
+
         // Exécution de la requête.
-        if ($this->dbi->execute($stmt, []) === false) {
+        if ($this->dbi->execute($stmt) === false) {
             throw new Exception("Failed to insert the post into the database.");
         }
 
@@ -122,7 +128,6 @@ class PostsRepository
         $post->setPostId((int) $this->dbi->lastInsertId());
 
         return $post;
-
     }//end createPost()
 
 
@@ -164,8 +169,7 @@ class PostsRepository
         }
 
         return true;
-
-    }//end updatePost()
+    } //end updatePost()
 
 
     /**
@@ -198,8 +202,7 @@ class PostsRepository
         }
 
         return true;
-
-    }//end deletePost()
+    } //end deletePost()
 
 
     /**
@@ -209,9 +212,9 @@ class PostsRepository
      *
      * @return Post[] Un tableau d'objets Post.
      */
-    public function findLatest(int $limit=5): array
+    public function findLatest(int $limit = 5): array
     {
-        $sql     = "SELECT * FROM post ORDER BY created_at DESC LIMIT ".intval($limit);
+        $sql     = "SELECT * FROM post ORDER BY created_at DESC LIMIT " . intval($limit);
         $results = $this->dbi->query($sql);
 
         $posts = [];
@@ -220,8 +223,7 @@ class PostsRepository
         }
 
         return $posts;
-
-    }//end findLatest()
+    } //end findLatest()
 
 
     /**
@@ -241,8 +243,7 @@ class PostsRepository
         $this->validateRow($row);
 
         return $this->buildPostFromRow($row);
-
-    }//end createPostFromResult()
+    } //end createPostFromResult()
 
 
     /**
@@ -256,6 +257,7 @@ class PostsRepository
      */
     private function validateRow(array $row): void
     {
+
         $requiredFields = [
             'post_id',
             'title',
@@ -270,8 +272,7 @@ class PostsRepository
                 throw new InvalidArgumentException("Tous les champs sauf 'updated_at' sont requis.");
             }
         }
-
-    }//end validateRow()
+    } //end validateRow()
 
 
     /**
@@ -290,10 +291,9 @@ class PostsRepository
             content: $row['content'],
             author: (int) $row['author'],
             createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) !== null ? new DateTime($row['updated_at']) : null
+            updatedAt: isset($row['updated_at']) && $row['updated_at']  !== null ? new DateTime($row['updated_at']) : null
         );
-
-    }//end buildPostFromRow()
+    } //end buildPostFromRow()
 
 
 }//end class
