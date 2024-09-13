@@ -3,10 +3,10 @@
 namespace Models;
 
 use DateTime;
-use Exception;
 use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
@@ -75,7 +75,7 @@ class PostsRepository
         $success = $this->dbi->execute($stmt, [':post_id' => $postId]);
 
         if ($success === false) {
-            throw new \Exception('Erreur lors de l\'exécution de la requête.');
+            throw new Exception('Erreur lors de l\'exécution de la requête.');
         }
 
         // Récupère le premier résultat.

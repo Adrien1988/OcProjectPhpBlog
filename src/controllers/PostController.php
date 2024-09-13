@@ -2,14 +2,15 @@
 
 namespace App\Controllers;
 
+use DateTime;
 use App\Models\Post;
 use Twig\Environment;
 use Models\PostsRepository;
-use App\Services\SecurityService;
 use App\Services\CsrfService;
-use PHPMailer\PHPMailer\Exception;
+use App\Services\SecurityService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Contrôleur pour la gestion des posts.
@@ -94,14 +95,14 @@ class PostController
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      *
-     * @throws \Exception Si l'article n'est pas trouvé.
+     * @throws Exception Si l'article n'est pas trouvé.
      */
     public function detailPost(int $postId): Response
     {
         $post = $this->postsRepository->findById($postId);
 
         if ($post === null) {
-            throw new \Exception('Post not found');
+            throw new Exception('Post not found');
         }
 
         $content = $this->twig->render(
@@ -146,15 +147,15 @@ class PostController
                 chapo: $chapo,
                 content: $postContent,
                 author: 1,
-                createdAt: new \DateTime(),
-                updatedAt: new \DateTime()
+                createdAt: new DateTime(),
+                updatedAt: new DateTime()
             );
             $post->setTitle($title);
             $post->setChapo($chapo);
             $post->setContent($postContent);
             $post->setAuthor(1);
-            $post->setCreatedAt(new \DateTime());
-            $post->setUpdatedAt(new \DateTime());
+            $post->setCreatedAt(new DateTime());
+            $post->setUpdatedAt(new DateTime());
 
             try {
                 // Enregistre le post en base de données via le repository.

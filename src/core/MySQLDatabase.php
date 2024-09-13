@@ -86,9 +86,9 @@ class MySQLDatabase implements DatabaseInterface
             // Si $params n'est pas vide, utilise-le dans l'exécution de la requête.
             if (empty($params) === false) {
                 return $stmt->execute($params);
-            } else {
-                return $stmt->execute();
             }
+
+            return $stmt->execute();
         } catch (\PDOException $e) {
             // Affiche l'erreur PDO avec plus de détails.
             echo "Erreur lors de l'exécution de la requête : ".$e->getMessage();
