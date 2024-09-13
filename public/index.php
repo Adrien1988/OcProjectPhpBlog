@@ -179,7 +179,6 @@ try {
         // Passer toutes les dépendances nécessaires au constructeur.
         $controllerInstance = new $class($twig, $postsRepository, $securityService, $csrfService);
         break;
-
     default:
         $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
         break;
