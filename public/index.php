@@ -211,7 +211,6 @@ try {
         },
         $dependencies
     );
-
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
     $response = new Response('Page not found: '.$e->getMessage(), 404);
 } catch (Exception $e) {
