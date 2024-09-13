@@ -6,7 +6,7 @@ Installez les dépendances PHP avec Composer :
 composer install
 
 Installez les dépendances Node.js :
-npm install
+yarn install
 
 Structure de l'architecture
 L'application suit le modèle MVC (Model-View-Controller). Voici une brève explication des dossiers principaux :
