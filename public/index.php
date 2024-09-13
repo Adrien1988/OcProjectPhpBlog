@@ -39,7 +39,7 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__ . '/../src/config/config.php';
+    $configPath = __DIR__.'/../src/config/config.php';
 
     if (file_exists($configPath) === false) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
@@ -54,7 +54,8 @@ function loadConfig(): array
     }
 
     return $config;
-} //end loadConfig()
+
+}//end loadConfig()
 
 
 /**
@@ -68,12 +69,13 @@ function initializeContainer(array $config): DependencyContainer
 {
     return new DependencyContainer(
         [
-            'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
+            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
             'db_user'     => $config['database']['user'],
             'db_password' => $config['database']['password'],
         ]
     );
-} //end initializeContainer()
+
+}//end initializeContainer()
 
 
 /**
@@ -100,11 +102,12 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
             return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
         }
     );
-} //end handleMiddlewares()
+
+}//end handleMiddlewares()
 
 
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 try {
     // Charger la configuration.
@@ -114,12 +117,12 @@ try {
     $container = initializeContainer($config);
 
     // Création de l'instance de PostsRepository.
-    $postsRepository = new PostsRepository($container->getDatabase());
-    $usersRepository = new UsersRepository($container->getDatabase());
+    $postsRepository    = new PostsRepository($container->getDatabase());
+    $usersRepository    = new UsersRepository($container->getDatabase());
     $commentsRepository = new CommentsRepository($container->getDatabase());
 
     // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__ . '/../templates');
+    $loader = new FilesystemLoader(__DIR__.'/../templates');
     $twig   = new Environment(
         $loader,
         [
@@ -136,14 +139,14 @@ try {
     $securityService = new SecurityService();
 
     // Créez une instance de Dotenv.
-    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
 
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
     // $errorController = new ErrorController();
     // Charger les routes.
-    $routes = include __DIR__ . '/../src/config/routes.php';
+    $routes = include __DIR__.'/../src/config/routes.php';
 
     // Initialiser le contexte de la requête.
     $context = new RequestContext();
@@ -172,14 +175,14 @@ try {
     // var_dump($class, $parameters);
     // die();.
     switch ($class) {
-        case 'App\Controllers\PostController':
-            // Passer toutes les dépendances nécessaires au constructeur.
-            $controllerInstance = new $class($twig, $postsRepository, $securityService, $csrfService);
-            break;
+    case 'App\Controllers\PostController':
+        // Passer toutes les dépendances nécessaires au constructeur.
+        $controllerInstance = new $class($twig, $postsRepository, $securityService, $csrfService);
+        break;
 
-        default:
-            $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
-            break;
+    default:
+        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
+        break;
     }
 
     // Supprimer les clés réservées de paramètres comme '_controller'.
@@ -191,7 +194,7 @@ try {
     ];
 
     // Middleware à exécuter.
-    if ($request->isMethod('POST')) {
+    if ($request->isMethod('POST') === true) {
         $middlewares = [
             new CsrfMiddleware($csrfService),
         ];
@@ -213,14 +216,14 @@ try {
     // Envoyer la réponse.
     $response->send();
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-    $response = new Response('Page not found: ' . $e->getMessage(), 404);
+    $response = new Response('Page not found: '.$e->getMessage(), 404);
 } catch (Exception $e) {
-    $response = new Response('An error occurred: ' . $e->getMessage(), 500);
-}
+    $response = new Response('An error occurred: '.$e->getMessage(), 500);
+}//end try
 
-// Assurez-vous que $response est défini avant de l'envoyer
-if (isset($response)) {
+// Assurez-vous que $response est défini avant de l'envoyer.
+if (isset($response) === true) {
     $response->send();
 } else {
     echo "An unexpected error occurred without response handling.";
-}//end try
+}//end if
