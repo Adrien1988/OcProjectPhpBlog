@@ -44,14 +44,13 @@ class PostsRepository
     public function findAll(): array
     {
         // 'query' retourne maintenant un Iterator.
-        $results = $this->dbi->query("SELECT post_id, title, chapo, content, author, created_at, updated_at FROM post");
+        $results = $this->dbi->query("SELECT * FROM post ORDER BY created_at DESC");
 
         // Initialiser un tableau pour stocker les objets Post.
         $posts = [];
 
         // Parcourir chaque ligne retournée par la requête.
         foreach ($results as $row) {
-            var_dump($row);
             $posts[] = $this->createPostFromResult($row);
         }
 
@@ -274,8 +273,8 @@ class PostsRepository
         ];
 
         foreach ($requiredFields as $field) {
-            if (array_key_exists($field, $row) === false || $row[$field] === '') {
-                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' sont requis.");
+            if (array_key_exists($field, $row) === false || $row[$field] === '' || $row[$field] === null) {
+                throw new InvalidArgumentException("Le champ {$field} est requis.");
             }
         }
 

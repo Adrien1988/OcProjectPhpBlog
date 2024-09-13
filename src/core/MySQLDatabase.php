@@ -50,7 +50,7 @@ class MySQLDatabase implements DatabaseInterface
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC) === true) {
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
             yield $row;
         }
 
