@@ -3,10 +3,7 @@
 session_start();
 
 use Dotenv\Dotenv;
-use App\Models\Post;
-use App\Models\User;
 use Twig\Environment;
-use App\Models\Comment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use App\Services\EnvService;
@@ -177,7 +174,7 @@ try {
     switch ($class) {
     case 'App\Controllers\PostController':
         // Passer toutes les dépendances nécessaires au constructeur.
-        $controllerInstance = new $class($twig, $postsRepository, $securityService, $csrfService);
+        $controllerInstance = new $class($postsRepository, $twig, $securityService, $envService, $csrfService);
         break;
     default:
         $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);

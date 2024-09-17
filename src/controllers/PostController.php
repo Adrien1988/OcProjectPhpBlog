@@ -4,64 +4,46 @@ namespace App\Controllers;
 
 use DateTime;
 use App\Models\Post;
-use Twig\Environment;
 use Models\PostsRepository;
+use App\Services\EnvService;
 use App\Services\CsrfService;
 use App\Services\SecurityService;
+use App\Controllers\BaseController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Twig\Environment;
 
 /**
  * Contrôleur pour la gestion des posts.
  */
-class PostController
+class PostController extends BaseController
 {
 
     /**
-     * Instance de l'environnement Twig pour le rendu des templates.
-     *
-     * @var Environment
-     */
-    private $twig;
-
-    /**
-     * Le repository des posts pour interagir avec la base de données des articles.
+     * Le repository des articles de blog.
      *
      * @var PostsRepository
      */
     private $postsRepository;
 
-    /**
-     * Le service de sécurité pour la protection et le nettoyage des entrées utilisateur.
-     *
-     * @var SecurityService
-     */
-    private $securityService;
-
-    /**
-     * Service pour la gestion des tokens CSRF.
-     *
-     * @var CsrfService
-     */
-    private $csrfService;
-
 
     /**
      * Constructeur de la classe PostController.
-     * Initialise les dépendances pour le rendu des templates, la gestion des articles et la sécurité.
      *
-     * @param Environment     $twig            Instance de l'environnement Twig pour le rendu des templates.
-     * @param PostsRepository $postsRepository Le repository des articles de blog pour récupérer et manipuler les posts.
-     * @param SecurityService $securityService Le service de sécurité pour la protection et le nettoyage des entrées utilisateur.
-     * @param CsrfService     $csrfService     Service pour la gestion des tokens CSRF.
+     * @param PostsRepository $postsRepository Le repository des articles de blog.
+     * @param Environment     $twig            L'environnement Twig pour le rendu des templates.
+     * @param SecurityService $securityService Le service de sécurité pour la protection contre les attaques XSS.
+     * @param EnvService      $envService      Le service de gestion des variables d'environnement.
+     * @param CsrfService     $csrfService     Le service de gestion des tokens CSRF.
      */
-    public function __construct(Environment $twig, PostsRepository $postsRepository, SecurityService $securityService, CsrfService $csrfService)
+    public function __construct(PostsRepository $postsRepository, Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService)
     {
-        $this->twig            = $twig;
+        // Appel du constructeur du BaseController avec toutes les dépendances nécessaires.
+        parent::__construct($twig, $securityService, $envService, $csrfService);
+
+        // Injection du PostsRepository spécifique au PostController.
         $this->postsRepository = $postsRepository;
-        $this->securityService = $securityService;
-        $this->csrfService     = $csrfService;
 
     }//end __construct()
 
@@ -76,14 +58,12 @@ class PostController
         // Récupère tous les posts via le repository.
         $posts = $this->postsRepository->findAll();
 
-        $content = $this->twig->render(
+        return $this->render(
             'posts/list.html.twig',
             [
                 'posts' => $posts,
             ]
         );
-
-        return new Response($content);
 
     }//end listPosts()
 
@@ -105,14 +85,12 @@ class PostController
             throw new Exception('Post not found');
         }
 
-        $content = $this->twig->render(
+        return $this->render(
             'posts/detail.html.twig',
             [
                 'post' => $post,
             ]
         );
-
-        return new Response($content);
 
     }//end detailPost()
 
@@ -131,14 +109,14 @@ class PostController
         if ($request->isMethod('POST') === true) {
             // Vérifier le token CSRF.
             $submittedToken = $request->request->get('_csrf_token');
-            if ($this->csrfService->isTokenValid('create_post_form', $submittedToken) === false) {
+            if ($this->isCsrfTokenValid('create_post_form', $submittedToken) === false) {
                 return new Response('Invalid CSRF token.', 403);
             }
 
             // Nettoyage des entrées utilisateur avec SecurityService.
-            $title       = $this->securityService->cleanInput($request->request->get('title'));
-            $chapo       = $this->securityService->cleanInput($request->request->get('chapo'));
-            $postContent = $this->securityService->cleanInput($request->request->get('content'));
+            $title       = $this->cleanInput($request->request->get('title'));
+            $chapo       = $this->cleanInput($request->request->get('chapo'));
+            $postContent = $this->cleanInput($request->request->get('content'));
 
             // Crée un nouvel objet Post avec les données nettoyées.
             $post = new Post(
@@ -168,9 +146,8 @@ class PostController
             }
         }//end if
 
-        $csrfToken = $this->csrfService->generateToken('create_post_form');
-        $content   = $this->twig->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
-        return new Response($content);
+        $csrfToken = $this->generateCsrfToken('create_post_form');
+        return $this->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
 
     }//end createPost()
 
