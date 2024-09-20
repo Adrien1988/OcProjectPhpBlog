@@ -72,14 +72,14 @@ class PostController extends BaseController
      * Affiche le détail d'un article de blog.
      * Cette méthode récupère un article à partir de son identifiant et rend une vue avec ses détails.
      *
-     * @param Request $request La requête HTTP courante.
-     * @param int     $postId  L'identifiant de l'article à afficher.
+     * @param int $postId L'identifiant de l'article
+     *                    à afficher.
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      *
      * @throws Exception Si l'article n'est pas trouvé.
      */
-    public function detailPost(Request $request, int $postId): Response
+    public function detailPost(int $postId): Response
     {
         $post = $this->postsRepository->findById($postId);
 
