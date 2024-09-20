@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Traits\IdTrait;
+use App\Models\Traits\TimestampableTrait;
+use App\Models\traits\AuthTrait;
 use DateTime;
 
 /**
@@ -9,13 +12,7 @@ use DateTime;
  */
 class Post
 {
-
-    /**
-     * The unique identifier of the post.
-     *
-     * @var integer
-     */
-    private int $postId;
+    use IdTrait, TimestampableTrait, AuthTrait;
 
     /**
      * The title of the post.
@@ -37,27 +34,6 @@ class Post
      * @var string
      */
     private string $content;
-
-    /**
-     * The identifier of the author who wrote the post.
-     *
-     * @var integer
-     */
-    private int $author;
-
-    /**
-     * The date and time when the post was created.
-     *
-     * @var DateTime
-     */
-    private DateTime $createdAt;
-
-    /**
-     * The date and time when the post was last updated, can be null.
-     *
-     * @var ?DateTime
-     */
-    private ?DateTime $updatedAt = null;
 
 
     /**
@@ -81,41 +57,15 @@ class Post
         DateTime $createdAt,
         ?DateTime $updatedAt=null
     ) {
-        $this->postId    = $postId;
-        $this->title     = $title;
-        $this->chapo     = $chapo;
-        $this->content   = $content;
-        $this->author    = $author;
-        $this->createdAt = $createdAt;
-        $this->updatedAt = $updatedAt;
+        $this->setId($postId);
+        $this->title   = $title;
+        $this->chapo   = $chapo;
+        $this->content = $content;
+        $this->setAuthor($author);
+        $this->setCreatedAt($createdAt);
+        $this->setUpdatedAt($updatedAt);
 
     }//end __construct()
-
-
-    /**
-     * Gets the unique identifier of the post.
-     *
-     * @return int
-     */
-    public function getPostId(): int
-    {
-        return $this->postId;
-
-    }//end getPostId()
-
-
-    /**
-     * Sets the unique identifier of the post.
-     *
-     * @param int $postId the unique identifier of the post.
-     *
-     * @return void
-     */
-    public function setPostId(int $postId): void
-    {
-        $this->postId = $postId;
-
-    }//end setPostId()
 
 
     /**
@@ -194,84 +144,6 @@ class Post
         $this->content = $content;
 
     }//end setContent()
-
-
-    /**
-     * Gets the identifier of the author who wrote the post.
-     *
-     * @return int
-     */
-    public function getAuthor(): int
-    {
-        return $this->author;
-
-    }//end getAuthor()
-
-
-    /**
-     * Sets the identifier of the author who wrote the post.
-     *
-     * @param int $author the identifier of the author who wrote the post.
-     *
-     * @return void
-     */
-    public function setAuthor(int $author): void
-    {
-        $this->author = $author;
-
-    }//end setAuthor()
-
-
-    /**
-     * Gets the date and time when the post was created.
-     *
-     * @return DateTime
-     */
-    public function getCreatedAt(): DateTime
-    {
-        return $this->createdAt;
-
-    }//end getCreatedAt()
-
-
-    /**
-     * Sets the date and time when the post was created.
-     *
-     * @param DateTime $createdAt the date and time when the post was created.
-     *
-     * @return void
-     */
-    public function setCreatedAt(DateTime $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-
-    }//end setCreatedAt()
-
-
-    /**
-     * Gets the date and time when the post was last updated.
-     *
-     * @return ?DateTime
-     */
-    public function getUpdatedAt(): ?DateTime
-    {
-        return $this->updatedAt;
-
-    }//end getUpdatedAt()
-
-
-    /**
-     * Sets the date and time when the post was last updated.
-     *
-     * @param ?DateTime $updatedAt the date and time when the post was last updated.
-     *
-     * @return void
-     */
-    public function setUpdatedAt(?DateTime $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-
-    }//end setUpdatedAt()
 
 
 }//end class

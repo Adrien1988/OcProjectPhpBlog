@@ -19,7 +19,7 @@ function createRoutes(): RouteCollection
     $routes->add('contact_submit', new Route('/contact/submit', ['_controller' => 'App\Controllers\HomeController::submitContact'], [], [], '', [], ['POST']));
     $routes->add('posts_list', new Route('/posts', ['_controller' => 'App\Controllers\PostController::listPosts']));
     $routes->add('create_post', new Route('/posts/create', ['_controller' => 'App\Controllers\PostController::createPost'], [], [], '', [], ['GET', 'POST']));
-    $routes->add('post_detail', new Route('/posts/{postId}', ['_controller' => 'App\Controllers\PostController::detailPost']));
+    $routes->add('post_detail', new Route('/posts/{postId}', ['_controller' => 'App\Controllers\PostController::detailPost'], ['postId' => '\d+']));
     $routes->add('edit_post', new Route('/posts/edit/{postId}', ['_controller' => 'App\Controllers\PostController::editPost'], [], [], '', [], ['GET', 'POST']));
     $routes->add('delete_post', new Route('/posts/delete/{postId}', ['_controller' => 'App\Controllers\PostController::deletePost'], [], [], '', [], ['POST']));
     return $routes;

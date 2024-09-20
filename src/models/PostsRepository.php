@@ -128,7 +128,7 @@ class PostsRepository
         }
 
         // Récupération et définition de l'ID de la dernière ligne insérée.
-        $post->setPostId((int) $this->dbi->lastInsertId());
+        $post->setId((int) $this->dbi->lastInsertId());
 
         return $post;
 
@@ -165,7 +165,7 @@ class PostsRepository
         $stmt->bindValue(':author', $post->getAuthor());
         $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':post_id', $post->getPostId());
+        $stmt->bindValue(':post_id', $post->getId());
 
         // Exécution de la requête.
         if ($this->dbi->execute($stmt, []) === false) {

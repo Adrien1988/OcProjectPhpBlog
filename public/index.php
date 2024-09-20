@@ -3,7 +3,6 @@
 session_start();
 
 use Dotenv\Dotenv;
-use ReflectionMethod;
 use Twig\Environment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
@@ -175,7 +174,7 @@ try {
     switch ($class) {
     case 'App\Controllers\PostController':
         // Passer toutes les dépendances nécessaires au constructeur.
-        $controllerInstance = new $class($postsRepository, $twig, $securityService, $envService, $csrfService);
+        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
         break;
     default:
         $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
@@ -204,18 +203,22 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($request, $controllerInstance, $method, $postsRepository, $securityService, $parameters) {
+        function () use ($request, $controllerInstance, $method, $postsRepository, $parameters) {
             // Assurez-vous que le paramètre 'postId' est bien défini.
             if (isset($parameters['postId']) === true) {
                 // Vérification du nombre d'arguments attendus par la méthode.
                 if ($method === 'editPost' || $method === 'deletePost') {
-                    return $controllerInstance->$method($request, (int) $parameters['postId'], $postsRepository, $securityService);
+                    return $controllerInstance->$method($request, (int) $parameters['postId'], $postsRepository);
                 } else if ($method === 'detailPost') {
-                    return $controllerInstance->$method((int) $parameters['postId'], $postsRepository, $securityService);
+                    return $controllerInstance->$method((int) $parameters['postId'], $postsRepository);
                 }
             } else {
-                // Si pas de 'postId', on appelle sans.
-                return $controllerInstance->$method($postsRepository, $securityService, ...array_values($parameters));
+                // Assurez-vous que le $postsRepository est bien passé en premier pour listPosts().
+                if ($method === 'listPosts') {
+                    return $controllerInstance->$method($postsRepository, $request);
+                }
+
+                return $controllerInstance->$method($request, $postsRepository,  ...array_values($parameters));
             }
         },
         $dependencies
