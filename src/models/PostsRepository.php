@@ -151,7 +151,7 @@ class PostsRepository
     public function updatePost(Post $post): bool
     {
         // La requête SQL pour mettre à jour un article existant.
-        $sql = "UPDATE posts SET title = :title, chapo = :chapo, content = :content, 
+        $sql = "UPDATE post SET title = :title, chapo = :chapo, content = :content, 
                 author = :author, created_at = :created_at, updated_at = :updated_at 
                 WHERE post_id = :post_id";
 
@@ -193,7 +193,7 @@ class PostsRepository
     public function deletePost(int $postId): bool
     {
         // La requête SQL pour supprimer un article.
-        $sql = "DELETE FROM posts WHERE post_id = :post_id";
+        $sql = "DELETE FROM post WHERE post_id = :post_id";
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
         $stmt = $this->dbi->prepare($sql);

@@ -203,14 +203,14 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($controllerInstance, $method, $postsRepository, $securityService, $parameters) {
+        function () use ($controllerInstance, $method, $request, $postsRepository, $securityService, $parameters) {
             // Si le paramètre 'postId' est défini dans la route.
             if (isset($parameters['postId']) === true) {
                 // Appeler la méthode du contrôleur avec le 'postId'.
-                return $controllerInstance->$method((int) $parameters['postId'], $postsRepository, $securityService);
+                return $controllerInstance->$method($request, (int) $parameters['postId'], $postsRepository, $securityService);
             } else {
                 // Sinon, appeler la méthode du contrôleur sans 'postId'.
-                return $controllerInstance->$method($postsRepository, $securityService, ...array_values($parameters));
+                return $controllerInstance->$method($request, $postsRepository, $securityService, ...array_values($parameters));
             }
         },
         $dependencies

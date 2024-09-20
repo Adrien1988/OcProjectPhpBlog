@@ -40,15 +40,36 @@
 										{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
 									</p>
 									<p>{{ post.chapo }}</p>
-									<div class="text-center">
+
+									<!-- Lire la suite -->
+									<div class="text-center mb-3">
 										<a href="/posts/{{ post.postId }}" class="btn btn-primary">Lire la suite</a>
+									</div>
+
+									<!-- Modifier et Supprimer -->
+									<div class="text-center">
+										<a href="/posts/edit/{{ post.postId }}" class="btn btn-warning btn-sm">Modifier</a>
+
+										<!-- Bouton pour ouvrir la modale -->
+										<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.postId }}">
+											Supprimer
+										</button>
 									</div>
 								</div>
 							</div>
 						</div>
+
+						<!-- Inclure la modale de confirmation de suppression -->
+						{% include 'partials/_confirm_delete_modal.html.twig' with {
+							modalId: 'deletePostModal' ~ post.postId,
+							itemName: post.title,
+							deleteUrl: '/posts/delete/' ~ post.postId,
+							csrf_token: csrf_token('delete_post')
+						} %}
 					{% endfor %}
 				{% endif %}
 			</div>
 		</div>
 	</section>
+
 {% endblock %}

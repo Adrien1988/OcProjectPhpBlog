@@ -1,0 +1,55 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Modification d'un Post
+{% endblock %}
+
+{% block content %}
+	<section class="page-section bg-light mt-5" id="editPost">
+		<div
+			class="container">
+			<!-- Section Heading-->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Modifier le Post</h2>
+
+			<!-- Icon Divider-->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+
+			<!-- Form -->
+			<div class="row justify-content-center">
+				<div class="col-lg-8 col-xl-7">
+					<form action="/posts/edit/{{ post.postId }}" method="POST" class="mt-4">
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+						<!-- Title -->
+						<div class="mb-3">
+							<label for="title" class="form-label text-uppercase text-secondary fw-bold">Titre</label>
+							<input type="text" id="title" name="title" class="form-control" value="{{ post.title }}" required>
+						</div>
+
+						<!-- Chapo -->
+						<div class="mb-3">
+							<label for="chapo" class="form-label text-uppercase text-secondary fw-bold">Chapô</label>
+							<input type="text" id="chapo" name="chapo" class="form-control" value="{{ post.chapo }}" required>
+						</div>
+
+						<!-- Content -->
+						<div class="mb-3">
+							<label for="content" class="form-label text-uppercase text-secondary fw-bold">Contenu</label>
+							<textarea id="content" name="content" class="form-control" rows="5" required>{{ post.content }}</textarea>
+						</div>
+
+						<div class="d-grid">
+							<button type="submit" class="btn btn-primary btn-xl">Enregistrer les modifications</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+{% endblock %}

@@ -70,14 +70,16 @@ class PostController extends BaseController
 
     /**
      * Affiche le détail d'un article de blog.
+     * Cette méthode récupère un article à partir de son identifiant et rend une vue avec ses détails.
      *
-     * @param int $postId L'identifiant de l'article à afficher.
+     * @param Request $request La requête HTTP courante.
+     * @param int     $postId  L'identifiant de l'article à afficher.
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      *
      * @throws Exception Si l'article n'est pas trouvé.
      */
-    public function detailPost(int $postId): Response
+    public function detailPost(Request $request, int $postId): Response
     {
         $post = $this->postsRepository->findById($postId);
 
@@ -150,6 +152,104 @@ class PostController extends BaseController
         return $this->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
 
     }//end createPost()
+
+
+    /**
+     * Modifie un article de blog.
+     * Cette méthode affiche le formulaire de modification d'un post, et si une requête POST est envoyée,
+     * elle met à jour l'article avec les nouvelles informations.
+     *
+     * @param Request $request La requête HTTP contenant les données du formulaire.
+     * @param int     $postId  L'identifiant de l'article à modifier.
+     *
+     * @return Response La réponse HTTP, contenant soit le formulaire, soit une redirection après mise à jour.
+     *
+     * @throws Exception Si l'article ou l'utilisateur n'est pas trouvé ou si une erreur survient lors de la mise à jour.
+     */
+    public function editPost(Request $request, int $postId): Response
+    {
+        $post = $this->postsRepository->findById($postId);
+
+        if ($post === null) {
+            throw new Exception('Post not found');
+        }
+
+        // // Récupérer l'utilisateur authentifié (en supposant que SecurityService a une méthode getUser())
+        // $currentUser = $this->securityService->getUser(); // Supposons que cette méthode retourne l'utilisateur connecté
+        // if ($currentUser === null) {
+        // throw new Exception('Utilisateur non authentifié');
+        // }
+        // Si la requête est en POST, on traite le formulaire de modification.
+        if ($request->isMethod('POST') === true) {
+            $submittedToken = $request->request->get('_csrf_token');
+            if ($this->isCsrfTokenValid('edit_post_form', $submittedToken) === false) {
+                return new Response('Invalid CSRF token.', 403);
+            }
+
+            $title       = $this->cleanInput($request->request->get('title'));
+            $chapo       = $this->cleanInput($request->request->get('chapo'));
+            $postContent = $this->cleanInput($request->request->get('content'));
+
+            // Mettre à jour les informations du post.
+            $post->setTitle($title);
+            $post->setChapo($chapo);
+            // $post->setAuthor($currentUser->getId());
+            $post->setContent($postContent);
+            $post->setUpdatedAt(new DateTime());
+
+            try {
+                // Sauvegarder les modifications via le repository.
+                $this->postsRepository->updatePost($post);
+                return new Response('', 302, ['Location' => '/posts/'.$postId]);
+            } catch (Exception $e) {
+                return new Response('Erreur lors de la modification du post : '.$e->getMessage(), 500);
+            }
+        }//end if
+
+        // Sinon, on affiche la page avec le formulaire pré-rempli.
+        $csrfToken = $this->generateCsrfToken('edit_post_form');
+        return $this->render('posts/edit.html.twig', ['post' => $post, 'csrf_token' => $csrfToken]);
+
+    }//end editPost()
+
+
+    /**
+     * Supprime un article de blog.
+     * Cette méthode vérifie le jeton CSRF, supprime l'article identifié par son identifiant,
+     * puis redirige vers la page de listing des posts.
+     *
+     * @param Request $request La requête HTTP contenant les données, y compris le token CSRF.
+     * @param int     $postId  L'identifiant de l'article à supprimer.
+     *
+     * @return Response La réponse HTTP, avec redirection ou message d'erreur.
+     *
+     * @throws Exception Si l'article n'est pas trouvé ou si une erreur survient lors de la suppression.
+     */
+    public function deletePost(Request $request, int $postId): Response
+    {
+        // Vérifier le token CSRF avant d'effectuer la suppression.
+        $submittedToken = $request->request->get('_csrf_token');
+        if ($this->isCsrfTokenValid('delete_post', $submittedToken) === false) {
+            return new Response('Invalid CSRF token.', 403);
+        }
+
+        $post = $this->postsRepository->findById($postId);
+
+        if ($post === null) {
+            throw new Exception('Post not found');
+        }
+
+        try {
+            // Supprimer l'article via le repository.
+            $this->postsRepository->deletePost($postId);
+
+            // Rediriger vers la page de listing des posts après suppression.
+            return new Response('', 302, ['Location' => '/posts']);
+        } catch (Exception $e) {
+            return new Response('Erreur lors de la suppression du post : '.$e->getMessage(), 500);
+        }
+
+    }//end deletePost()
 
 
 }//end class
