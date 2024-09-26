@@ -3,18 +3,20 @@
 session_start();
 
 use Dotenv\Dotenv;
+use ReflectionMethod;
 use Twig\Environment;
+use ReflectionException;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
+use Models\UsersRepository;
 use App\Services\EnvService;
 use App\Services\CsrfService;
+use Models\CommentsRepository;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
-use Models\CommentsRepository;
-use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
@@ -164,25 +166,17 @@ try {
     // }
     // Ajouter un try catch de parameters ici pour intégrer les erreurs d'url dans une page 404.
     $parameters = $matcher->match($request->getPathInfo());
+
     // Extraire le contrôleur et l'action.
     $controller           = $parameters['_controller'];
     list($class, $method) = explode('::', $controller);
 
-    // Instancier le contrôleur et appeler l'action.
-    // var_dump($class, $parameters);
-    // die();.
-    switch ($class) {
-    case 'App\Controllers\PostController':
-        // Passer toutes les dépendances nécessaires au constructeur.
-        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
-        break;
-    default:
-        $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
-        break;
-    }
+    // Instancier le contrôleur.
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
 
-    // Supprimer les clés réservées de paramètres comme '_controller'.
-    unset($parameters['_controller']);
+
+    // Supprimer les clés réservées de paramètres.
+    unset($parameters['_controller'], $parameters['_route']);
 
     // Dépendances pour les middlewares.
     $dependencies = [
@@ -198,35 +192,106 @@ try {
         $middlewares = [];
     }
 
+    // Définir une liste de méthodes autorisées par contrôleur.
+    $allowedMethods = [
+        'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
+        'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
+        // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
+    ];
+
+    // Vérifier si la méthode est autorisée.
+    if (isset($allowedMethods[$class]) === false || in_array($method, $allowedMethods[$class]) === false) {
+        $response = new Response('Méthode non autorisée', 403);
+        $response->send();
+        exit;
+    }
+
 
     // Appeler la méthode du contrôleur avec les middlewares.
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($request, $controllerInstance, $method, $postsRepository, $parameters) {
-            // Assurez-vous que le paramètre 'postId' est bien défini.
-            if (isset($parameters['postId']) === true) {
-                // Vérification du nombre d'arguments attendus par la méthode.
-                if ($method === 'editPost' || $method === 'deletePost') {
-                    return $controllerInstance->$method($request, (int) $parameters['postId'], $postsRepository);
-                } else if ($method === 'detailPost') {
-                    return $controllerInstance->$method((int) $parameters['postId'], $postsRepository);
-                }
-            } else {
-                // Assurez-vous que le $postsRepository est bien passé en premier pour listPosts().
-                if ($method === 'listPosts') {
-                    return $controllerInstance->$method($postsRepository, $request);
+        function () use ($request, $controllerInstance, $method, $postsRepository, $parameters, $csrfService) {
+            try {
+                // Utiliser la réflexion pour obtenir les paramètres de la méthode.
+                $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
+
+                // Vérifier que la méthode est publique.
+                if ($reflectionMethod->isPublic() === false) {
+                    throw new Exception('Méthode non accessible');
                 }
 
-                return $controllerInstance->$method($request, $postsRepository,  ...array_values($parameters));
-            }
+                // Préparer les paramètres de la méthode.
+                $methodParameters = [];
+
+                foreach ($reflectionMethod->getParameters() as $param) {
+                    $paramName = $param->getName();
+                    $paramType = $param->getType();
+
+                    if ($paramType !== null) {
+                        $typeName = $paramType->getName();
+
+                        // Vérifier si le type est une classe (objet) ou un type scalaire.
+                        if ($paramType->isBuiltin() === false) {
+                            // Injecter les dépendances en fonction du type.
+                            if ($typeName === Request::class) {
+                                $methodParameters[] = $request;
+                            } else if ($typeName === PostsRepository::class) {
+                                $methodParameters[] = $postsRepository;
+                            } else if ($typeName === CsrfService::class) {
+                                $methodParameters[] = $csrfService;
+                            } else {
+                                throw new Exception("Type de paramètre non pris en charge : {$typeName}");
+                            }
+                        } else {
+                            // Pour les types scalaires, chercher dans les paramètres de la route.
+                            if (isset($parameters[$paramName]) === true) {
+                                // Convertir la valeur en fonction du type attendu.
+                                settype($parameters[$paramName], $typeName);
+                                $methodParameters[] = $parameters[$paramName];
+                            } else if ($param->isOptional() === true) {
+                                // Si le paramètre est optionnel, utiliser la valeur par défaut s'il existe.
+                                if ($param->isDefaultValueAvailable() === true) {
+                                    $methodParameters[] = $param->getDefaultValue();
+                                } else {
+                                    // Si aucune valeur par défaut, utiliser null pour les types nullable.
+                                    $methodParameters[] = null;
+                                }
+                            } else {
+                                throw new Exception("Paramètre requis manquant : '{$paramName}'");
+                            }
+                        }//end if
+                    } else if (isset($parameters[$paramName]) === true) {
+                        // Utiliser les paramètres de la route.
+                        $methodParameters[] = $parameters[$paramName];
+                    } else if ($param->isOptional() === true) {
+                        // Si le paramètre est optionnel, utiliser la valeur par défaut s'il existe.
+                        if ($param->isDefaultValueAvailable() === true) {
+                            $methodParameters[] = $param->getDefaultValue();
+                        } else {
+                            $methodParameters[] = null;
+                        }
+                    } else {
+                        throw new Exception("Impossible de résoudre le paramètre '{$paramName}' pour la méthode '{$method}'");
+                    }//end if
+                }//end foreach
+
+                // Appeler la méthode du contrôleur avec les paramètres résolus.
+                return $controllerInstance->$method(...$methodParameters);
+            } catch (ReflectionException $e) {
+                // Gérer les erreurs de réflexion.
+                return new Response('Méthode introuvable : '.$e->getMessage(), 404);
+            } catch (Exception $e) {
+                // Gérer les autres exceptions.
+                return new Response('Une erreur est survenue : '.$e->getMessage(), 500);
+            }//end try
         },
         $dependencies
     );
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-    $response = new Response('Page not found: '.$e->getMessage(), 404);
+    $response = new Response('Page non trouvée : '.$e->getMessage(), 404);
 } catch (Exception $e) {
-    $response = new Response('An error occurred: '.$e->getMessage(), 500);
+    $response = new Response('Une erreur est survenue : '.$e->getMessage(), 500);
 }//end try
 
 // Assurez-vous que $response est défini avant de l'envoyer.

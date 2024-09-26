@@ -40,10 +40,10 @@
 
 					<!-- Buttons to Edit and Delete Post -->
 					<div class="text-center mt-4">
-						<a href="/posts/edit/{{ post.postId }}" class="btn btn-warning btn-sm">Modifier</a>
+						<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
 
 						<!-- Button to trigger the modal -->
-						<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.postId }}">
+						<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
 							Supprimer
 						</button>
 					</div>
@@ -109,7 +109,7 @@
 			<!-- Comment Form -->
 			<div class="row justify-content-center">
 				<div class="col-lg-6 col-md-8">
-					<form action="/post/{{ post.postId }}/comment" method="POST" id="commentForm">
+					<form action="/post/{{ post.id }}/comment" method="POST" id="commentForm">
 						<input
 						type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
 
@@ -130,9 +130,9 @@
 
 	<!-- Inclusion de la modale avec des variables spécifiques pour ce post -->
 	{% include 'partials/_confirm_delete_modal.html.twig' with {
-    modalId: 'deletePostModal' ~ post.postId,
+    modalId: 'deletePostModal' ~ post.id,
     itemName: post.title,
-    deleteUrl: '/posts/delete/' ~ post.postId,
+    deleteUrl: '/posts/delete/' ~ post.id,
     csrf_token: csrf_token('delete_post')
 } %}
 
