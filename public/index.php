@@ -17,6 +17,8 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
+use Models\CommentsRepository;
+use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
@@ -173,7 +175,6 @@ try {
 
     // Instancier le contrôleur.
     $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
-
 
     // Supprimer les clés réservées de paramètres.
     unset($parameters['_controller'], $parameters['_route']);
