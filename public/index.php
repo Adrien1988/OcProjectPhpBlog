@@ -4,8 +4,8 @@ session_start();
 
 use Dotenv\Dotenv;
 use ReflectionMethod;
-use Twig\Environment;
 use ReflectionException;
+use Twig\Environment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;

@@ -15,8 +15,8 @@
 					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/posts">Liste des Blog Posts</a>
 				</li>
 				{# <li class="nav-item mx-0 mx-lg-1">
-					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#contact">Contact</a>
-				</li> #}
+													<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#contact">Contact</a>
+												</li> #}
 				{% if app.user and app.user.is_admin %}
 					<li class="nav-item mx-0 mx-lg-1">
 						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Ajouter un Blog Post</a>
@@ -28,12 +28,19 @@
 						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Gérer les Blog Posts</a>
 					</li>
 				{% endif %}
-				<li class="nav-item mx-0 mx-lg-1">
-					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Connexion</a>
-				</li>
-				<li class="nav-item mx-0 mx-lg-1">
-					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Enregistrement</a>
-				</li>
+
+				{% if app.user %}
+					<li class="nav-item mx-0 mx-lg-1">
+						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/logout">Déconnexion</a>
+					</li>
+				{% else %}
+					<li class="nav-item mx-0 mx-lg-1">
+						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/login">Connexion</a>
+					</li>
+					<li class="nav-item mx-0 mx-lg-1">
+						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/register">Enregistrement</a>
+					</li>
+				{% endif %}
 			</ul>
 		</div>
 	</div>
