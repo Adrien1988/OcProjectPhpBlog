@@ -55,14 +55,14 @@ class User
      *
      * @var string
      */
-    private string $token;
+    private ?string $token;
 
     /**
      * The date and time when the user's session or token expires.
      *
      * @var DateTime
      */
-    private DateTime $expireAt;
+    private ?DateTime $expireAt;
 
 
     /**
@@ -200,7 +200,7 @@ class User
      *
      * @return string
      */
-    public function getToken(): string
+    public function getToken(): ?string
     {
         return $this->token;
 
@@ -214,7 +214,7 @@ class User
      *
      * @return void
      */
-    public function setToken(string $token): void
+    public function setToken(?string $token): void
     {
         $this->token = $token;
 
@@ -226,7 +226,7 @@ class User
      *
      * @return DateTime
      */
-    public function getExpireAt(): DateTime
+    public function getExpireAt(): ?DateTime
     {
         return $this->expireAt;
 
@@ -240,7 +240,7 @@ class User
      *
      * @return void
      */
-    public function setExpireAt(DateTime $expireAt): void
+    public function setExpireAt(?DateTime $expireAt): void
     {
         $this->expireAt = $expireAt;
 

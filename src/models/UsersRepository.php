@@ -30,8 +30,7 @@ class UsersRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-
-    }//end __construct()
+    } //end __construct()
 
 
     /**
@@ -50,8 +49,7 @@ class UsersRepository
         }
 
         return $users;
-
-    }//end findAll()
+    } //end findAll()
 
 
     /**
@@ -61,17 +59,16 @@ class UsersRepository
      *
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
-    public function findById(int $userId): ?User
+    public function findById(int $id): ?User
     {
-        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
+        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $id]);
 
         if (empty($result) === false) {
             return $this->createUserFromResult($result[0]);
         }
 
         return null;
-
-    }//end findById()
+    } //end findById()
 
 
     /**
@@ -83,7 +80,7 @@ class UsersRepository
      */
     public function findByEmail(string $email): ?User
     {
-        $results = $this->dbi->query("SELECT * FROM users WHERE email = :email", [':email' => $email]);
+        $results = $this->dbi->query("SELECT * FROM user WHERE email = :email", [':email' => $email]);
 
         foreach ($results as $result) {
             if ($result !== null) {
@@ -92,8 +89,7 @@ class UsersRepository
         }
 
         return null;
-
-    }//end findByEmail()
+    } //end findByEmail()
 
 
     /**
@@ -111,7 +107,7 @@ class UsersRepository
      */
     public function createUser(User $user): User
     {
-        $sql = "INSERT INTO users (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
+        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
 
@@ -119,11 +115,10 @@ class UsersRepository
             throw new Exception("Failed to insert the user into the database.");
         }
 
-        $user->setUserId((int) $this->dbi->lastInsertId());
+        $user->setId((int) $this->dbi->lastInsertId());
 
         return $user;
-
-    }//end createUser()
+    } //end createUser()
 
 
     /**
@@ -141,20 +136,19 @@ class UsersRepository
      */
     public function updateUser(User $user): bool
     {
-        $sql = "UPDATE users SET last_name = :last_name, first_name = :first_name, email = :email, 
+        $sql = "UPDATE user SET last_name = :last_name, first_name = :first_name, email = :email, 
          password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
          token = :token, expire_at = :expire_at WHERE user_id = :user_id";
 
         $stmt = $this->prepareAndBind($sql, $user);
-        $stmt->bindValue(':user_id', $user->getUserId());
+        $stmt->bindValue(':user_id', $user->getId());
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to update the user in the database.");
         }
 
         return true;
-
-    }//end updateUser()
+    } //end updateUser()
 
 
     /**
@@ -170,21 +164,20 @@ class UsersRepository
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deleteUser(int $userId): bool
+    public function deleteUser(int $id): bool
     {
-        $sql = "DELETE FROM users WHERE user_id = :user_id";
+        $sql = "DELETE FROM user WHERE user_id = :user_id";
 
         $stmt = $this->dbi->prepare($sql);
 
-        $stmt->bindValue(':user_id', $userId);
+        $stmt->bindValue(':user_id', $id);
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to delete the user from the database.");
         }
 
         return true;
-
-    }//end deleteUser()
+    } //end deleteUser()
 
 
     /**
@@ -201,8 +194,7 @@ class UsersRepository
         $this->validateRow($row);
 
         return $this->buildUserFromRow($row);
-
-    }//end createUserFromResult()
+    } //end createUserFromResult()
 
 
     /**
@@ -224,15 +216,13 @@ class UsersRepository
             'password',
             'role',
             'created_at',
-            'expire_at',
         ];
         foreach ($requiredFields as $field) {
-            if (empty($row[$field]) !== null) {
-                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' et 'token' sont requis.");
+            if (empty($row[$field]) && !isset($row[$field])) {
+                throw new InvalidArgumentException("Le champ '{$field}' est requis et ne peut pas être vide.");
             }
         }
-
-    }//end validateRow()
+    } //end validateRow()
 
 
     /**
@@ -245,19 +235,18 @@ class UsersRepository
     private function buildUserFromRow(array $row): User
     {
         return new User(
-            userId: (int) $row['user_id'],
+            id: (int) $row['user_id'],
             lastName: $row['last_name'],
             firstName: $row['first_name'],
             email: $row['email'],
             password: $row['password'],
             role: $row['role'],
             createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) !== null ? new DateTime($row['updated_at']) : null,
-            token: ($row['token'] ?? ''),
-            expireAt: new DateTime($row['expire_at'])
+            updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null,
+            token: $row['token'] ?? null,
+            expireAt: isset($row['expire_at']) && $row['expire_at'] !== null ? new DateTime($row['expire_at']) : null
         );
-
-    }//end buildUserFromRow()
+    } //end buildUserFromRow()
 
 
     /**
@@ -280,12 +269,24 @@ class UsersRepository
         $stmt->bindValue(':role', $user->getRole());
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':token', $user->getToken());
-        $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+
+        // Gérer le token nullable
+        if ($user->getToken() !== null) {
+            $stmt->bindValue(':token', $user->getToken());
+        } else {
+            $stmt->bindValue(':token', null, \PDO::PARAM_NULL);
+        }
+
+        // Gérer expireAt nullable
+        if ($user->getExpireAt() !== null) {
+            $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+        } else {
+            $stmt->bindValue(':expire_at', null, \PDO::PARAM_NULL);
+        }
+
 
         return $stmt;
-
-    }//end prepareAndBind()
+    } //end prepareAndBind()
 
 
 }//end class
