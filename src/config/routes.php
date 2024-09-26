@@ -17,6 +17,9 @@ function createRoutes(): RouteCollection
     $routes->add('terms', new Route('/terms-of-service', ['_controller' => 'App\Controllers\HomeController::showTerms']));
     $routes->add('privacy', new Route('/privacy-policy', ['_controller' => 'App\Controllers\HomeController::showPrivacyPolicy']));
     $routes->add('contact_submit', new Route('/contact/submit', ['_controller' => 'App\Controllers\HomeController::submitContact'], [], [], '', [], ['POST']));
+    $routes->add('posts_list', new Route('/posts', ['_controller' => 'App\Controllers\PostController::listPosts']));
+    $routes->add('create_post', new Route('/posts/create', ['_controller' => 'App\Controllers\PostController::createPost'], [], [], '', [], ['GET', 'POST']));
+    $routes->add('post_detail', new Route('/posts/{postId}', ['_controller' => 'App\Controllers\PostController::detailPost']));
     return $routes;
 
 }//end createRoutes()

@@ -2,11 +2,8 @@
 
 namespace App\Controllers;
 
-use Twig\Environment;
+
 use Models\PostsRepository;
-use App\Services\EnvService;
-use App\Services\CsrfService;
-use App\Services\SecurityService;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,55 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Contrôleur pour la page d'accueil.
  */
-class HomeController
+class HomeController extends BaseController
 {
-
-    /**
-     * Instance de l'environnement Twig pour le rendu des templates.
-     *
-     * @var Environment
-     */
-    private $twig;
-
-    /**
-     * Service de sécurité pour la protection contre les attaques XSS.
-     *
-     * @var SecurityService
-     */
-    private $securityService;
-
-    /**
-     * Service pour charger les variables d'environnement.
-     *
-     * @var EnvService
-     */
-    private EnvService $envService;
-
-    /**
-     * Service pour la gestion des tokens CSRF.
-     *
-     * @var CsrfService
-     */
-    private $csrfService;
-
-
-    /**
-     * Constructeur de la classe.
-     * Initialise l'instance Twig pour le rendu des templates.
-     *
-     * @param Environment     $twig            Instance de l'environnement Twig.
-     * @param SecurityService $securityService Le service de sécurité pour la protection contre les attaques XSS.
-     * @param EnvService      $envService      Instance du service de gestion des variables d'environnement.
-     * @param CsrfService     $csrfService     Service pour la gestion des tokens CSRF.
-     */
-    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService)
-    {
-        $this->twig            = $twig;
-        $this->securityService = $securityService;
-        $this->envService      = $envService;
-        $this->csrfService     = $csrfService;
-
-    }//end __construct()
 
 
     /**
@@ -71,16 +21,13 @@ class HomeController
      * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
      * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
      *
-     * @param Request         $request         La requête HTTP courante.
      * @param PostsRepository $postsRepository Le repository des posts pour récupérer les derniers articles.
      *
      * @return Response La réponse HTTP contenant le contenu rendu du template.
      */
-    public function index(Request $request, PostsRepository $postsRepository): Response
+    public function index(PostsRepository $postsRepository): Response
     {
 
-        // Utiliser $request de manière inoffensive pour éviter l'avertissement.
-        $request->getMethod();
         // Consomme la variable sans rien en faire.
         // Définition des éléments du portfolio.
         $portfolioItems = [
@@ -114,7 +61,7 @@ class HomeController
         $posts = $postsRepository->findLatest();
 
         // Rendu du template avec les données.
-        $content = $this->twig->render(
+        return $this->render(
             'home/index.html.twig',
             [
                 'portfolioItems' => $portfolioItems,
@@ -122,8 +69,6 @@ class HomeController
                 'posts' => $posts,
             ]
         );
-
-        return new Response($content);
 
     }//end index()
 
@@ -135,9 +80,7 @@ class HomeController
      */
     public function showTerms(): Response
     {
-        $content = $this->twig->render('legal/termsOfService.html.twig');
-
-        return new Response($content);
+        return $this->render('legal/termsOfService.html.twig');
 
     }//end showTerms()
 
@@ -149,8 +92,7 @@ class HomeController
      */
     public function showPrivacyPolicy(): Response
     {
-        $content = $this->twig->render('legal/privacyPolicy.html.twig');
-        return new Response($content);
+        return $this->render('legal/privacyPolicy.html.twig');
 
     }//end showPrivacyPolicy()
 
@@ -191,14 +133,14 @@ class HomeController
 
         // Vérifier le token CSRF.
         $submittedToken = $request->request->get('_csrf_token');
-        if ($this->csrfService->isTokenValid('contact_form', $submittedToken) === false) {
+        if ($this->isCsrfTokenValid('contact_form', $submittedToken) === false) {
             return new Response('Invalid CSRF token.', 400);
         }
 
         // Récupérer les données du formulaire.
-        $name    = $this->securityService->cleanInput($request->request->get('name', ''));
-        $email   = $this->securityService->cleanInput($request->request->get('email', ''));
-        $message = $this->securityService->cleanInput($request->request->get('message', ''));
+        $name    = $this->cleanInput($request->request->get('name', ''));
+        $email   = $this->cleanInput($request->request->get('email', ''));
+        $message = $this->cleanInput($request->request->get('message', ''));
 
         // Valider les données.
         if (empty($name) === true || empty($email) === true || empty($message) === true) {
@@ -209,21 +151,25 @@ class HomeController
             return new Response('Email non valide.', 400);
         }
 
-        // Vérifiez l'adresse e-mail de destination.
-        $toEmail = $this->envService->getEnv('SMTP_USERNAME');
-
-        // Envoyer l'email.
-        $mail = new PHPMailer(true);
-
         try {
+            // Vérifiez l'adresse e-mail de destination.
+            $toEmail = $this->getEnv('SMTP_USERNAME');
+
+            if (empty($toEmail) === true) {
+                return new Response('Adresse e-mail de destination non configurée.', 500);
+            }
+
+            // Envoyer l'email.
+            $mail = new PHPMailer(true);
+
             // Configurer le serveur SMTP.
             $mail->isSMTP();
-            $mail->Host       = $this->envService->getEnv('SMTP_HOST', 'smtp.gmail.com');
+            $mail->Host       = $this->getEnv('SMTP_HOST', 'smtp.gmail.com');
             $mail->SMTPAuth   = true;
-            $mail->Username   = $this->envService->getEnv('SMTP_USERNAME');
-            $mail->Password   = $this->envService->getEnv('SMTP_PASSWORD');
+            $mail->Username   = $this->getEnv('SMTP_USERNAME');
+            $mail->Password   = $this->getEnv('SMTP_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $this->envService->getEnv('SMTP_PORT', 587);
+            $mail->Port       = $this->getEnv('SMTP_PORT', 587);
 
             // Destinataires.
             $mail->setFrom($email, $name);

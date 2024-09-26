@@ -61,6 +61,38 @@ class Post
 
 
     /**
+     * Constructeur de la classe Post.
+     *
+     * @param int       $postId    L'identifiant unique du post.
+     * @param string    $title     Le titre du post.
+     * @param string    $chapo     Le chapo (introduction) du post.
+     * @param string    $content   Le contenu principal du post.
+     * @param int       $author    L'identifiant de l'auteur.
+     * @param DateTime  $createdAt La date de création du
+     *                             post.
+     * @param ?DateTime $updatedAt La date de mise à jour du post (peut être null).
+     */
+    public function __construct(
+        int $postId,
+        string $title,
+        string $chapo,
+        string $content,
+        int $author,
+        DateTime $createdAt,
+        ?DateTime $updatedAt=null
+    ) {
+        $this->postId    = $postId;
+        $this->title     = $title;
+        $this->chapo     = $chapo;
+        $this->content   = $content;
+        $this->author    = $author;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+
+    }//end __construct()
+
+
+    /**
      * Gets the unique identifier of the post.
      *
      * @return int

@@ -3,10 +3,7 @@
 session_start();
 
 use Dotenv\Dotenv;
-use App\Models\Post;
-use App\Models\User;
 use Twig\Environment;
-use App\Models\Comment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use App\Services\EnvService;
@@ -16,6 +13,8 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
+use Models\CommentsRepository;
+use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
@@ -107,7 +106,6 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
 require __DIR__.'/../vendor/autoload.php';
 
-// Logique d'exécution après les déclarations et inclusions.
 try {
     // Charger la configuration.
     $config = loadConfig();
@@ -115,13 +113,10 @@ try {
     // Initialiser le conteneur de dépendances.
     $container = initializeContainer($config);
 
-    // Création des modèles et injection de l'instance de base de données à partir du conteneur.
-    $postModel    = new Post($container->getDatabase());
-    $userModel    = new User($container->getDatabase());
-    $commentModel = new Comment($container->getDatabase());
-
     // Création de l'instance de PostsRepository.
-    $postsRepository = new PostsRepository($container->getDatabase());
+    $postsRepository    = new PostsRepository($container->getDatabase());
+    $usersRepository    = new UsersRepository($container->getDatabase());
+    $commentsRepository = new CommentsRepository($container->getDatabase());
 
     // Configurer Twig.
     $loader = new FilesystemLoader(__DIR__.'/../templates');
@@ -159,7 +154,6 @@ try {
     $matcher   = new UrlMatcher($routes, $context);
     $generator = new UrlGenerator($routes, $context);
 
-
     // Try {
     // Matcher la requête à une route.
     // $parameters = $matcher->match($request->getPathInfo());
@@ -178,6 +172,10 @@ try {
     // var_dump($class, $parameters);
     // die();.
     switch ($class) {
+    case 'App\Controllers\PostController':
+        // Passer toutes les dépendances nécessaires au constructeur.
+        $controllerInstance = new $class($postsRepository, $twig, $securityService, $envService, $csrfService);
+        break;
     default:
         $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
         break;
@@ -192,25 +190,40 @@ try {
     ];
 
     // Middleware à exécuter.
-    $middlewares = [
-        new CsrfMiddleware($csrfService),
-    ];
+    if ($request->isMethod('POST') === true) {
+        $middlewares = [
+            new CsrfMiddleware($csrfService),
+        ];
+    } else {
+        $middlewares = [];
+    }
 
 
     // Appeler la méthode du contrôleur avec les middlewares.
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function (Request $request) use ($controllerInstance, $method, $postsRepository, $parameters) {
-            return $controllerInstance->$method($request, $postsRepository, ...array_values($parameters));
+        function () use ($controllerInstance, $method, $postsRepository, $securityService, $parameters) {
+            // Si le paramètre 'postId' est défini dans la route.
+            if (isset($parameters['postId']) === true) {
+                // Appeler la méthode du contrôleur avec le 'postId'.
+                return $controllerInstance->$method((int) $parameters['postId'], $postsRepository, $securityService);
+            } else {
+                // Sinon, appeler la méthode du contrôleur sans 'postId'.
+                return $controllerInstance->$method($postsRepository, $securityService, ...array_values($parameters));
+            }
         },
         $dependencies
     );
-
-    // Envoyer la réponse.
-    $response->send();
+} catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
+    $response = new Response('Page not found: '.$e->getMessage(), 404);
 } catch (Exception $e) {
-    // Gestion des erreurs (par exemple, route non trouvée).
-    $response = new Response('Not Found: '.$e->getMessage(), 404);
-    $response->send();
+    $response = new Response('An error occurred: '.$e->getMessage(), 500);
 }//end try
+
+// Assurez-vous que $response est défini avant de l'envoyer.
+if (isset($response) === true) {
+    $response->send();
+} else {
+    echo "An unexpected error occurred without response handling.";
+}//end if

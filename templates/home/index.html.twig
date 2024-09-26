@@ -58,11 +58,18 @@
 							<div class="post-item mx-auto">
 								<h3>{{ post.title }}</h3>
 								<p>{{ post.chapo }}</p>
-								<a href="/post/show/{{ post.post_id }}" class="btn btn-primary">Lire la suite</a>
+								<a href="/posts/show/{{ post.post_id }}" class="btn btn-primary">Lire la suite</a>
 							</div>
 						</div>
 					{% endfor %}
 				{% endif %}
+			</div>
+			<!-- Bouton pour voir tous les posts -->
+			<div class="text-center mt-4">
+				<a href="/posts" class="btn btn-secondary btn-lg">
+					<i class="fas fa-list"></i>
+					Voir tous les posts
+				</a>
 			</div>
 		</div>
 	</section>
@@ -148,5 +155,5 @@
 		</div>
 	</section>
 	{% include 'partials/_portfolio_modal.html.twig' with {'modals': modals} %}
-    {% include 'partials/_feedback_modal.html.twig' %}
+	{% include 'partials/_feedback_modal.html.twig' %}
 {% endblock %}

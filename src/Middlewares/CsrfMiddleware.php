@@ -52,8 +52,12 @@ class CsrfMiddleware
     public function handle(Request $request, callable $next)
     {
         if ($request->isMethod('POST') === true) {
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->csrfService->isTokenValid('contact_form', $submittedToken) === false) {
+             // Récupère l'identifiant du formulaire.
+             $formTokenId    = $request->request->get('_csrf_token_id');
+             $submittedToken = $request->request->get('_csrf_token');
+
+             // Vérifier si le token est présent et valide.
+            if ($formTokenId === true && $submittedToken === true && $this->csrfService->isTokenValid($formTokenId, $submittedToken) === false) {
                 return new Response('Invalid CSRF token.', 400);
             }
         }

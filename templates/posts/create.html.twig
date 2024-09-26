@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Création d'un Post
+{% endblock %}
+
+{% block content %}
+
+	<section class="page-section bg-light mt-5" id="createPost">
+		<div
+			class="container">
+			<!-- Titre de la page -->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Créer un nouveau post</h2>
+
+			<!-- Ligne de séparation avec icône -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+
+			<!-- Formulaire -->
+			<div class="row justify-content-center">
+				<div class="col-lg-8 col-xl-7">
+					<form action="/posts/create" method="POST" class="mt-4">
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token('create_post_form') }}"/>
+                        <input type="hidden" name="_csrf_token_id" value="create_post_form">
+						<!-- Titre -->
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="title" name="title" placeholder="Titre du post" required>
+							<label for="title">Titre</label>
+						</div>
+
+						<!-- Chapô -->
+						<div class="form-floating mb-3">
+							<textarea class="form-control" id="chapo" name="chapo" placeholder="Introduction courte du post" style="height: 100px" required></textarea>
+							<label for="chapo">Chapô</label>
+						</div>
+
+						<!-- Contenu -->
+						<div class="form-floating mb-3">
+							<textarea class="form-control" id="content" name="content" placeholder="Contenu du post" style="height: 200px" required></textarea>
+							<label for="content">Contenu</label>
+						</div>
+
+						<!-- Bouton de soumission -->
+						<div class="d-grid">
+							<button type="submit" class="btn btn-primary btn-xl">Créer</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+{% endblock %}

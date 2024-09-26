@@ -29,6 +29,12 @@ class MySQLDatabase implements DatabaseInterface
     {
         $this->pdo = $pdo;
 
+        try {
+            $this->pdo->query('SELECT 1');
+        } catch (\Exception $e) {
+            die('Database connection failed: '.$e->getMessage());
+        }
+
     }//end __construct()
 
 
@@ -44,7 +50,7 @@ class MySQLDatabase implements DatabaseInterface
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC) === true) {
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
             yield $row;
         }
 
@@ -76,7 +82,18 @@ class MySQLDatabase implements DatabaseInterface
      */
     public function execute(PDOStatement $stmt, array $params=[]): bool
     {
-        return $stmt->execute($params);
+        try {
+            // Si $params n'est pas vide, utilise-le dans l'exécution de la requête.
+            if (empty($params) === false) {
+                return $stmt->execute($params);
+            }
+
+            return $stmt->execute();
+        } catch (\PDOException $e) {
+            // Affiche l'erreur PDO avec plus de détails.
+            echo "Erreur lors de l'exécution de la requête : ".$e->getMessage();
+            return false;
+        }
 
     }//end execute()
 

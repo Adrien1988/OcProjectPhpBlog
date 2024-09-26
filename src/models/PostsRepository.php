@@ -3,10 +3,10 @@
 namespace Models;
 
 use DateTime;
-use Exception;
 use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
@@ -44,7 +44,7 @@ class PostsRepository
     public function findAll(): array
     {
         // 'query' retourne maintenant un Iterator.
-        $results = $this->dbi->query("SELECT * FROM post");
+        $results = $this->dbi->query("SELECT * FROM post ORDER BY created_at DESC");
 
         // Initialiser un tableau pour stocker les objets Post.
         $posts = [];
@@ -68,17 +68,26 @@ class PostsRepository
      */
     public function findById(int $postId): ?Post
     {
-        // Prépare et exécute la requête pour obtenir un seul enregistrement basé sur l'ID.
-        $result = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :id", ['id' => $postId]);
+        // Prépare la requête SQL.
+        $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
 
-        // Vérifie si le résultat contient au moins un enregistrement.
-        if (empty($result) === false) {
-            // Utilise createPostFromResult pour transformer le premier enregistrement trouvé en objet Post.
-            return $this->createPostFromResult($result[0]);
+        // Exécute la requête avec l'ID du post.
+        $success = $this->dbi->execute($stmt, [':post_id' => $postId]);
+
+        if ($success === false) {
+            throw new Exception('Erreur lors de l\'exécution de la requête.');
         }
 
-        // Retourne null si aucun enregistrement n'est trouvé.
-        return null;
+        // Récupère le premier résultat.
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        // Vérifie si un résultat est trouvé, sinon retourne null.
+        if ($result === false) {
+            return null;
+        }
+
+        // Retourne l'objet Post créé à partir des résultats.
+        return $this->createPostFromResult($result);
 
     }//end findById()
 
@@ -99,8 +108,8 @@ class PostsRepository
     public function createPost(Post $post): Post
     {
         // La requête SQL pour insérer un nouvel article.
-        $sql = "INSERT INTO post (title, chapo, content, author, created_at, updated_at) 
-                VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
+        $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`, `updated_at`) 
+        VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
         $stmt = $this->dbi->prepare($sql);
@@ -114,7 +123,7 @@ class PostsRepository
         $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
         // Exécution de la requête.
-        if ($this->dbi->execute($stmt, []) === false) {
+        if ($this->dbi->execute($stmt) === false) {
             throw new Exception("Failed to insert the post into the database.");
         }
 
@@ -256,8 +265,8 @@ class PostsRepository
      */
     private function validateRow(array $row): void
     {
+
         $requiredFields = [
-            'post_id',
             'title',
             'chapo',
             'content',
@@ -266,8 +275,8 @@ class PostsRepository
         ];
 
         foreach ($requiredFields as $field) {
-            if (array_key_exists($field, $row) === false || $row[$field] === '') {
-                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' sont requis.");
+            if (array_key_exists($field, $row) === false || $row[$field] === '' || $row[$field] === null) {
+                throw new InvalidArgumentException("Le champ {$field} est requis.");
             }
         }
 
@@ -290,7 +299,7 @@ class PostsRepository
             content: $row['content'],
             author: (int) $row['author'],
             createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) !== null ? new DateTime($row['updated_at']) : null
+            updatedAt: isset($row['updated_at']) === true && $row['updated_at'] !== null ? new DateTime($row['updated_at']) : null
         );
 
     }//end buildPostFromRow()
