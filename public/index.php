@@ -3,6 +3,7 @@
 session_start();
 
 use Dotenv\Dotenv;
+use ReflectionMethod;
 use Twig\Environment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
@@ -203,13 +204,17 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($controllerInstance, $method, $postsRepository, $securityService, $parameters) {
-            // Si le paramètre 'postId' est défini dans la route.
+        function () use ($request, $controllerInstance, $method, $postsRepository, $securityService, $parameters) {
+            // Assurez-vous que le paramètre 'postId' est bien défini.
             if (isset($parameters['postId']) === true) {
-                // Appeler la méthode du contrôleur avec le 'postId'.
-                return $controllerInstance->$method((int) $parameters['postId'], $postsRepository, $securityService);
+                // Vérification du nombre d'arguments attendus par la méthode.
+                if ($method === 'editPost' || $method === 'deletePost') {
+                    return $controllerInstance->$method($request, (int) $parameters['postId'], $postsRepository, $securityService);
+                } else if ($method === 'detailPost') {
+                    return $controllerInstance->$method((int) $parameters['postId'], $postsRepository, $securityService);
+                }
             } else {
-                // Sinon, appeler la méthode du contrôleur sans 'postId'.
+                // Si pas de 'postId', on appelle sans.
                 return $controllerInstance->$method($postsRepository, $securityService, ...array_values($parameters));
             }
         },

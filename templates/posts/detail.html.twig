@@ -2,103 +2,138 @@
 
 {% block content %}
 
-<!-- Post Detail Section -->
-<section class="page-section bg-light mt-5" id="post-detail">
-    <div class="container">
-        <!-- Post Title -->
-        <h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">{{ post.title }}</h2>
+	<!-- Post Detail Section -->
+	<section class="page-section bg-light mt-5" id="post-detail">
+		<div
+			class="container">
+			<!-- Post Title -->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">{{ post.title }}</h2>
 
-        <!-- Post Chapô -->
-        <div class="divider-custom">
-            <div class="divider-custom-line"></div>
-            <div class="divider-custom-icon">
-                <i class="fas fa-star"></i>
-            </div>
-            <div class="divider-custom-line"></div>
-        </div>
+			<!-- Post Chapô -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
 
-        <!-- Post Information -->
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <p><strong>Chapô :</strong> {{ post.chapo }}</p>
-                <p>{{ post.content }}</p>
-                <p><strong>Auteur :</strong> {{ post.author }}</p>
-                <p><strong>Dernière mise à jour :</strong> {{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}</p>
-            </div>
-        </div>
-    </div>
-</section>
+			<!-- Post Information -->
+			<div class="row justify-content-center">
+				<div class="col-lg-8">
+					<p>
+						<strong>Chapô :</strong>
+						{{ post.chapo }}
+					</p>
+					<p>
+						<strong>Contenu :</strong>
+						{{ post.content }}
+					</p>
+					<p>
+						<strong>Auteur :</strong>
+						{{ post.author }}
+					</p>
+					<p>
+						<strong>Dernière mise à jour :</strong>
+						{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
+					</p>
 
-<!-- Comments List Section -->
-<section class="page-section bg-light text-dark" id="comments-list">
-    <div class="container">
-        <!-- Réduction de la taille du titre avec les classes Bootstrap -->
-        <h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Commentaires</h2>
+					<!-- Buttons to Edit and Delete Post -->
+					<div class="text-center mt-4">
+						<a href="/posts/edit/{{ post.postId }}" class="btn btn-warning btn-sm">Modifier</a>
 
-        <!-- Divider -->
-        <div class="divider-custom">
-            <div class="divider-custom-line"></div>
-            <div class="divider-custom-icon">
-                <i class="fas fa-comments"></i>
-            </div>
-            <div class="divider-custom-line"></div>
-        </div>
+						<!-- Button to trigger the modal -->
+						<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.postId }}">
+							Supprimer
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-        <!-- Comments -->
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                {% if comments is empty %}
-                    <p class="text-center">Aucun commentaire pour l'instant.</p>
-                {% else %}
-                    {% for comment in comments %}
-                        <div class="comment border-bottom mb-2 pb-2">
-                            <p>
-                                <strong>{{ comment.author }}</strong> -
-                                {{ comment.createdAt|date('d-m-Y H:i') }}
-                            </p>
-                            <p>{{ comment.content }}</p>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</section>
+	<!-- Comments List Section -->
+	<section class="page-section bg-light text-dark" id="comments-list">
+		<div
+			class="container">
+			<!-- Réduction de la taille du titre avec les classes Bootstrap -->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Commentaires</h2>
 
-<!-- Comment Form Section -->
-<section class="page-section" id="add-comment">
-    <div class="container">
-        <!-- Réduction de la taille du titre avec les classes Bootstrap -->
-        <h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Ajouter un commentaire</h2>
+			<!-- Divider -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-comments"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
 
-        <!-- Divider -->
-        <div class="divider-custom">
-            <div class="divider-custom-line"></div>
-            <div class="divider-custom-icon">
-                <i class="fas fa-comment"></i>
-            </div>
-            <div class="divider-custom-line"></div>
-        </div>
+			<!-- Comments -->
+			<div class="row justify-content-center">
+				<div class="col-lg-6 col-md-8">
+					{% if comments is empty %}
+						<p class="text-center">Aucun commentaire pour l'instant.</p>
+					{% else %}
+						{% for comment in comments %}
+							<div class="comment border-bottom mb-2 pb-2">
+								<p>
+									<strong>{{ comment.author }}</strong>
+									-
+									{{ comment.createdAt|date('d-m-Y H:i') }}
+								</p>
+								<p>{{ comment.content }}</p>
+							</div>
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</section>
 
-        <!-- Comment Form -->
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <form action="/post/{{ post.postId }}/comment" method="POST" id="commentForm">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
+	<!-- Comment Form Section -->
+	<section class="page-section" id="add-comment">
+		<div
+			class="container">
+			<!-- Réduction de la taille du titre avec les classes Bootstrap -->
+			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Ajouter un commentaire</h2>
 
-                    <!-- Réduction de la taille du champ de texte avec form-control-sm -->
-                    <div class="form-group mb-3">
-                        <textarea class="form-control form-control-sm" id="commentContent" name="content" rows="3" placeholder="Votre commentaire..." required></textarea>
-                    </div>
+			<!-- Divider -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-comment"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
 
-                    <!-- Réduction de la taille du bouton avec btn-sm -->
-                    <div class="text-center mt-4">
-                        <button class="btn btn-primary btn-sm" id="submitButton" type="submit">Soumettre</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
+			<!-- Comment Form -->
+			<div class="row justify-content-center">
+				<div class="col-lg-6 col-md-8">
+					<form action="/post/{{ post.postId }}/comment" method="POST" id="commentForm">
+						<input
+						type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
+
+						<!-- Réduction de la taille du champ de texte avec form-control-sm -->
+						<div class="form-group mb-3">
+							<textarea class="form-control form-control-sm" id="commentContent" name="content" rows="3" placeholder="Votre commentaire..." required></textarea>
+						</div>
+
+						<!-- Réduction de la taille du bouton avec btn-sm -->
+						<div class="text-center mt-4">
+							<button class="btn btn-primary btn-sm" id="submitButton" type="submit">Soumettre</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Inclusion de la modale avec des variables spécifiques pour ce post -->
+	{% include 'partials/_confirm_delete_modal.html.twig' with {
+    modalId: 'deletePostModal' ~ post.postId,
+    itemName: post.title,
+    deleteUrl: '/posts/delete/' ~ post.postId,
+    csrf_token: csrf_token('delete_post')
+} %}
 
 {% endblock %}
