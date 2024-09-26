@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Traits\IdTrait;
+use App\Models\Traits\TimestampableTrait;
+use App\Models\traits\AuthTrait;
 use DateTime;
 
 /**
@@ -10,12 +13,7 @@ use DateTime;
 class User
 {
 
-    /**
-     * The unique identifier of the user.
-     *
-     * @var integer
-     */
-    private int $userId;
+    use IdTrait, TimestampableTrait, AuthTrait;
 
     /**
      * The last name of the user.
@@ -53,20 +51,6 @@ class User
     private string $role;
 
     /**
-     * The date and time when the user account was created.
-     *
-     * @var DateTime
-     */
-    private DateTime $createdAt;
-
-    /**
-     * The date and time when the user account was last updated, can be null.
-     *
-     * @var ?DateTime
-     */
-    private ?DateTime $updatedAt = null;
-
-    /**
      * The authentication token for the user.
      *
      * @var string
@@ -79,32 +63,6 @@ class User
      * @var DateTime
      */
     private DateTime $expireAt;
-
-
-    /**
-     * Gets the unique identifier of the user.
-     *
-     * @return int
-     */
-    public function getUserId(): int
-    {
-        return $this->userId;
-
-    }//end getUserId()
-
-
-    /**
-     * Sets the unique identifier of the user.
-     *
-     * @param int $userId The unique identifier of the user.
-     *
-     * @return void
-     */
-    public function setUserId(int $userId): void
-    {
-        $this->userId = $userId;
-
-    }//end setUserId()
 
 
     /**
@@ -235,58 +193,6 @@ class User
         $this->role = $role;
 
     }//end setRole()
-
-
-    /**
-     * Gets the date and time when the user account was created.
-     *
-     * @return DateTime
-     */
-    public function getCreatedAt(): DateTime
-    {
-        return $this->createdAt;
-
-    }//end getCreatedAt()
-
-
-    /**
-     * Sets the date and time when the user account was created.
-     *
-     * @param DateTime $createdAt The date and time when the user account was created.
-     *
-     * @return void
-     */
-    public function setCreatedAt(DateTime $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-
-    }//end setCreatedAt()
-
-
-    /**
-     * Gets the date and time when the user account was last updated.
-     *
-     * @return ?DateTime
-     */
-    public function getUpdatedAt(): ?DateTime
-    {
-        return $this->updatedAt;
-
-    }//end getUpdatedAt()
-
-
-    /**
-     * Sets the date and time when the user account was last updated.
-     *
-     * @param ?DateTime $updatedAt The date and time when the user account was last updated.
-     *
-     * @return void
-     */
-    public function setUpdatedAt(?DateTime $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-
-    }//end setUpdatedAt()
 
 
     /**

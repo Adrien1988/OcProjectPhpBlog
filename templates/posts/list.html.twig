@@ -43,15 +43,15 @@
 
 									<!-- Lire la suite -->
 									<div class="text-center mb-3">
-										<a href="/posts/{{ post.postId }}" class="btn btn-primary">Lire la suite</a>
+										<a href="/posts/{{ post.id }}" class="btn btn-primary">Lire la suite</a>
 									</div>
 
 									<!-- Modifier et Supprimer -->
 									<div class="text-center">
-										<a href="/posts/edit/{{ post.postId }}" class="btn btn-warning btn-sm">Modifier</a>
+										<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
 
 										<!-- Bouton pour ouvrir la modale -->
-										<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.postId }}">
+										<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
 											Supprimer
 										</button>
 									</div>
@@ -61,9 +61,9 @@
 
 						<!-- Inclure la modale de confirmation de suppression -->
 						{% include 'partials/_confirm_delete_modal.html.twig' with {
-							modalId: 'deletePostModal' ~ post.postId,
+							modalId: 'deletePostModal' ~ post.id,
 							itemName: post.title,
-							deleteUrl: '/posts/delete/' ~ post.postId,
+							deleteUrl: '/posts/delete/' ~ post.id,
 							csrf_token: csrf_token('delete_post')
 						} %}
 					{% endfor %}
