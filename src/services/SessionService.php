@@ -110,48 +110,4 @@ class SessionService
     }//end isStarted()
 
 
-    /**
-     * Récupère la valeur de $_SESSION pour la clé donnée.
-     *
-     * @param string $key     La clé de la session à récupérer.
-     * @param mixed  $default La valeur par défaut à retourner si la clé n'existe pas.
-     *
-     * @return mixed La valeur de la session ou la valeur par défaut.
-     */
-    private function getSessionData(string $key, $default=null)
-    {
-        return ($_SESSION[$key] ?? $default);
-
-    }//end getSessionData()
-
-
-    /**
-     * Définit une valeur dans $_SESSION de manière encapsulée.
-     *
-     * @param string $key   La clé de la session à définir.
-     * @param mixed  $value La valeur à définir.
-     *
-     * @return void
-     */
-    private function setSessionData(string $key, $value): void
-    {
-        $_SESSION[$key] = $value;
-
-    }//end setSessionData()
-
-
-    /**
-     * Supprime une clé de $_SESSION de manière encapsulée.
-     *
-     * @param string $key La clé de la session à supprimer.
-     *
-     * @return void
-     */
-    private function removeSessionData(string $key): void
-    {
-        unset($_SESSION[$key]);
-
-    }//end removeSessionData()
-
-
 }//end class
