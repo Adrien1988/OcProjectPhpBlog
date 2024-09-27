@@ -62,17 +62,17 @@ class PostsRepository
     /**
      * Récupère un article par son identifiant.
      *
-     * @param int $id L'identifiant de l'article à récupérer.
+     * @param int $postId L'identifiant de l'article à récupérer.
      *
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
-    public function findById(int $id): ?Post
+    public function findById(int $postId): ?Post
     {
         // Prépare la requête SQL.
         $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
 
         // Exécute la requête avec l'ID du post.
-        $success = $this->dbi->execute($stmt, [':post_id' => $id]);
+        $success = $this->dbi->execute($stmt, [':post_id' => $postId]);
 
         if ($success === false) {
             throw new Exception('Erreur lors de l\'exécution de la requête.');
@@ -184,13 +184,13 @@ class PostsRepository
      * lie l'identifiant de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $id L'identifiant de l'article à supprimer.
+     * @param int $postId L'identifiant de l'article à supprimer.
      *
      * @return bool Retourne true si la suppression a réussi, sinon false.
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deletePost(int $id): bool
+    public function deletePost(int $postId): bool
     {
         // La requête SQL pour supprimer un article.
         $sql = "DELETE FROM post WHERE post_id = :post_id";
@@ -199,7 +199,7 @@ class PostsRepository
         $stmt = $this->dbi->prepare($sql);
 
         // Liaison de l'identifiant à la requête préparée.
-        $stmt->bindValue(':post_id', $id);
+        $stmt->bindValue(':post_id', $postId);
 
         // Exécution de la requête.
         if ($this->dbi->execute($stmt, []) === false) {
@@ -293,7 +293,7 @@ class PostsRepository
     private function buildPostFromRow(array $row): Post
     {
         return new Post(
-            id: (int) $row['post_id'],
+            postId: (int) $row['post_id'],
             title: $row['title'],
             chapo: $row['chapo'],
             content: $row['content'],

@@ -39,7 +39,7 @@ class Post
     /**
      * Constructeur de la classe Post.
      *
-     * @param int       $id        L'identifiant unique du post.
+     * @param int       $postId    L'identifiant unique du post.
      * @param string    $title     Le titre du post.
      * @param string    $chapo     Le chapo (introduction) du post.
      * @param string    $content   Le contenu principal du post.
@@ -49,7 +49,7 @@ class Post
      * @param ?DateTime $updatedAt La date de mise à jour du post (peut être null).
      */
     public function __construct(
-        int $id,
+        int $postId,
         string $title,
         string $chapo,
         string $content,
@@ -57,7 +57,7 @@ class Post
         DateTime $createdAt,
         ?DateTime $updatedAt=null
     ) {
-        $this->setId($id);
+        $this->setId($postId);
         $this->title   = $title;
         $this->chapo   = $chapo;
         $this->content = $content;

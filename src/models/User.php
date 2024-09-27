@@ -6,8 +6,8 @@ use DateTime;
 use App\Models\Traits\IdTrait;
 use App\Models\traits\AuthTrait;
 use App\Models\Traits\TimestampableTrait;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
@@ -17,6 +17,13 @@ class User
 {
 
     use IdTrait, TimestampableTrait, AuthTrait;
+
+    /**
+     * Le validateur Symfony.
+     *
+     * @var ValidatorInterface
+     */
+    private ValidatorInterface $validator;
 
     /**
      * The last name of the user.
@@ -66,6 +73,58 @@ class User
      * @var DateTime
      */
     private ?DateTime $expireAt;
+
+
+    /**
+     * Constructeur pour la classe User.
+     *
+     * @param int                $userId    L'identifiant unique de l'utilisateur.
+     * @param string             $lastName  Le nom de famille de l'utilisateur.
+     * @param string             $firstName Le prénom de
+     *                                      l'utilisateur.
+     * @param string             $email     L'adresse e-mail de l'utilisateur.
+     * @param string             $password  Le mot de passe de l'utilisateur.
+     * @param string             $role      Le rôle de
+     *                                      l'utilisateur.
+     * @param DateTime           $createdAt La date de création de
+     *                                      l'utilisateur.
+     * @param DateTime|null      $updatedAt La date de mise à jour de l'utilisateur (peut être
+     *                                      null).
+     * @param string|null        $token     Le jeton d'authentification de l'utilisateur (peut être
+     *                                      null).
+     * @param DateTime|null      $expireAt  La date d'expiration du jeton (peut être
+     *                                      null).
+     * @param ValidatorInterface $validator L'instance du validateur Symfony.
+     */
+    public function __construct(int $userId, string $lastName, string $firstName, string $email, string $password, string $role, DateTime $createdAt, ?DateTime $updatedAt=null, ?string $token=null, ?DateTime $expireAt=null, ValidatorInterface $validator)
+    {
+        $this->setId($userId);
+        $this->lastName  = $lastName;
+        $this->firstName = $firstName;
+        $this->email     = $email;
+        $this->password  = $password;
+        $this->role      = $role;
+        $this->setCreatedAt($createdAt);
+        $this->setUpdatedAt($updatedAt);
+        $this->token     = $token;
+        $this->expireAt  = $expireAt;
+        $this->validator = $validator;
+
+    }//end __construct()
+
+
+    /**
+     * Injecte le validateur Symfony dans l'entité User.
+     *
+     * @param ValidatorInterface $validator Le validateur Symfony à injecter.
+     *
+     * @return void
+     */
+    public function setValidator(ValidatorInterface $validator): void
+    {
+        $this->validator = $validator;
+
+    }//end setValidator()
 
 
     /**
@@ -257,57 +316,25 @@ class User
      */
     public function validate(): ?ConstraintViolationListInterface
     {
-        $validator = Validation::createValidator();
-
         $constraints = new Assert\Collection(
             [
-                'lastName' => [
-                    new Assert\NotBlank(['message' => 'Le nom est requis.']),
-                    new Assert\Length(['max' => 50, 'maxMessage' => 'Le nom ne doit pas dépasser 50 caractères.']),
-                ],
-                'firstName' => [
-                    new Assert\NotBlank(['message' => 'Le prénom est requis.']),
-                    new Assert\Length(['max' => 50, 'maxMessage' => 'Le prénom ne doit pas dépasser 50 caractères.']),
-                ],
-                'email' => [
-                    new Assert\NotBlank(['message' => 'L\'adresse e-mail est requise.']),
-                    new Assert\Email(['message' => 'L\'adresse e-mail n\'est pas valide.']),
-                ],
-                'password' => [
-                    new Assert\NotBlank(['message' => 'Le mot de passe est requis.']),
-                    new Assert\Length(['min' => 8, 'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.']),
-                ],
-                'role' => [
-                    new Assert\NotBlank(['message' => 'Le rôle est requis.']),
-                ],
-                'token' => [
-                    new Assert\Optional(
-                        [
-                            new Assert\Length(['max' => 255, 'maxMessage' => 'Le token ne doit pas dépasser 255 caractères.']),
-                        ]
-                    ),
-                ],
-                'expireAt' => [
-                    new Assert\Optional(
-                        [
-                            new Assert\DateTime(['message' => 'La date d\'expiration doit être une date valide.']),
-                        ]
-                    ),
-                ],
+                'lastName'   => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 50])],
+                'firstName'  => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 50])],
+                'email'      => [new Assert\NotBlank(), new Assert\Email()],
+                'password'   => [new Assert\NotBlank(), new Assert\Length(['min' => 8])],
+                'role'       => [new Assert\NotBlank()],
             ]
         );
 
         $data = [
-            'lastName'  => $this->lastName,
-            'firstName' => $this->firstName,
-            'email'     => $this->email,
-            'password'  => $this->password,
-            'role'      => $this->role,
-            'token'     => $this->token,
-            'expireAt'  => ($this->expireAt !== null) ? $this->expireAt->format('Y-m-d H:i:s') : null,
+            'lastName'  => $this->getLastName(),
+            'firstName' => $this->getFirstName(),
+            'email'     => $this->getEmail(),
+            'password'  => $this->getPassword(),
+            'role'      => $this->getRole(),
         ];
 
-        return $validator->validate($data, $constraints);
+        return $this->validator->validate($data, $constraints);
 
     }//end validate()
 

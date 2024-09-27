@@ -2,9 +2,7 @@
 
 
 use Dotenv\Dotenv;
-use ReflectionMethod;
 use Twig\Environment;
-use ReflectionException;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;
@@ -17,6 +15,7 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
@@ -111,9 +110,12 @@ try {
     // Initialiser le conteneur de dépendances.
     $container = initializeContainer($config);
 
+    // Instanciation du validateur.
+    $validator = Validation::createValidator();
+
     // Création de l'instance de PostsRepository.
     $postsRepository    = new PostsRepository($container->getDatabase());
-    $usersRepository    = new UsersRepository($container->getDatabase());
+    $usersRepository    = new UsersRepository($container->getDatabase(), $validator);
     $commentsRepository = new CommentsRepository($container->getDatabase());
 
     // Configurer Twig.
@@ -214,7 +216,7 @@ try {
         function () use ($request, $controllerInstance, $method, $postsRepository, $usersRepository, $parameters, $csrfService) {
             try {
                 // Utiliser la réflexion pour obtenir les paramètres de la méthode.
-                $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
+                $reflectionMethod = new \ReflectionMethod($controllerInstance, $method);
 
                 // Vérifier que la méthode est publique.
                 if ($reflectionMethod->isPublic() === false) {
@@ -280,7 +282,7 @@ try {
 
                 // Appeler la méthode du contrôleur avec les paramètres résolus.
                 return $controllerInstance->$method(...$methodParameters);
-            } catch (ReflectionException $e) {
+            } catch (\ReflectionException $e) {
                 // Gérer les erreurs de réflexion.
                 return new Response('Méthode introuvable : '.$e->getMessage(), 404);
             } catch (Exception $e) {

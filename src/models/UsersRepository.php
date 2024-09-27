@@ -8,6 +8,7 @@ use PDOStatement;
 use App\Models\User;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersRepository
 {
@@ -21,15 +22,25 @@ class UsersRepository
      */
     private DatabaseInterface $dbi;
 
+    /**
+     * Le validateur Symfony.
+     *
+     * @var ValidatorInterface
+     */
+    private ValidatorInterface $validator;
+
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
+     * @param DatabaseInterface  $dbi       Interface pour interagir avec la base de
+     *                                      données.
+     * @param ValidatorInterface $validator Le validateur Symfony.
      */
-    public function __construct(DatabaseInterface $dbi)
+    public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
     {
-        $this->dbi = $dbi;
+        $this->dbi       = $dbi;
+        $this->validator = $validator;
 
     }//end __construct()
 
@@ -57,13 +68,13 @@ class UsersRepository
     /**
      * Récupère un utilisateur par son identifiant.
      *
-     * @param int $id L'identifiant de l'utilisateur à récupérer.
+     * @param int $userId L'identifiant de l'utilisateur à récupérer.
      *
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
-    public function findById(int $id): ?User
+    public function findById(int $userId): ?User
     {
-        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $id]);
+        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
 
         if (empty($result) === false) {
             return $this->createUserFromResult($result[0]);
@@ -111,6 +122,19 @@ class UsersRepository
      */
     public function createUser(User $user): User
     {
+        $user->setValidator($this->validator);
+
+        // Validation avant l'insertion.
+        $violations = $user->validate();
+        if ($violations->count() > 0) {
+            $messages = [];
+            foreach ($violations as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+
+            throw new Exception('Erreur de validation : '.implode(', ', $messages));
+        }
+
         $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
@@ -164,19 +188,19 @@ class UsersRepository
      * lie l'identifiant de l'utilisateur à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $id L'identifiant de l'utilisateur à supprimer.
+     * @param int $userId L'identifiant de l'utilisateur à supprimer.
      *
      * @return bool Retourne true si la suppression a réussi, sinon false.
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deleteUser(int $id): bool
+    public function deleteUser(int $userId): bool
     {
         $sql = "DELETE FROM user WHERE user_id = :user_id";
 
         $stmt = $this->dbi->prepare($sql);
 
-        $stmt->bindValue(':user_id', $id);
+        $stmt->bindValue(':user_id', $userId);
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to delete the user from the database.");
@@ -244,7 +268,7 @@ class UsersRepository
     private function buildUserFromRow(array $row): User
     {
         return new User(
-            id: (int) $row['user_id'],
+            userId: (int) $row['user_id'],
             lastName: $row['last_name'],
             firstName: $row['first_name'],
             email: $row['email'],
@@ -253,7 +277,8 @@ class UsersRepository
             createdAt: new DateTime($row['created_at']),
             updatedAt: (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
             token: ($row['token'] ?? null),
-            expireAt: (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null
+            expireAt: (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+            validator: $this->validator
         );
 
     }//end buildUserFromRow()
@@ -281,18 +306,10 @@ class UsersRepository
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
         // Gérer le token nullable.
-        if ($user->getToken() !== null) {
-            $stmt->bindValue(':token', $user->getToken());
-        } else {
-            $stmt->bindValue(':token', null, \PDO::PARAM_NULL);
-        }
+        $stmt->bindValue(':token', $user->getToken() !== null ? $user->getToken() : null, \PDO::PARAM_NULL);
 
         // Gérer expireAt nullable.
-        if ($user->getExpireAt() !== null) {
-            $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
-        } else {
-            $stmt->bindValue(':expire_at', null, \PDO::PARAM_NULL);
-        }
+        $stmt->bindValue(':expire_at', $user->getExpireAt() !== null ? $user->getExpireAt()->format('Y-m-d H:i:s') : null, \PDO::PARAM_NULL);
 
         return $stmt;
 

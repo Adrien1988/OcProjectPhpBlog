@@ -31,8 +31,8 @@ class SessionService
     public function get(string $key, $default=null)
     {
         $this->start();
-        // Assurez-vous que la session est démarrée avant d'accéder à $_SESSION.
-        return $this->has($key) === true ? $_SESSION[$key] : $default;
+        // Utilisez la méthode encapsulée pour accéder à la session.
+        return $this->has($key) === true ? $this->getSessionData($key, $default) : $default;
 
     }//end get()
 
@@ -48,8 +48,7 @@ class SessionService
     public function set(string $key, $value): void
     {
         $this->start();
-        // Assurez-vous que la session est démarrée avant de manipuler $_SESSION.
-        $_SESSION[$key] = $value;
+        $this->setSessionData($key, $value);
 
     }//end set()
 
@@ -64,8 +63,7 @@ class SessionService
     public function remove(string $key): void
     {
         $this->start();
-        // Assurez-vous que la session est démarrée.
-        unset($_SESSION[$key]);
+        $this->removeSessionData($key);
 
     }//end remove()
 
@@ -95,7 +93,6 @@ class SessionService
     public function has(string $key): bool
     {
         $this->start();
-        // Assurez-vous que la session est démarrée.
         return isset($_SESSION[$key]);
 
     }//end has()
@@ -111,6 +108,50 @@ class SessionService
         return session_status() === PHP_SESSION_ACTIVE;
 
     }//end isStarted()
+
+
+    /**
+     * Récupère la valeur de $_SESSION pour la clé donnée.
+     *
+     * @param string $key     La clé de la session à récupérer.
+     * @param mixed  $default La valeur par défaut à retourner si la clé n'existe pas.
+     *
+     * @return mixed La valeur de la session ou la valeur par défaut.
+     */
+    private function getSessionData(string $key, $default=null)
+    {
+        return ($_SESSION[$key] ?? $default);
+
+    }//end getSessionData()
+
+
+    /**
+     * Définit une valeur dans $_SESSION de manière encapsulée.
+     *
+     * @param string $key   La clé de la session à définir.
+     * @param mixed  $value La valeur à définir.
+     *
+     * @return void
+     */
+    private function setSessionData(string $key, $value): void
+    {
+        $_SESSION[$key] = $value;
+
+    }//end setSessionData()
+
+
+    /**
+     * Supprime une clé de $_SESSION de manière encapsulée.
+     *
+     * @param string $key La clé de la session à supprimer.
+     *
+     * @return void
+     */
+    private function removeSessionData(string $key): void
+    {
+        unset($_SESSION[$key]);
+
+    }//end removeSessionData()
 
 
 }//end class

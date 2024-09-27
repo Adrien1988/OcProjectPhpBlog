@@ -10,7 +10,7 @@ trait IdTrait
      *
      * @var integer
      */
-    private int $id;
+    private int $entityId;
 
 
     /**
@@ -20,7 +20,7 @@ trait IdTrait
      */
     public function getId(): int
     {
-        return $this->id;
+        return $this->entityId;
 
     }//end getId()
 
@@ -28,13 +28,13 @@ trait IdTrait
     /**
      * Sets the unique identifier of the entity.
      *
-     * @param int $id The unique identifier of the entity.
+     * @param int $entityId The unique identifier of the entity.
      *
      * @return void
      */
-    public function setId(int $id): void
+    public function setId(int $entityId): void
     {
-        $this->id = $id;
+        $this->id = $entityId;
 
     }//end setId()
 
