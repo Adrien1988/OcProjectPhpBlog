@@ -30,7 +30,8 @@ class UsersRepository
     public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
-    } //end __construct()
+
+    }//end __construct()
 
 
     /**
@@ -49,13 +50,14 @@ class UsersRepository
         }
 
         return $users;
-    } //end findAll()
+
+    }//end findAll()
 
 
     /**
      * Récupère un utilisateur par son identifiant.
      *
-     * @param int $userId L'identifiant de l'utilisateur à récupérer.
+     * @param int $id L'identifiant de l'utilisateur à récupérer.
      *
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
@@ -68,7 +70,8 @@ class UsersRepository
         }
 
         return null;
-    } //end findById()
+
+    }//end findById()
 
 
     /**
@@ -89,7 +92,8 @@ class UsersRepository
         }
 
         return null;
-    } //end findByEmail()
+
+    }//end findByEmail()
 
 
     /**
@@ -118,7 +122,8 @@ class UsersRepository
         $user->setId((int) $this->dbi->lastInsertId());
 
         return $user;
-    } //end createUser()
+
+    }//end createUser()
 
 
     /**
@@ -148,7 +153,8 @@ class UsersRepository
         }
 
         return true;
-    } //end updateUser()
+
+    }//end updateUser()
 
 
     /**
@@ -158,7 +164,7 @@ class UsersRepository
      * lie l'identifiant de l'utilisateur à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $userId L'identifiant de l'utilisateur à supprimer.
+     * @param int $id L'identifiant de l'utilisateur à supprimer.
      *
      * @return bool Retourne true si la suppression a réussi, sinon false.
      *
@@ -177,7 +183,8 @@ class UsersRepository
         }
 
         return true;
-    } //end deleteUser()
+
+    }//end deleteUser()
 
 
     /**
@@ -194,7 +201,8 @@ class UsersRepository
         $this->validateRow($row);
 
         return $this->buildUserFromRow($row);
-    } //end createUserFromResult()
+
+    }//end createUserFromResult()
 
 
     /**
@@ -218,11 +226,12 @@ class UsersRepository
             'created_at',
         ];
         foreach ($requiredFields as $field) {
-            if (empty($row[$field]) && !isset($row[$field])) {
+            if (empty($row[$field]) === true && isset($row[$field]) === false) {
                 throw new InvalidArgumentException("Le champ '{$field}' est requis et ne peut pas être vide.");
             }
         }
-    } //end validateRow()
+
+    }//end validateRow()
 
 
     /**
@@ -242,11 +251,12 @@ class UsersRepository
             password: $row['password'],
             role: $row['role'],
             createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) ? new DateTime($row['updated_at']) : null,
-            token: $row['token'] ?? null,
-            expireAt: isset($row['expire_at']) && $row['expire_at'] !== null ? new DateTime($row['expire_at']) : null
+            updatedAt: (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
+            token: ($row['token'] ?? null),
+            expireAt: (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null
         );
-    } //end buildUserFromRow()
+
+    }//end buildUserFromRow()
 
 
     /**
@@ -270,23 +280,23 @@ class UsersRepository
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
-        // Gérer le token nullable
+        // Gérer le token nullable.
         if ($user->getToken() !== null) {
             $stmt->bindValue(':token', $user->getToken());
         } else {
             $stmt->bindValue(':token', null, \PDO::PARAM_NULL);
         }
 
-        // Gérer expireAt nullable
+        // Gérer expireAt nullable.
         if ($user->getExpireAt() !== null) {
             $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
         } else {
             $stmt->bindValue(':expire_at', null, \PDO::PARAM_NULL);
         }
 
-
         return $stmt;
-    } //end prepareAndBind()
+
+    }//end prepareAndBind()
 
 
 }//end class

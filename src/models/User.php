@@ -76,7 +76,8 @@ class User
     public function getLastName(): string
     {
         return $this->lastName;
-    } //end getLastName()
+
+    }//end getLastName()
 
 
     /**
@@ -89,7 +90,8 @@ class User
     public function setLastName(string $lastName): void
     {
         $this->lastName = $lastName;
-    } //end setLastName()
+
+    }//end setLastName()
 
 
     /**
@@ -100,7 +102,8 @@ class User
     public function getFirstName(): string
     {
         return $this->firstName;
-    } //end getFirstName()
+
+    }//end getFirstName()
 
 
     /**
@@ -113,7 +116,8 @@ class User
     public function setFirstName(string $firstName): void
     {
         $this->firstName = $firstName;
-    } //end setFirstName()
+
+    }//end setFirstName()
 
 
     /**
@@ -124,7 +128,8 @@ class User
     public function getEmail(): string
     {
         return $this->email;
-    } //end getEmail()
+
+    }//end getEmail()
 
 
     /**
@@ -137,7 +142,8 @@ class User
     public function setEmail(string $email): void
     {
         $this->email = $email;
-    } //end setEmail()
+
+    }//end setEmail()
 
 
     /**
@@ -148,7 +154,8 @@ class User
     public function getPassword(): string
     {
         return $this->password;
-    } //end getPassword()
+
+    }//end getPassword()
 
 
     /**
@@ -161,7 +168,8 @@ class User
     public function setPassword(string $password): void
     {
         $this->password = $password;
-    } //end setPassword()
+
+    }//end setPassword()
 
 
     /**
@@ -172,7 +180,8 @@ class User
     public function getRole(): string
     {
         return $this->role;
-    } //end getRole()
+
+    }//end getRole()
 
 
     /**
@@ -185,7 +194,8 @@ class User
     public function setRole(string $role): void
     {
         $this->role = $role;
-    } //end setRole()
+
+    }//end setRole()
 
 
     /**
@@ -196,7 +206,8 @@ class User
     public function getToken(): ?string
     {
         return $this->token;
-    } //end getToken()
+
+    }//end getToken()
 
 
     /**
@@ -209,7 +220,8 @@ class User
     public function setToken(?string $token): void
     {
         $this->token = $token;
-    } //end setToken()
+
+    }//end setToken()
 
 
     /**
@@ -220,7 +232,8 @@ class User
     public function getExpireAt(): ?DateTime
     {
         return $this->expireAt;
-    } //end getExpireAt()
+
+    }//end getExpireAt()
 
 
     /**
@@ -233,7 +246,8 @@ class User
     public function setExpireAt(?DateTime $expireAt): void
     {
         $this->expireAt = $expireAt;
-    } //end setExpireAt()
+
+    }//end setExpireAt()
 
 
     /**
@@ -245,37 +259,43 @@ class User
     {
         $validator = Validation::createValidator();
 
-        $constraints = new Assert\Collection([
-            'lastName' => [
-                new Assert\NotBlank(['message' => 'Le nom est requis.']),
-                new Assert\Length(['max' => 50, 'maxMessage' => 'Le nom ne doit pas dépasser 50 caractères.']),
-            ],
-            'firstName' => [
-                new Assert\NotBlank(['message' => 'Le prénom est requis.']),
-                new Assert\Length(['max' => 50, 'maxMessage' => 'Le prénom ne doit pas dépasser 50 caractères.']),
-            ],
-            'email' => [
-                new Assert\NotBlank(['message' => 'L\'adresse e-mail est requise.']),
-                new Assert\Email(['message' => 'L\'adresse e-mail n\'est pas valide.']),
-            ],
-            'password' => [
-                new Assert\NotBlank(['message' => 'Le mot de passe est requis.']),
-                new Assert\Length(['min' => 8, 'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.']),
-            ],
-            'role' => [
-                new Assert\NotBlank(['message' => 'Le rôle est requis.']),
-            ],
-            'token' => [
-                new Assert\Optional([
-                    new Assert\Length(['max' => 255, 'maxMessage' => 'Le token ne doit pas dépasser 255 caractères.']),
-                ]),
-            ],
-            'expireAt' => [
-                new Assert\Optional([
-                    new Assert\DateTime(['message' => 'La date d\'expiration doit être une date valide.']),
-                ]),
-            ],
-        ]);
+        $constraints = new Assert\Collection(
+            [
+                'lastName' => [
+                    new Assert\NotBlank(['message' => 'Le nom est requis.']),
+                    new Assert\Length(['max' => 50, 'maxMessage' => 'Le nom ne doit pas dépasser 50 caractères.']),
+                ],
+                'firstName' => [
+                    new Assert\NotBlank(['message' => 'Le prénom est requis.']),
+                    new Assert\Length(['max' => 50, 'maxMessage' => 'Le prénom ne doit pas dépasser 50 caractères.']),
+                ],
+                'email' => [
+                    new Assert\NotBlank(['message' => 'L\'adresse e-mail est requise.']),
+                    new Assert\Email(['message' => 'L\'adresse e-mail n\'est pas valide.']),
+                ],
+                'password' => [
+                    new Assert\NotBlank(['message' => 'Le mot de passe est requis.']),
+                    new Assert\Length(['min' => 8, 'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères.']),
+                ],
+                'role' => [
+                    new Assert\NotBlank(['message' => 'Le rôle est requis.']),
+                ],
+                'token' => [
+                    new Assert\Optional(
+                        [
+                            new Assert\Length(['max' => 255, 'maxMessage' => 'Le token ne doit pas dépasser 255 caractères.']),
+                        ]
+                    ),
+                ],
+                'expireAt' => [
+                    new Assert\Optional(
+                        [
+                            new Assert\DateTime(['message' => 'La date d\'expiration doit être une date valide.']),
+                        ]
+                    ),
+                ],
+            ]
+        );
 
         $data = [
             'lastName'  => $this->lastName,
@@ -284,9 +304,12 @@ class User
             'password'  => $this->password,
             'role'      => $this->role,
             'token'     => $this->token,
-            'expireAt'  => $this->expireAt ? $this->expireAt->format('Y-m-d H:i:s') : null,
+            'expireAt'  => ($this->expireAt !== null) ? $this->expireAt->format('Y-m-d H:i:s') : null,
         ];
 
         return $validator->validate($data, $constraints);
-    }
+
+    }//end validate()
+
+
 }//end class
