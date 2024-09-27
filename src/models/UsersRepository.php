@@ -267,19 +267,22 @@ class UsersRepository
      */
     private function buildUserFromRow(array $row): User
     {
-        return new User(
-            userId: (int) $row['user_id'],
-            lastName: $row['last_name'],
-            firstName: $row['first_name'],
-            email: $row['email'],
-            password: $row['password'],
-            role: $row['role'],
-            createdAt: new DateTime($row['created_at']),
-            updatedAt: (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
-            token: ($row['token'] ?? null),
-            expireAt: (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
-            validator: $this->validator
-        );
+        // Regrouper les données de l'utilisateur dans un tableau.
+        $userData = [
+            'userId'    => (int) $row['user_id'],
+            'lastName'  => $row['last_name'],
+            'firstName' => $row['first_name'],
+            'email'     => $row['email'],
+            'password'  => $row['password'],
+            'role'      => $row['role'],
+            'createdAt' => new DateTime($row['created_at']),
+            'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
+            'token'     => ($row['token'] ?? null),
+            'expireAt'  => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+        ];
+
+        // Créer l'objet User avec le tableau de données et le validateur.
+        return new User($userData, $this->validator);
 
     }//end buildUserFromRow()
 

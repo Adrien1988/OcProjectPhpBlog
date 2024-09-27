@@ -78,36 +78,21 @@ class User
     /**
      * Constructeur pour la classe User.
      *
-     * @param int                $userId    L'identifiant unique de l'utilisateur.
-     * @param string             $lastName  Le nom de famille de l'utilisateur.
-     * @param string             $firstName Le prénom de
-     *                                      l'utilisateur.
-     * @param string             $email     L'adresse e-mail de l'utilisateur.
-     * @param string             $password  Le mot de passe de l'utilisateur.
-     * @param string             $role      Le rôle de
-     *                                      l'utilisateur.
-     * @param DateTime           $createdAt La date de création de
-     *                                      l'utilisateur.
-     * @param DateTime|null      $updatedAt La date de mise à jour de l'utilisateur (peut être
-     *                                      null).
-     * @param string|null        $token     Le jeton d'authentification de l'utilisateur (peut être
-     *                                      null).
-     * @param DateTime|null      $expireAt  La date d'expiration du jeton (peut être
-     *                                      null).
-     * @param ValidatorInterface $validator L'instance du validateur Symfony.
+     * @param array              $userData  Tableau contenant les données de l'utilisateur.
+     * @param ValidatorInterface $validator Le validateur Symfony à injecter.
      */
-    public function __construct(int $userId, string $lastName, string $firstName, string $email, string $password, string $role, DateTime $createdAt, ?DateTime $updatedAt=null, ?string $token=null, ?DateTime $expireAt=null, ValidatorInterface $validator)
+    public function __construct(array $userData, ValidatorInterface $validator)
     {
-        $this->setId($userId);
-        $this->lastName  = $lastName;
-        $this->firstName = $firstName;
-        $this->email     = $email;
-        $this->password  = $password;
-        $this->role      = $role;
-        $this->setCreatedAt($createdAt);
-        $this->setUpdatedAt($updatedAt);
-        $this->token     = $token;
-        $this->expireAt  = $expireAt;
+        $this->setId($userData['userId']);
+        $this->lastName  = $userData['lastName'];
+        $this->firstName = $userData['firstName'];
+        $this->email     = $userData['email'];
+        $this->password  = $userData['password'];
+        $this->role      = $userData['role'];
+        $this->setCreatedAt($userData['createdAt']);
+        $this->setUpdatedAt((isset($userData['updatedAt']) === true) ? $userData['updatedAt'] : null);
+        $this->token     = ($userData['token'] ?? null);
+        $this->expireAt  = ($userData['expireAt'] ?? null);
         $this->validator = $validator;
 
     }//end __construct()

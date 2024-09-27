@@ -31,8 +31,8 @@ class SessionService
     public function get(string $key, $default=null)
     {
         $this->start();
-        // Utilisez la méthode encapsulée pour accéder à la session.
-        return $this->has($key) === true ? $this->getSessionData($key, $default) : $default;
+        // Utilisation de la méthode has pour vérifier la présence de la clé.
+        return $this->has($key) === true ? $_SESSION[$key] : $default;
 
     }//end get()
 
@@ -48,7 +48,7 @@ class SessionService
     public function set(string $key, $value): void
     {
         $this->start();
-        $this->setSessionData($key, $value);
+        $_SESSION[$key] = $value;
 
     }//end set()
 
@@ -63,7 +63,7 @@ class SessionService
     public function remove(string $key): void
     {
         $this->start();
-        $this->removeSessionData($key);
+        unset($_SESSION[$key]);
 
     }//end remove()
 
@@ -93,7 +93,7 @@ class SessionService
     public function has(string $key): bool
     {
         $this->start();
-        return isset($_SESSION[$key]);
+        return array_key_exists($key, $_SESSION);
 
     }//end has()
 
