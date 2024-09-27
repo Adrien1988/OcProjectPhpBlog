@@ -2,10 +2,11 @@
 
 namespace App\Controllers;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use DateTime;
 use App\Models\User;
 use Models\UsersRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends BaseController
 {
@@ -28,13 +29,24 @@ class AuthController extends BaseController
                 return new Response('Invalid CSRF token.', 403);
             }
 
-            // Récupération et création de l'objet User.
-            $user = new User();
-            $user->setLastName($this->cleanInput($request->request->get('last_name')));
-            $user->setFirstName($this->cleanInput($request->request->get('first_name')));
-            $user->setEmail($this->cleanInput($request->request->get('email')));
-            $user->setPassword(password_hash($request->request->get('password'), PASSWORD_BCRYPT));
-            $user->setRole('user');
+            // Récupération des données du formulaire et création de l'objet User.
+            $userData = [
+                'userId'    => 0,
+            // Si c'est un nouvel utilisateur, tu peux mettre 0 ou null ici.
+                'lastName'  => $this->cleanInput($request->request->get('last_name')),
+                'firstName' => $this->cleanInput($request->request->get('first_name')),
+                'email'     => $this->cleanInput($request->request->get('email')),
+                'password'  => password_hash($request->request->get('password'), PASSWORD_BCRYPT),
+                'role'      => 'user',
+                'createdAt' => new DateTime(),
+            // Date actuelle pour la création.
+                'updatedAt' => null,
+                'token'     => null,
+                'expireAt'  => null
+            ];
+
+            // Instancier l'objet User avec les données et le validateur injecté.
+            $user = new User($userData, $this->validator);
 
             // Validation de l'utilisateur.
             $violations = $user->validate();

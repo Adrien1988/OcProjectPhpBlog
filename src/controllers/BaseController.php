@@ -8,6 +8,7 @@ use App\Services\CsrfService;
 use App\Services\SessionService;
 use App\Services\SecurityService;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 
@@ -50,24 +51,34 @@ class BaseController
      */
     protected SessionService $sessionService;
 
+    /**
+     * Le validateur Symfony pour la validation des entités.
+     *
+     * @var ValidatorInterface
+     */
+    protected ValidatorInterface $validator;
+
 
     /**
      * Constructeur de la classe.
      * Initialise l'instance Twig pour le rendu des templates.
      *
-     * @param Environment     $twig            Instance de l'environnement Twig.
-     * @param SecurityService $securityService Le service de sécurité pour la protection contre les attaques XSS.
-     * @param EnvService      $envService      Instance du service de gestion des variables d'environnement.
-     * @param CsrfService     $csrfService     Service pour la gestion des tokens CSRF.
-     * @param SessionService  $sessionService  L'instance de SessionService pour la gestion des sessions.
+     * @param Environment        $twig            Instance de l'environnement Twig.
+     * @param SecurityService    $securityService Le service de sécurité pour la protection contre les attaques
+     *                                            XSS.
+     * @param EnvService         $envService      Instance du service de gestion des variables d'environnement.
+     * @param CsrfService        $csrfService     Service pour la gestion des tokens CSRF.
+     * @param SessionService     $sessionService  L'instance de SessionService pour la gestion des sessions.
+     * @param ValidatorInterface $validator       Le validateur Symfony pour la validation des entités.
      */
-    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService)
+    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService, ValidatorInterface $validator)
     {
         $this->twig            = $twig;
         $this->securityService = $securityService;
         $this->envService      = $envService;
         $this->csrfService     = $csrfService;
         $this->sessionService  = $sessionService;
+        $this->validator       = $validator;
 
         // Démarre la session si elle n'est pas déjà démarrée.
         if ($this->sessionService->isStarted() === false) {
@@ -209,6 +220,18 @@ class BaseController
         return $this->sessionService->has($key);
 
     }//end hasSessionKey()
+
+
+    /**
+     * Obtient l'instance du validateur Symfony.
+     *
+     * @return ValidatorInterface
+     */
+    protected function getValidator(): ValidatorInterface
+    {
+        return $this->validator;
+
+    }//end getValidator()
 
 
 }//end class

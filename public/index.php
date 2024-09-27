@@ -173,7 +173,7 @@ try {
     list($class, $method) = explode('::', $controller);
 
     // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService);
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $validator);
 
 
     // Supprimer les clés réservées de paramètres.
