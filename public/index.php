@@ -1,17 +1,17 @@
 <?php
 
-session_start();
 
 use Dotenv\Dotenv;
 use ReflectionMethod;
-use ReflectionException;
 use Twig\Environment;
+use ReflectionException;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;
 use App\Services\EnvService;
 use App\Services\CsrfService;
 use Models\CommentsRepository;
+use App\Services\SessionService;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
@@ -23,10 +23,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 
 /**
@@ -143,6 +139,9 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
+    // Créez une instance de SessionService.
+    $sessionService = new SessionService();
+
     // $errorController = new ErrorController();
     // Charger les routes.
     $routes = include __DIR__.'/../src/config/routes.php';
@@ -172,7 +171,7 @@ try {
     list($class, $method) = explode('::', $controller);
 
     // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService);
 
 
     // Supprimer les clés réservées de paramètres.
@@ -196,6 +195,7 @@ try {
     $allowedMethods = [
         'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
         'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
+        'App\Controllers\AuthController' => ['register', 'login', 'logout'],
         // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
     ];
 
@@ -211,7 +211,7 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($request, $controllerInstance, $method, $postsRepository, $parameters, $csrfService) {
+        function () use ($request, $controllerInstance, $method, $postsRepository, $usersRepository, $parameters, $csrfService) {
             try {
                 // Utiliser la réflexion pour obtenir les paramètres de la méthode.
                 $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
@@ -238,6 +238,8 @@ try {
                                 $methodParameters[] = $request;
                             } else if ($typeName === PostsRepository::class) {
                                 $methodParameters[] = $postsRepository;
+                            } else if ($typeName === UsersRepository::class) {
+                                $methodParameters[] = $usersRepository;
                             } else if ($typeName === CsrfService::class) {
                                 $methodParameters[] = $csrfService;
                             } else {

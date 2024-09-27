@@ -5,7 +5,6 @@ namespace App\Controllers;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\User;
-use DateTime;
 use Models\UsersRepository;
 
 class AuthController extends BaseController
@@ -111,21 +110,20 @@ class AuthController extends BaseController
 
             // Vérifier si l'utilisateur existe.
             $user = $usersRepository->findByEmail($email);
+
             if ($user === null || password_verify($password, $user->getPassword()) === false) {
-                $errors[] = 'Adresse e-mail ou mot de passe incorrect.';
                 return $this->render(
                     'auth/login.html.twig',
                     [
-                        'errors' => $errors,
-                        'email' => $email,
+                        'error' => 'Identifiants incorrects',
                         'csrf_token' => $submittedToken,
                     ]
                 );
             }
 
-            // Enregistrer l'utilisateur en session.
-            $_SESSION['user_id']   = $user->getId();
-            $_SESSION['user_role'] = $user->getRole();
+            // Utiliser le SessionService pour stocker les informations de l'utilisateur connecté.
+            $this->sessionService->set('user_id', $user->getId());
+            $this->sessionService->set('user_role', $user->getRole());
 
             return new Response('', 302, ['Location' => '/']);
         }//end if
@@ -148,9 +146,8 @@ class AuthController extends BaseController
      */
     public function logout(): Response
     {
-        // Détruire la session de l'utilisateur.
-        session_unset();
-        session_destroy();
+        // Utiliser le SessionService pour détruire la session de l'utilisateur.
+        $this->sessionService->destroy();
 
         return new Response('', 302, ['Location' => '/']);
 

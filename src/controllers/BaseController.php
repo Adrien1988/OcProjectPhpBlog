@@ -5,6 +5,7 @@ namespace App\Controllers;
 use Twig\Environment;
 use App\Services\EnvService;
 use App\Services\CsrfService;
+use App\Services\SessionService;
 use App\Services\SecurityService;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,6 +43,13 @@ class BaseController
      */
     protected $csrfService;
 
+    /**
+     * Service de session pour gérer les sessions utilisateur.
+     *
+     * @var SessionService
+     */
+    protected SessionService $sessionService;
+
 
     /**
      * Constructeur de la classe.
@@ -51,13 +59,20 @@ class BaseController
      * @param SecurityService $securityService Le service de sécurité pour la protection contre les attaques XSS.
      * @param EnvService      $envService      Instance du service de gestion des variables d'environnement.
      * @param CsrfService     $csrfService     Service pour la gestion des tokens CSRF.
+     * @param SessionService  $sessionService  L'instance de SessionService pour la gestion des sessions.
      */
-    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService)
+    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService)
     {
         $this->twig            = $twig;
         $this->securityService = $securityService;
         $this->envService      = $envService;
         $this->csrfService     = $csrfService;
+        $this->sessionService  = $sessionService;
+
+        // Démarre la session si elle n'est pas déjà démarrée.
+        if ($this->sessionService->isStarted() === false) {
+            $this->sessionService->start();
+        }
 
     }//end __construct()
 
@@ -136,6 +151,64 @@ class BaseController
         return $this->envService->getEnv($key, $default);
 
     }//end getEnv()
+
+
+    /**
+     * Récupère une valeur de la session.
+     *
+     * @param string $key     La clé de la valeur à récupérer.
+     * @param mixed  $default La valeur par défaut si la clé n'existe pas.
+     *
+     * @return mixed La valeur de la session ou la valeur par défaut.
+     */
+    protected function getSessionValue(string $key, $default=null)
+    {
+        return $this->sessionService->get($key, $default);
+
+    }//end getSessionValue()
+
+
+    /**
+     * Définit une valeur dans la session.
+     *
+     * @param string $key   La clé de la valeur à définir.
+     * @param mixed  $value La valeur à définir.
+     *
+     * @return void
+     */
+    protected function setSessionValue(string $key, $value): void
+    {
+        $this->sessionService->set($key, $value);
+
+    }//end setSessionValue()
+
+
+    /**
+     * Supprime une valeur de la session.
+     *
+     * @param string $key La clé de la valeur à supprimer.
+     *
+     * @return void
+     */
+    protected function removeSessionValue(string $key): void
+    {
+        $this->sessionService->remove($key);
+
+    }//end removeSessionValue()
+
+
+    /**
+     * Vérifie si une clé existe dans la session.
+     *
+     * @param string $key La clé à vérifier.
+     *
+     * @return bool True si la clé existe, false sinon.
+     */
+    protected function hasSessionKey(string $key): bool
+    {
+        return $this->sessionService->has($key);
+
+    }//end hasSessionKey()
 
 
 }//end class
