@@ -1,40 +1,53 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Connexion
+{% endblock %}
 
 {% block content %}
-<section id="login">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <h2 class="text-center text-uppercase text-secondary">Connexion</h2>
-            <hr class="star-dark mb-5">
-            
-            {% if errors is defined and errors|length > 0 %}
-                <div class="alert alert-danger">
-                    <ul>
-                        {% for error in errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-            
-            <form action="/login" method="POST" novalidate>
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-                
-                <div class="form-group">
-                    <label for="email">Email :</label>
-                    <input type="email" class="form-control" id="email" name="email" required value="{{ email ?? '' }}">
-                </div>
+	<section class="page-section bg-light mt-5" id="login">
+		<div class="container">
+			<h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Connexion</h2>
 
-                <div class="form-group">
-                    <label for="password">Mot de passe :</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
+			<!-- Ligne de séparation avec icône -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-star"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
 
-                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-            </form>
-        </div>
-    </div>
-</section>
+			{% if errors is defined and errors|length > 0 %}
+				<div class="alert alert-danger">
+					<ul>
+						{% for error in errors %}
+							<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			{% endif %}
+
+			<div class="row justify-content-center">
+				<div class="col-lg-8 col-xl-7">
+					<form action="/login" method="POST" class="mt-4" novalidate>
+						<input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+						<div class="form-floating mb-3">
+							<input type="email" class="form-control" id="email" name="email" placeholder="Email" required value="{{ email ?? '' }}">
+							<label for="email">Email</label>
+						</div>
+
+						<div class="form-floating mb-3">
+							<input type="password" class="form-control" id="password" name="password" placeholder="Mot de passe" required>
+							<label for="password">Mot de passe</label>
+						</div>
+
+						<div class="d-grid">
+							<button type="submit" class="btn btn-primary btn-xl">Se connecter</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
 {% endblock %}

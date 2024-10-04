@@ -33,7 +33,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__.'/../src/config/config.php';
+    $configPath = __DIR__ . '/../src/config/config.php';
 
     if (file_exists($configPath) === false) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
@@ -48,8 +48,7 @@ function loadConfig(): array
     }
 
     return $config;
-
-}//end loadConfig()
+} //end loadConfig()
 
 
 /**
@@ -63,13 +62,12 @@ function initializeContainer(array $config): DependencyContainer
 {
     return new DependencyContainer(
         [
-            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
+            'dsn'         => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
             'db_user'     => $config['database']['user'],
             'db_password' => $config['database']['password'],
         ]
     );
-
-}//end initializeContainer()
+} //end initializeContainer()
 
 
 /**
@@ -96,12 +94,11 @@ function handleMiddlewares(Request $request, array $middlewares, callable $contr
             return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
         }
     );
-
-}//end handleMiddlewares()
+} //end handleMiddlewares()
 
 
 // Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 try {
     // Charger la configuration.
@@ -114,12 +111,12 @@ try {
     $validator = Validation::createValidator();
 
     // Création de l'instance de PostsRepository.
-    $postsRepository    = new PostsRepository($container->getDatabase());
+    $postsRepository    = new PostsRepository($container->getDatabase(), $validator);
     $usersRepository    = new UsersRepository($container->getDatabase(), $validator);
     $commentsRepository = new CommentsRepository($container->getDatabase());
 
     // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__.'/../templates');
+    $loader = new FilesystemLoader(__DIR__ . '/../templates');
     $twig   = new Environment(
         $loader,
         [
@@ -136,7 +133,7 @@ try {
     $securityService = new SecurityService();
 
     // Créez une instance de Dotenv.
-    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
@@ -144,9 +141,21 @@ try {
     // Créez une instance de SessionService.
     $sessionService = new SessionService();
 
+    // Récupérer l'utilisateur actuellement connecté
+    $currentUser = null;
+    if ($sessionService->has('user_id')) {
+        $userId = $sessionService->get('user_id');
+        $currentUser = $usersRepository->findById($userId);
+    }
+
+    // Passer l'utilisateur actuel à Twig
+    $twig->addGlobal('app', [
+        'user' => $currentUser,
+    ]);
+
     // $errorController = new ErrorController();
     // Charger les routes.
-    $routes = include __DIR__.'/../src/config/routes.php';
+    $routes = include __DIR__ . '/../src/config/routes.php';
 
     // Initialiser le contexte de la requête.
     $context = new RequestContext();
@@ -264,7 +273,7 @@ try {
                             } else {
                                 throw new Exception("Paramètre requis manquant : '{$paramName}'");
                             }
-                        }//end if
+                        } //end if
                     } else if (isset($parameters[$paramName]) === true) {
                         // Utiliser les paramètres de la route.
                         $methodParameters[] = $parameters[$paramName];
@@ -277,26 +286,26 @@ try {
                         }
                     } else {
                         throw new Exception("Impossible de résoudre le paramètre '{$paramName}' pour la méthode '{$method}'");
-                    }//end if
-                }//end foreach
+                    } //end if
+                } //end foreach
 
                 // Appeler la méthode du contrôleur avec les paramètres résolus.
                 return $controllerInstance->$method(...$methodParameters);
             } catch (\ReflectionException $e) {
                 // Gérer les erreurs de réflexion.
-                return new Response('Méthode introuvable : '.$e->getMessage(), 404);
+                return new Response('Méthode introuvable : ' . $e->getMessage(), 404);
             } catch (Exception $e) {
                 // Gérer les autres exceptions.
-                return new Response('Une erreur est survenue : '.$e->getMessage(), 500);
-            }//end try
+                return new Response('Une erreur est survenue : ' . $e->getMessage(), 500);
+            } //end try
         },
         $dependencies
     );
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-    $response = new Response('Page non trouvée : '.$e->getMessage(), 404);
+    $response = new Response('Page non trouvée : ' . $e->getMessage(), 404);
 } catch (Exception $e) {
-    $response = new Response('Une erreur est survenue : '.$e->getMessage(), 500);
-}//end try
+    $response = new Response('Une erreur est survenue : ' . $e->getMessage(), 500);
+} //end try
 
 // Assurez-vous que $response est défini avant de l'envoyer.
 if (isset($response) === true) {

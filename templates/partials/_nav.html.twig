@@ -1,47 +1,66 @@
 <!-- Navigation-->
 <nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
-	<div class="container">
-		<a class="navbar-brand" href="/">PHP_blog</a>
-		<button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-			Menu
-			<i class="fas fa-bars"></i>
-		</button>
-		<div class="collapse navbar-collapse" id="navbarResponsive">
-			<ul class="navbar-nav ms-auto">
-				<li class="nav-item mx-0 mx-lg-1">
-					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/">Page d'accueil</a>
-				</li>
-				<li class="nav-item mx-0 mx-lg-1">
-					<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/posts">Liste des Blog Posts</a>
-				</li>
-				{# <li class="nav-item mx-0 mx-lg-1">
-													<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#contact">Contact</a>
-												</li> #}
-				{% if app.user and app.user.is_admin %}
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Ajouter un Blog Post</a>
-					</li>
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Modifier un Blog Post</a>
-					</li>
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="#">Gérer les Blog Posts</a>
-					</li>
-				{% endif %}
+    <div class="container">
+        <a class="navbar-brand" href="/">PHP_blog</a>
+        <button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive"
+            aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <!-- Liens communs -->
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/">Page d'accueil</a>
+                </li>
+                <li class="nav-item mx-0 mx-lg-1">
+                    <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/posts">Liste des Blog Posts</a>
+                </li>
 
-				{% if app.user %}
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/logout">Déconnexion</a>
-					</li>
-				{% else %}
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/login">Connexion</a>
-					</li>
-					<li class="nav-item mx-0 mx-lg-1">
-						<a class="nav-link py-3 px-0 px-lg-3 rounded" href="/register">Enregistrement</a>
-					</li>
-				{% endif %}
-			</ul>
-		</div>
-	</div>
+                {% if app.user %}
+                    {% if app.user.is_admin %}
+                        <!-- Liens pour l'administrateur -->
+                        <li class="nav-item mx-0 mx-lg-1">
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/posts/create">Ajouter un Blog Post</a>
+                        </li>
+                        <li class="nav-item mx-0 mx-lg-1">
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/posts/manage">Gérer les Blog Posts</a>
+                        </li>
+                    {% endif %}
+                    <!-- Menu déroulant "Mon Profil" pour les utilisateurs connectés -->
+                    <li class="nav-item dropdown mx-0 mx-lg-1">
+                        <a class="nav-link dropdown-toggle py-3 px-0 px-lg-3 rounded" href="#" id="profileDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Mon Profil
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                            <li>
+                                <span class="dropdown-item-text small">
+                                    Connecté en tant que : {{ app.user.firstName }} {{ app.user.lastName }}
+                                </span>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/profile">Voir mon profil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/logout">Déconnexion</a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- Liens pour les visiteurs non connectés -->
+                    <li class="nav-item mx-0 mx-lg-1">
+                        <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/login">Connexion</a>
+                    </li>
+                    <li class="nav-item mx-0 mx-lg-1">
+                        <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/register">Enregistrement</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </nav>

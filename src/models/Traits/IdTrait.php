@@ -10,7 +10,7 @@ trait IdTrait
      *
      * @var integer
      */
-    private int $entityId;
+    private ?int $entityId = null;
 
 
     /**
@@ -18,8 +18,12 @@ trait IdTrait
      *
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
+        if ($this->entityId === null) {
+            throw new \Exception('L\'ID de l\'utilisateur n\'est pas défini.');
+        }
+
         return $this->entityId;
 
     }//end getId()
@@ -28,13 +32,13 @@ trait IdTrait
     /**
      * Sets the unique identifier of the entity.
      *
-     * @param int $entityId The unique identifier of the entity.
+     * @param int $id The unique identifier of the entity.
      *
      * @return void
      */
-    public function setId(int $entityId): void
+    public function setId(?int $id): void
     {
-        $this->id = $entityId;
+        $this->entityId = $id;
 
     }//end setId()
 

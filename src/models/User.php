@@ -83,7 +83,7 @@ class User
      */
     public function __construct(array $userData, ValidatorInterface $validator)
     {
-        $this->setId($userData['userId']);
+        $this->setId(($userData['userId'] ?? null));
         $this->lastName  = $userData['lastName'];
         $this->firstName = $userData['firstName'];
         $this->email     = $userData['email'];
@@ -240,6 +240,18 @@ class User
         $this->role = $role;
 
     }//end setRole()
+
+
+    /**
+     * Vérifie si l'utilisateur a le rôle d'administrateur.
+     *
+     * @return bool Retourne true si l'utilisateur est un administrateur, sinon false.
+     */
+    public function isAdmin(): bool
+    {
+        return strtolower($this->role) === 'admin';
+
+    }//end isAdmin()
 
 
     /**

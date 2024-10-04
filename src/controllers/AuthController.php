@@ -31,15 +31,15 @@ class AuthController extends BaseController
 
             // Récupération des données du formulaire et création de l'objet User.
             $userData = [
-                'userId'    => 0,
-            // Si c'est un nouvel utilisateur, tu peux mettre 0 ou null ici.
+                'userId'    => null,
+                // Pour un nouvel utilisateur, mettre null ici.
                 'lastName'  => $this->cleanInput($request->request->get('last_name')),
                 'firstName' => $this->cleanInput($request->request->get('first_name')),
                 'email'     => $this->cleanInput($request->request->get('email')),
                 'password'  => password_hash($request->request->get('password'), PASSWORD_BCRYPT),
                 'role'      => 'user',
                 'createdAt' => new DateTime(),
-            // Date actuelle pour la création.
+                // Date actuelle pour la création.
                 'updatedAt' => null,
                 'token'     => null,
                 'expireAt'  => null
@@ -85,8 +85,18 @@ class AuthController extends BaseController
             }
 
             // Enregistrer l'utilisateur.
-            $usersRepository->createUser($user);
-            return new Response('', 302, ['Location' => '/login']);
+            $user = $usersRepository->createUser($user);
+
+            // Vérifier que l'ID est bien défini.
+            if ($user->getId() === null) {
+                throw new \Exception('Impossible de récupérer l\'ID de l\'utilisateur après l\'enregistrement.');
+            }
+
+            // Connecter l'utilisateur en définissant les informations en session.
+            $this->sessionService->set('user_id', $user->getId());
+            $this->sessionService->set('user_role', $user->getRole());
+
+            return new Response('', 302, ['Location' => '/']);
         }//end if
 
         // Affichage du formulaire.
@@ -111,6 +121,8 @@ class AuthController extends BaseController
      */
     public function login(Request $request, UsersRepository $usersRepository): Response
     {
+        error_log('Méthode login appelée');
+
         if ($request->isMethod('POST') === true) {
             $submittedToken = $request->request->get('_csrf_token');
             if ($this->isCsrfTokenValid('login_form', $submittedToken) === false) {
@@ -124,10 +136,12 @@ class AuthController extends BaseController
             $user = $usersRepository->findByEmail($email);
 
             if ($user === null || password_verify($password, $user->getPassword()) === false) {
+                $errors = ['Identifiants incorrects'];
+
                 return $this->render(
                     'auth/login.html.twig',
                     [
-                        'error' => 'Identifiants incorrects',
+                        'errors' => $errors,
                         'csrf_token' => $submittedToken,
                     ]
                 );

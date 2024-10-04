@@ -74,10 +74,12 @@ class UsersRepository
      */
     public function findById(int $userId): ?User
     {
-        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id");
+        $stmt->execute(['id' => $userId]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (empty($result) === false) {
-            return $this->createUserFromResult($result[0]);
+        if ($result !== false) {
+            return $this->createUserFromResult($result);
         }
 
         return null;
@@ -94,12 +96,12 @@ class UsersRepository
      */
     public function findByEmail(string $email): ?User
     {
-        $results = $this->dbi->query("SELECT * FROM user WHERE email = :email", [':email' => $email]);
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        foreach ($results as $result) {
-            if ($result !== null) {
-                return $this->createUserFromResult($result);
-            }
+        if ($result !== false) {
+            return $this->createUserFromResult($result);
         }
 
         return null;
@@ -212,7 +214,7 @@ class UsersRepository
 
 
     /**
-     * Crée un utilisateur à partir d'une ligne de données.
+     * Transforme une ligne de données en un objet User après validation.
      *
      * @param array $row La ligne de données contenant les informations de l'utilisateur.
      *
@@ -267,6 +269,7 @@ class UsersRepository
      */
     private function buildUserFromRow(array $row): User
     {
+
         // Regrouper les données de l'utilisateur dans un tableau.
         $userData = [
             'userId'    => (int) $row['user_id'],

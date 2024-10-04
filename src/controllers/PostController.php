@@ -94,7 +94,7 @@ class PostController extends BaseController
 
             // Crée un nouvel objet Post avec les données nettoyées.
             $post = new Post(
-                id: 0,
+                postId: 0,
                 title: $title,
                 chapo: $chapo,
                 content: $postContent,
