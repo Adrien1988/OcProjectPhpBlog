@@ -73,11 +73,11 @@ class PostsRepository
     /**
      * Récupère un article par son identifiant.
      *
-     * @param int $postId L'identifiant de l'article à récupérer.
+     * @param int $id L'identifiant de l'article à récupérer.
      *
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
-    public function findById(int $postId): ?Post
+    public function findById(int $id): ?Post
     {
         // Prépare la requête SQL.
         $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
@@ -208,13 +208,13 @@ class PostsRepository
      * lie l'identifiant de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $postId L'identifiant de l'article à supprimer.
+     * @param int $id L'identifiant de l'article à supprimer.
      *
      * @return bool Retourne true si la suppression a réussi, sinon false.
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deletePost(int $postId): bool
+    public function deletePost(int $id): bool
     {
         // La requête SQL pour supprimer un article.
         $sql = "DELETE FROM post WHERE post_id = :post_id";
@@ -223,7 +223,7 @@ class PostsRepository
         $stmt = $this->dbi->prepare($sql);
 
         // Liaison de l'identifiant à la requête préparée.
-        $stmt->bindValue(':post_id', $postId);
+        $stmt->bindValue(':post_id', $id);
 
         // Exécution de la requête.
         if ($this->dbi->execute($stmt, []) === false) {
