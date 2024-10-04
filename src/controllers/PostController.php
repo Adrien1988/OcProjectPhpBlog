@@ -35,7 +35,8 @@ class PostController extends BaseController
                 'posts' => $posts,
             ]
         );
-    } //end listPosts()
+
+    }//end listPosts()
 
 
     /**
@@ -64,7 +65,8 @@ class PostController extends BaseController
                 'post' => $post,
             ]
         );
-    } //end detailPost()
+
+    }//end detailPost()
 
 
     /**
@@ -90,18 +92,18 @@ class PostController extends BaseController
             $chapo       = $this->cleanInput($request->request->get('chapo'));
             $postContent = $this->cleanInput($request->request->get('content'));
 
-            // Récupérer l'ID de l'auteur depuis la session
+            // Récupérer l'ID de l'auteur depuis la session.
             $authorId = $this->sessionService->get('user_id');
 
             // Crée un nouvel objet Post avec les données nettoyées.
             $postData = [
-                'postId'=> null,
-                'title'=> $title,
-                'chapo'=> $chapo,
-                'content'=> $postContent,
-                'author'=> $authorId,
-                'createdAt'=> new DateTime(),
-                'updatedAt'=> null,
+                'postId' => null,
+                'title' => $title,
+                'chapo' => $chapo,
+                'content' => $postContent,
+                'author' => $authorId,
+                'createdAt' => new DateTime(),
+                'updatedAt' => null,
             ];
 
             $post = new Post($postData, $this->validator);
@@ -113,13 +115,14 @@ class PostController extends BaseController
                 // Rediriger vers la page de listing des posts après la création.
                 return new Response('', 302, ['Location' => '/posts']);
             } catch (Exception $e) {
-                return new Response('Erreur lors de la création du post : ' . $e->getMessage(), 500);
+                return new Response('Erreur lors de la création du post : '.$e->getMessage(), 500);
             }
-        } //end if
+        }//end if
 
         $csrfToken = $this->generateCsrfToken('create_post_form');
         return $this->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
-    } //end createPost()
+
+    }//end createPost()
 
 
     /**
@@ -169,16 +172,17 @@ class PostController extends BaseController
             try {
                 // Sauvegarder les modifications via le repository.
                 $postsRepository->updatePost($post);
-                return new Response('', 302, ['Location' => '/posts/' . $postId]);
+                return new Response('', 302, ['Location' => '/posts/'.$postId]);
             } catch (Exception $e) {
-                return new Response('Erreur lors de la modification du post : ' . $e->getMessage(), 500);
+                return new Response('Erreur lors de la modification du post : '.$e->getMessage(), 500);
             }
-        } //end if
+        }//end if
 
         // Sinon, on affiche la page avec le formulaire pré-rempli.
         $csrfToken = $this->generateCsrfToken('edit_post_form');
         return $this->render('posts/edit.html.twig', ['post' => $post, 'csrf_token' => $csrfToken]);
-    } //end editPost()
+
+    }//end editPost()
 
 
     /**
@@ -215,9 +219,10 @@ class PostController extends BaseController
             // Rediriger vers la page de listing des posts après suppression.
             return new Response('', 302, ['Location' => '/posts']);
         } catch (Exception $e) {
-            return new Response('Erreur lors de la suppression du post : ' . $e->getMessage(), 500);
+            return new Response('Erreur lors de la suppression du post : '.$e->getMessage(), 500);
         }
-    } //end deletePost()
+
+    }//end deletePost()
 
 
 }//end class
