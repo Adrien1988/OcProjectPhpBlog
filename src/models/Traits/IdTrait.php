@@ -10,7 +10,7 @@ trait IdTrait
      *
      * @var integer
      */
-    private int $id;
+    private ?int $entityId = null;
 
 
     /**
@@ -18,9 +18,13 @@ trait IdTrait
      *
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
-        return $this->id;
+        if ($this->entityId === null) {
+            throw new \Exception('L\'ID de l\'utilisateur n\'est pas défini.');
+        }
+
+        return $this->entityId;
 
     }//end getId()
 
@@ -32,9 +36,9 @@ trait IdTrait
      *
      * @return void
      */
-    public function setId(int $id): void
+    public function setId(?int $id): void
     {
-        $this->id = $id;
+        $this->entityId = $id;
 
     }//end setId()
 
