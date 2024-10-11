@@ -26,7 +26,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 
-
 /**
  * Charge la configuration de l'application.
  *
@@ -144,9 +143,9 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
-    // Initialiser le gestionnaire de session Symfony
+    // Initialiser le gestionnaire de session Symfony.
     $sessionStorage = new NativeSessionStorage();
-    $session = new Session($sessionStorage);
+    $session        = new Session($sessionStorage);
     $session->start();
 
     // Créez une instance de SessionService avec la session Symfony.
