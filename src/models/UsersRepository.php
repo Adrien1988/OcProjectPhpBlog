@@ -137,7 +137,8 @@ class UsersRepository
             throw new Exception('Erreur de validation : '.implode(', ', $messages));
         }
 
-        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
+        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, password_reset_token, password_reset_expires_at)
+        VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :password_reset_token, :password_reset_expires_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
 
@@ -167,9 +168,18 @@ class UsersRepository
      */
     public function updateUser(User $user): bool
     {
-        $sql = "UPDATE user SET last_name = :last_name, first_name = :first_name, email = :email, 
-         password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
-         token = :token, expire_at = :expire_at WHERE user_id = :user_id";
+        $sql = "UPDATE user SET 
+        last_name = :last_name, 
+        first_name = :first_name, 
+        email = :email, 
+        password = :password, 
+        password_reset_token = :password_reset_token, 
+        password_reset_expires_at = :password_reset_expires_at, 
+        role = :role, 
+        updated_at = :updated_at, 
+        token = :token, 
+        expire_at = :expire_at 
+        WHERE user_id = :user_id";
 
         $stmt = $this->prepareAndBind($sql, $user);
         $stmt->bindValue(':user_id', $user->getId());
@@ -282,6 +292,8 @@ class UsersRepository
             'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
             'token'     => ($row['token'] ?? null),
             'expireAt'  => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+            'passwordResetToken'    => ($row['password_reset_token'] ?? null),
+            'passwordResetExpiresAt' => (isset($row['password_reset_expires_at']) === true && $row['password_reset_expires_at'] !== null) ? new DateTime($row['password_reset_expires_at']) : null,
         ];
 
         // Créer l'objet User avec le tableau de données et le validateur.
@@ -307,6 +319,8 @@ class UsersRepository
         $stmt->bindValue(':first_name', $user->getFirstName());
         $stmt->bindValue(':email', $user->getEmail());
         $stmt->bindValue(':password', $user->getPassword());
+        $stmt->bindValue(':password_reset_token', $user->getPasswordResetToken());
+        $stmt->bindValue(':password_reset_expires_at', $user->getPasswordResetExpiresAt() === true ? $user->getPasswordResetExpiresAt()->format('Y-m-d H:i:s') : null);
         $stmt->bindValue(':role', $user->getRole());
         $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
         $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
@@ -320,6 +334,30 @@ class UsersRepository
         return $stmt;
 
     }//end prepareAndBind()
+
+
+    /**
+     * Récupère un utilisateur par son token de réinitialisation de mot de passe.
+     *
+     * @param string $token Le token de réinitialisation de mot de passe.
+     *
+     * @return User|null Retourne l'objet User si trouvé, sinon null.
+     */
+    public function findByPasswordResetToken(string $token): ?User
+    {
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE password_reset_token = :token");
+        $stmt->bindValue(':token', $token);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return null;
+        }
+
+        return $this->createUserFromResult($result);
+
+    }//end findByPasswordResetToken()
 
 
 }//end class

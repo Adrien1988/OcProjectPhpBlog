@@ -1,7 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion
-{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block content %}
 	<section class="page-section bg-light mt-5" id="login">
@@ -27,6 +26,13 @@
 				</div>
 			{% endif %}
 
+			<!-- Affichage du message de succès -->
+			{% if successMessage %}
+				<div class="alert alert-success">
+					{{ successMessage }}
+				</div>
+			{% endif %}
+
 			<div class="row justify-content-center">
 				<div class="col-lg-8 col-xl-7">
 					<form action="/login" method="POST" class="mt-4" novalidate>
@@ -46,6 +52,11 @@
 							<button type="submit" class="btn btn-primary btn-xl">Se connecter</button>
 						</div>
 					</form>
+
+					<!-- Ajout du lien "Mot de passe oublié ?" -->
+					<p class="mt-3 text-center">
+						<a href="/password-reset">Mot de passe oublié ?</a>
+					</p>
 				</div>
 			</div>
 		</div>

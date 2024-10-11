@@ -74,6 +74,20 @@ class User
      */
     private ?DateTime $expireAt;
 
+    /**
+     * The password reset token.
+     *
+     * @var string|null
+     */
+    private ?string $passwordResetToken = null;
+
+    /**
+     * The expiration date and time of the password reset token.
+     *
+     * @var DateTime|null
+     */
+    private ?DateTime $passwordResetExpiresAt = null;
+
 
     /**
      * Constructeur pour la classe User.
@@ -91,8 +105,10 @@ class User
         $this->role      = $userData['role'];
         $this->setCreatedAt($userData['createdAt']);
         $this->setUpdatedAt((isset($userData['updatedAt']) === true) ? $userData['updatedAt'] : null);
-        $this->token     = ($userData['token'] ?? null);
-        $this->expireAt  = ($userData['expireAt'] ?? null);
+        $this->token    = ($userData['token'] ?? null);
+        $this->expireAt = ($userData['expireAt'] ?? null);
+        $this->passwordResetToken     = ($userData['passwordResetToken'] ?? null);
+        $this->passwordResetExpiresAt = ($userData['passwordResetExpiresAt'] ?? null);
         $this->validator = $validator;
 
     }//end __construct()
@@ -307,6 +323,58 @@ class User
 
 
     /**
+     * Gets the password reset token.
+     *
+     * @return string|null
+     */
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+
+    }//end getPasswordResetToken()
+
+
+    /**
+     * Sets the password reset token.
+     *
+     * @param string|null $token The password reset token.
+     *
+     * @return void
+     */
+    public function setPasswordResetToken(?string $token): void
+    {
+        $this->passwordResetToken = $token;
+
+    }//end setPasswordResetToken()
+
+
+    /**
+     * Gets the password reset expiration date.
+     *
+     * @return DateTime|null
+     */
+    public function getPasswordResetExpiresAt(): ?DateTime
+    {
+        return $this->passwordResetExpiresAt;
+
+    }//end getPasswordResetExpiresAt()
+
+
+    /**
+     * Sets the password reset expiration date.
+     *
+     * @param DateTime|null $expiresAt The expiration date.
+     *
+     * @return void
+     */
+    public function setPasswordResetExpiresAt(?DateTime $expiresAt): void
+    {
+        $this->passwordResetExpiresAt = $expiresAt;
+
+    }//end setPasswordResetExpiresAt()
+
+
+    /**
      * Validates the user entity.
      *
      * @return ConstraintViolationListInterface|null Returns the list of violations or null if there are none.
@@ -320,6 +388,8 @@ class User
                 'email'      => [new Assert\NotBlank(), new Assert\Email()],
                 'password'   => [new Assert\NotBlank(), new Assert\Length(['min' => 8])],
                 'role'       => [new Assert\NotBlank()],
+                'passwordResetToken'      => new Assert\Optional([new Assert\Type('string')]),
+                'passwordResetExpiresAt'  => new Assert\Optional([new Assert\DateTime()]),
             ]
         );
 
@@ -329,6 +399,8 @@ class User
             'email'     => $this->getEmail(),
             'password'  => $this->getPassword(),
             'role'      => $this->getRole(),
+            'passwordResetToken'      => $this->getPasswordResetToken(),
+            'passwordResetExpiresAt'  => $this->getPasswordResetExpiresAt() === true ? $this->getPasswordResetExpiresAt()->format('Y-m-d H:i:s') : null,
         ];
 
         return $this->validator->validate($data, $constraints);

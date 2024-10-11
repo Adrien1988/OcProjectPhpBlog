@@ -15,6 +15,7 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
+use App\Services\EmailService;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
@@ -143,6 +144,9 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
+    // Créez une instance de EmaiService.
+    $emailService = new EmailService($envService);
+
     // Initialiser le gestionnaire de session Symfony.
     $sessionStorage = new NativeSessionStorage();
     $session        = new Session($sessionStorage);
@@ -195,7 +199,7 @@ try {
     list($class, $method) = explode('::', $controller);
 
     // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $validator);
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $emailService, $validator);
 
 
     // Supprimer les clés réservées de paramètres.
@@ -219,7 +223,7 @@ try {
     $allowedMethods = [
         'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
         'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
-        'App\Controllers\AuthController' => ['register', 'login', 'logout'],
+        'App\Controllers\AuthController' => ['register', 'login', 'logout', 'passwordResetRequest', 'passwordReset'],
         // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
     ];
 

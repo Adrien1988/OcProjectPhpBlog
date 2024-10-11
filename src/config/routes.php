@@ -31,7 +31,8 @@ function createRoutes(): RouteCollection
     $routes->add('register', new Route('/register', ['_controller' => 'App\Controllers\AuthController::register'], [], [], '', [], ['GET', 'POST']));
     $routes->add('login', new Route('/login', ['_controller' => 'App\Controllers\AuthController::login'], [], [], '', [], ['GET', 'POST']));
     $routes->add('logout', new Route('/logout', ['_controller' => 'App\Controllers\AuthController::logout'], [], [], '', [], ['GET']));
-
+    $routes->add('password_reset_request', new Route('/password-reset', ['_controller' => 'App\Controllers\AuthController::passwordResetRequest',]));
+    $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset',]));
     return $routes;
 
 }//end createRoutes()

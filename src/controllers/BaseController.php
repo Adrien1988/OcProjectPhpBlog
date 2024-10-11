@@ -5,6 +5,7 @@ namespace App\Controllers;
 use Twig\Environment;
 use App\Services\EnvService;
 use App\Services\CsrfService;
+use App\Services\EmailService;
 use App\Services\SessionService;
 use App\Services\SecurityService;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +53,13 @@ class BaseController
     protected SessionService $sessionService;
 
     /**
+     * Service pour la gestion des envois de mail.
+     *
+     * @var EmailService
+     */
+    protected EmailService $emailService;
+
+    /**
      * Le validateur Symfony pour la validation des entités.
      *
      * @var ValidatorInterface
@@ -69,15 +77,17 @@ class BaseController
      * @param EnvService         $envService      Instance du service de gestion des variables d'environnement.
      * @param CsrfService        $csrfService     Service pour la gestion des tokens CSRF.
      * @param SessionService     $sessionService  L'instance de SessionService pour la gestion des sessions.
+     * @param EmailService       $emailService    Service pour l'envoi de mail.
      * @param ValidatorInterface $validator       Le validateur Symfony pour la validation des entités.
      */
-    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService, ValidatorInterface $validator)
+    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService, EmailService $emailService, ValidatorInterface $validator)
     {
         $this->twig            = $twig;
         $this->securityService = $securityService;
         $this->envService      = $envService;
         $this->csrfService     = $csrfService;
         $this->sessionService  = $sessionService;
+        $this->emailService    = $emailService;
         $this->validator       = $validator;
 
         // Démarre la session si elle n'est pas déjà démarrée.
