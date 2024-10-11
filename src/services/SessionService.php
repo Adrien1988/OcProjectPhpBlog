@@ -2,25 +2,27 @@
 
 namespace App\Services;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 class SessionService
 {
 
     /**
      * Le gestionnaire de stockage pour les données de session.
      *
-     * @var SessionStorage
+     * @var SessionInterface
      */
-    private SessionStorage $storage;
+    private SessionInterface $session;
 
 
     /**
      * Constructeur de la classe SessionService.
      *
-     * @param SessionStorage $storage Le gestionnaire de stockage des sessions.
+     * @param SessionInterface $session Le gestionnaire de session Symfony.
      */
-    public function __construct(SessionStorage $storage)
+    public function __construct(SessionInterface $session)
     {
-        $this->storage = $storage;
+        $this->session = $session;
 
     }//end __construct()
 
@@ -32,8 +34,8 @@ class SessionService
      */
     public function start(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        if ($this->session->isStarted() === false) {
+            $this->session->start();
         }
 
     }//end start()
@@ -51,7 +53,7 @@ class SessionService
     {
         $this->start();
         // Utilisation de la méthode has pour vérifier la présence de la clé.
-        return $this->storage->has($key) === true ? $this->storage->get($key) : $default;
+        return $this->session->get($key, $default);
 
     }//end get()
 
@@ -67,7 +69,7 @@ class SessionService
     public function set(string $key, $value): void
     {
         $this->start();
-        $this->storage->set($key, $value);
+        $this->session->set($key, $value);
 
     }//end set()
 
@@ -82,7 +84,7 @@ class SessionService
     public function remove(string $key): void
     {
         $this->start();
-        $this->storage->remove($key);
+        $this->session->remove($key);
 
     }//end remove()
 
@@ -94,9 +96,8 @@ class SessionService
      */
     public function destroy(): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_unset();
-            session_destroy();
+        if ($this->session->isStarted() === true) {
+            $this->session->invalidate();
         }
 
     }//end destroy()
@@ -112,7 +113,7 @@ class SessionService
     public function has(string $key): bool
     {
         $this->start();
-        return $this->storage->has($key);
+        return $this->session->has($key);
 
     }//end has()
 
@@ -124,7 +125,7 @@ class SessionService
      */
     public function isStarted(): bool
     {
-        return session_status() === PHP_SESSION_ACTIVE;
+        return $this->session->isStarted();
 
     }//end isStarted()
 

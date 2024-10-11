@@ -15,7 +15,6 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
-use App\Services\SessionStorage;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
@@ -23,6 +22,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+
 
 
 /**
@@ -142,11 +144,13 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
-    // Créez une instance de SessionStorage.
-    $sessionStorage = new SessionStorage();
+    // Initialiser le gestionnaire de session Symfony
+    $sessionStorage = new NativeSessionStorage();
+    $session = new Session($sessionStorage);
+    $session->start();
 
-    // Créez une instance de SessionService.
-    $sessionService = new SessionService($sessionStorage);
+    // Créez une instance de SessionService avec la session Symfony.
+    $sessionService = new SessionService($session);
 
     // Récupérer l'utilisateur actuellement connecté.
     $currentUser = null;
