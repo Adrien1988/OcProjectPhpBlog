@@ -5,6 +5,25 @@ namespace App\Services;
 class SessionService
 {
 
+    /**
+     * Le gestionnaire de stockage pour les données de session.
+     *
+     * @var SessionStorage
+     */
+    private SessionStorage $storage;
+
+
+    /**
+     * Constructeur de la classe SessionService.
+     *
+     * @param SessionStorage $storage Le gestionnaire de stockage des sessions.
+     */
+    public function __construct(SessionStorage $storage)
+    {
+        $this->storage = $storage;
+
+    }//end __construct()
+
 
     /**
      * Démarre la session si elle n'est pas déjà démarrée.
@@ -32,7 +51,7 @@ class SessionService
     {
         $this->start();
         // Utilisation de la méthode has pour vérifier la présence de la clé.
-        return $this->has($key) === true ? $_SESSION[$key] : $default;
+        return $this->storage->has($key) === true ? $this->storage->get($key) : $default;
 
     }//end get()
 
@@ -48,7 +67,7 @@ class SessionService
     public function set(string $key, $value): void
     {
         $this->start();
-        $_SESSION[$key] = $value;
+        $this->storage->set($key, $value);
 
     }//end set()
 
@@ -63,7 +82,7 @@ class SessionService
     public function remove(string $key): void
     {
         $this->start();
-        unset($_SESSION[$key]);
+        $this->storage->remove($key);
 
     }//end remove()
 
@@ -93,7 +112,7 @@ class SessionService
     public function has(string $key): bool
     {
         $this->start();
-        return array_key_exists($key, $_SESSION);
+        return $this->storage->has($key);
 
     }//end has()
 

@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Traits\IdTrait;
-use App\Models\Traits\TimestampableTrait;
-use App\Models\traits\AuthTrait;
 use DateTime;
 use App\Models\Traits\IdTrait;
 use App\Models\traits\AuthTrait;
