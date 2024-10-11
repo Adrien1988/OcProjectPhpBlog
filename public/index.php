@@ -223,7 +223,7 @@ try {
     $allowedMethods = [
         'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
         'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
-        'App\Controllers\AuthController' => ['register', 'login', 'logout', 'passwordResetRequest', 'passwordReset'],
+        'App\Controllers\AuthController' => ['register', 'login', 'logout', 'passwordResetRequest', 'passwordReset', 'passwordResetRequestSuccess'],
         // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
     ];
 

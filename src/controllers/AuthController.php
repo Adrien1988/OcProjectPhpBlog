@@ -211,13 +211,46 @@ class AuthController extends BaseController
             }
 
             // Toujours afficher un message de succès pour éviter de révéler si l'e-mail existe.
-            return new Response('Si un compte est associé à cette adresse e-mail, un message a été envoyé avec les instructions pour réinitialiser votre mot de passe :\n\n{$resetLink}\n\nCe lien expirera dans 1 heure.');
+            // Stocker le message de succès dans la session.
+            $this->sessionService->set('success_message', 'Si un compte est associé à cette adresse e-mail, un message a été envoyé avec les instructions pour réinitialiser votre mot de passe. Ce lien expirera dans 1 heure.');
+
+            // Rediriger vers la page de succès.
+            return new Response('', 302, ['Location' => '/password-reset-request/success']);
         }
 
         // Afficher le formulaire de demande de réinitialisation.
-        return $this->render('auth/password_reset_request.html.twig');
+        return $this->render(
+            'auth/password_reset_request.html.twig',
+            [
+                'csrf_token' => $this->generateCsrfToken('password_reset_request_form'),
+            ]
+        );
 
     }//end passwordResetRequest()
+
+
+    /**
+     * Affiche la page de succès après une demande de réinitialisation de mot de passe.
+     *
+     * @return Response La réponse HTTP.
+     */
+    public function passwordResetRequestSuccess(): Response
+    {
+        // Récupérer le message de succès depuis la session.
+        $successMessage = $this->sessionService->get('success_message', null);
+
+        // Supprimer le message de la session pour qu'il ne s'affiche qu'une seule fois.
+        $this->sessionService->remove('success_message');
+
+        // Afficher la vue de succès.
+        return $this->render(
+            'auth/password_reset_request_success.html.twig',
+            [
+                'message' => $successMessage,
+            ]
+        );
+
+    }//end passwordResetRequestSuccess()
 
 
     /**
@@ -244,9 +277,17 @@ class AuthController extends BaseController
         // Générer le lien de réinitialisation.
         $resetLink = $this->generateResetLink($token);
 
+        // Ajouter une instruction pour enregistrer ou afficher le lien.
+        error_log("Lien de réinitialisation généré : {$resetLink}");
+
         // Envoyer l'e-mail (Vous devrez implémenter le service d'envoi d'e-mails).
         $subject = 'Réinitialisation de votre mot de passe';
-        $body    = "Bonjour,\n\nCliquez sur le lien suivant pour réinitialiser votre mot de passe :\n\n{$resetLink}\n\nCe lien expirera dans 1 heure.";
+        $body    = $this->renderTemplate(
+            'auth/password_reset_email.html.twig',
+            [
+                'reset_link' => $resetLink,
+            ]
+        );
 
         // Utilisez votre service d'envoi d'e-mails.
         $this->emailService->sendEmail($user->getEmail(), $subject, $body);
@@ -276,9 +317,26 @@ class AuthController extends BaseController
      */
     private function getBaseUrl(): string
     {
-        $scheme = isset($_SERVER['HTTPS']) === true && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
-        $host   = ($_SERVER['HTTP_HOST'] ?? 'localhost');
-        return "{$scheme}://{$host}";
+        $scheme = 'http';
+
+        if (isset($_SERVER['HTTPS']) === true && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === '1')) {
+            $scheme = 'https';
+        } else if (isset($_SERVER['SERVER_PORT']) === true && $_SERVER['SERVER_PORT'] === '443') {
+            $scheme = 'https';
+        } else if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) === true && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+            $scheme = 'https';
+        } else if (isset($_SERVER['REQUEST_SCHEME']) === true && strtolower($_SERVER['REQUEST_SCHEME']) === 'https') {
+            $scheme = 'https';
+        }
+
+        $host = 'localhost';
+        if (isset($_SERVER['HTTP_HOST']) === true) {
+            $host = $_SERVER['HTTP_HOST'];
+        } else if (isset($_SERVER['SERVER_NAME']) === true) {
+            $host = $_SERVER['SERVER_NAME'];
+        }
+
+        return $scheme.'://'.$host;
 
     }//end getBaseUrl()
 
@@ -308,29 +366,50 @@ class AuthController extends BaseController
                 return new Response('Invalid CSRF token.', 403);
             }
 
-            $newPassword     = $request->request->get('password');
-            $confirmPassword = $request->request->get('confirm_password');
+            $newPassword     = trim($request->request->get('password'));
+            $confirmPassword = trim($request->request->get('confirm_password'));
 
-            if ($newPassword !== $confirmPassword) {
-                $error = 'Les mots de passe ne correspondent pas.';
-                return $this->render('auth/password_reset.html.twig', ['error' => $error]);
+            $errors = [];
+
+            // Validation des mots de passe.
+            if (empty($newPassword) === true || empty($confirmPassword) === true) {
+                $errors[] = 'Tous les champs sont obligatoires.';
+            } else if ($newPassword !== $confirmPassword) {
+                $errors[] = 'Les mots de passe ne correspondent pas.';
+            } else if (strlen($newPassword) < 6) {
+                // Vous pouvez ajuster la longueur minimale.
+                $errors[] = 'Le mot de passe doit contenir au moins 6 caractères.';
             }
 
-            // Mettre à jour le mot de passe.
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-            $user->setPassword($hashedPassword);
+            if (empty($errors) === true) {
+                // Hacher le nouveau mot de passe.
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-            // Invalider le token.
-            $user->setPasswordResetToken(null);
-            $user->setPasswordResetExpiresAt(null);
+                // Mettre à jour le mot de passe et supprimer le token.
+                $user->setPassword($hashedPassword);
+                $user->setPasswordResetToken(null);
+                $user->setPasswordResetExpiresAt(null);
+                $user->setUpdatedAt(new \DateTime());
 
-            $usersRepository->updateUser($user);
+                // Mettre à jour l'utilisateur dans la base de données.
+                $usersRepository->updateUser($user);
 
-             // Stocker le message de succès dans la session.
-            $this->sessionService->set('success_message', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');
+                // Stocker le message de succès dans la session.
+                $this->sessionService->set('success_message', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');
 
-            // Rediriger vers la page de connexion.
-            return new Response('', 302, ['Location' => '/login']);
+                // Rediriger vers la page de connexion.
+                return new Response('', 302, ['Location' => '/login']);
+            }
+
+            // Rendre le formulaire avec les erreurs.
+            return $this->render(
+                'auth/password_reset.html.twig',
+                [
+                    'errors' => $errors,
+                    'csrf_token' => $this->generateCsrfToken('password_reset_form'),
+                    'token' => $token,
+                ]
+            );
         }//end if
 
         // Afficher le formulaire de réinitialisation.

@@ -116,6 +116,22 @@ class BaseController
 
 
     /**
+     * Rends un template Twig en une chaîne de caractères.
+     *
+     * @param string $template Le chemin du template Twig, relatif au dossier des templates.
+     * @param array  $data     Les données à passer au
+     *                         template.
+     *
+     * @return string Le contenu rendu du template.
+     */
+    protected function renderTemplate(string $template, array $data=[]): string
+    {
+        return $this->twig->render($template, $data);
+
+    }//end renderTemplate()
+
+
+    /**
      * Générer un token CSRF.
      *
      * @param string $tokenId L'identifiant du token.

@@ -315,21 +315,48 @@ class UsersRepository
     private function prepareAndBind(string $sql, User $user): PDOStatement
     {
         $stmt = $this->dbi->prepare($sql);
-        $stmt->bindValue(':last_name', $user->getLastName());
-        $stmt->bindValue(':first_name', $user->getFirstName());
-        $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());
-        $stmt->bindValue(':password_reset_token', $user->getPasswordResetToken());
-        $stmt->bindValue(':password_reset_expires_at', $user->getPasswordResetExpiresAt() === true ? $user->getPasswordResetExpiresAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':role', $user->getRole());
-        $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
 
-        // Gérer le token nullable.
-        $stmt->bindValue(':token', $user->getToken() !== null ? $user->getToken() : null, \PDO::PARAM_NULL);
+        // Extraire les placeholders de la requête SQL.
+        preg_match_all('/:\w+/', $sql, $matches);
+        $placeholders = $matches[0];
 
-        // Gérer expireAt nullable.
-        $stmt->bindValue(':expire_at', $user->getExpireAt() !== null ? $user->getExpireAt()->format('Y-m-d H:i:s') : null, \PDO::PARAM_NULL);
+        // Définir le mapping des paramètres aux méthodes.
+        $paramMethodMap = [
+            'user_id' => 'getId',
+        // Ajoutez d'autres mappings si nécessaire.
+        ];
+
+        // Parcourir les placeholders et lier les valeurs correspondantes.
+        foreach ($placeholders as $placeholder) {
+            // Retirer les deux-points pour obtenir le nom du paramètre.
+            $paramName = substr($placeholder, 1);
+
+            // Vérifier si le paramètre a un mapping spécifique.
+            if (isset($paramMethodMap[$paramName]) === true) {
+                $methodName = $paramMethodMap[$paramName];
+            } else {
+                // Convertir le nom du paramètre en nom de méthode.
+                $methodName = 'get'.str_replace('_', '', ucwords($paramName, '_'));
+            }
+
+            if (method_exists($user, $methodName) === true) {
+                $value = $user->$methodName();
+
+                // Gérer les dates (DateTime).
+                if ($value instanceof \DateTime) {
+                    $value = $value->format('Y-m-d H:i:s');
+                }
+
+                // Gérer les valeurs nulles.
+                if ($value === null) {
+                    $stmt->bindValue($placeholder, null, \PDO::PARAM_NULL);
+                } else {
+                    $stmt->bindValue($placeholder, $value);
+                }
+            } else {
+                throw new Exception("Méthode {$methodName} non définie dans la classe User.");
+            }
+        }//end foreach
 
         return $stmt;
 

@@ -46,6 +46,10 @@ class EmailService
         $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $this->mailer->Port       = $this->envService->getEnv('SMTP_PORT', 587);
 
+        // Définir l'encodage.
+        $this->mailer->CharSet  = 'UTF-8';
+        $this->mailer->Encoding = 'base64';
+
          // Définir l'expéditeur par défaut.
          $defaultFromEmail = $this->envService->getEnv('SMTP_FROM_EMAIL', $this->mailer->Username);
          $defaultFromName  = $this->envService->getEnv('SMTP_FROM_NAME', 'Votre Application');
