@@ -2,26 +2,28 @@
 
 namespace App\Models\Traits;
 
+use Symfony\Component\Config\Definition\Exception\Exception;
+
 trait IdTrait
 {
 
     /**
-     * The unique identifier of the entity.
+     * L'identifiant unique de l'entité.
      *
-     * @var integer
+     * @var integer|null
      */
     private ?int $entityId = null;
 
 
     /**
-     * Gets the unique identifier of the entity.
+     * Obtient l'identifiant unique de l'entité.
      *
-     * @return int
+     * @return int|null
      */
     public function getId(): ?int
     {
         if ($this->entityId === null) {
-            throw new \Exception('L\'ID de l\'utilisateur n\'est pas défini.');
+            throw new Exception('L\'ID de l\'entité n\'est pas défini.');
         }
 
         return $this->entityId;
@@ -30,15 +32,15 @@ trait IdTrait
 
 
     /**
-     * Sets the unique identifier of the entity.
+     * Définit l'identifiant unique de l'entité.
      *
-     * @param int $id The unique identifier of the entity.
+     * @param int|null $entityId L'identifiant unique de l'entité.
      *
      * @return void
      */
-    public function setId(?int $id): void
+    public function setId(?int $entityId): void
     {
-        $this->entityId = $id;
+        $this->entityId = $entityId;
 
     }//end setId()
 

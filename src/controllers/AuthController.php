@@ -7,6 +7,7 @@ use App\Models\User;
 use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class AuthController extends BaseController
 {
@@ -89,7 +90,7 @@ class AuthController extends BaseController
 
             // Vérifier que l'ID est bien défini.
             if ($user->getId() === null) {
-                throw new \Exception('Impossible de récupérer l\'ID de l\'utilisateur après l\'enregistrement.');
+                throw new Exception('Impossible de récupérer l\'ID de l\'utilisateur après l\'enregistrement.');
             }
 
             // Connecter l'utilisateur en définissant les informations en session.
