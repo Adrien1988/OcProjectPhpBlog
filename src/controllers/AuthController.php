@@ -7,6 +7,7 @@ use App\Models\User;
 use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 class AuthController extends BaseController
@@ -304,41 +305,10 @@ class AuthController extends BaseController
      */
     private function generateResetLink(string $token): string
     {
-        $baseUrl = $this->getBaseUrl();
-        return "{$baseUrl}/password-reset/{$token}";
+        // Passer le troisième argument à UrlGenerator::ABSOLUTE_URL pour obtenir une URL complète.
+        return $this->urlGeneratorService->generateUrl('password_reset', ['token' => $token], UrlGenerator::ABSOLUTE_URL);
 
     }//end generateResetLink()
-
-
-    /**
-     * Obtient l'URL de base de l'application.
-     *
-     * @return string L'URL de base.
-     */
-    private function getBaseUrl(): string
-    {
-        $scheme = 'http';
-
-        if (isset($_SERVER['HTTPS']) === true && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === '1')) {
-            $scheme = 'https';
-        } else if (isset($_SERVER['SERVER_PORT']) === true && $_SERVER['SERVER_PORT'] === '443') {
-            $scheme = 'https';
-        } else if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) === true && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
-            $scheme = 'https';
-        } else if (isset($_SERVER['REQUEST_SCHEME']) === true && strtolower($_SERVER['REQUEST_SCHEME']) === 'https') {
-            $scheme = 'https';
-        }
-
-        $host = 'localhost';
-        if (isset($_SERVER['HTTP_HOST']) === true) {
-            $host = $_SERVER['HTTP_HOST'];
-        } else if (isset($_SERVER['SERVER_NAME']) === true) {
-            $host = $_SERVER['SERVER_NAME'];
-        }
-
-        return $scheme.'://'.$host;
-
-    }//end getBaseUrl()
 
 
     /**

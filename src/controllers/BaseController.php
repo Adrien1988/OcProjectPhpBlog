@@ -8,6 +8,7 @@ use App\Services\CsrfService;
 use App\Services\EmailService;
 use App\Services\SessionService;
 use App\Services\SecurityService;
+use App\Services\UrlGeneratorService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -66,22 +67,39 @@ class BaseController
      */
     protected ValidatorInterface $validator;
 
+    /**
+     * Service de génération d'URL.
+     *
+     * @var UrlGeneratorService
+     */
+    protected UrlGeneratorService $urlGeneratorService;
+
 
     /**
      * Constructeur de la classe.
      * Initialise l'instance Twig pour le rendu des templates.
      *
-     * @param Environment        $twig            Instance de l'environnement Twig.
-     * @param SecurityService    $securityService Le service de sécurité pour la protection contre les attaques
-     *                                            XSS.
-     * @param EnvService         $envService      Instance du service de gestion des variables d'environnement.
-     * @param CsrfService        $csrfService     Service pour la gestion des tokens CSRF.
-     * @param SessionService     $sessionService  L'instance de SessionService pour la gestion des sessions.
-     * @param EmailService       $emailService    Service pour l'envoi de mail.
-     * @param ValidatorInterface $validator       Le validateur Symfony pour la validation des entités.
+     * @param Environment         $twig                Instance de l'environnement Twig.
+     * @param SecurityService     $securityService     Le service de sécurité pour la protection contre les
+     *                                                 attaques XSS.
+     * @param EnvService          $envService          Instance du service de gestion des variables d'environnement.
+     * @param CsrfService         $csrfService         Service pour la gestion des tokens CSRF.
+     * @param SessionService      $sessionService      L'instance de SessionService pour la gestion des sessions.
+     * @param EmailService        $emailService        Service pour l'envoi de mail.
+     * @param ValidatorInterface  $validator           Le validateur Symfony pour la validation des
+     *                                                 entités.
+     * @param UrlGeneratorService $urlGeneratorService Service pour générer les URLs de base.
      */
-    public function __construct(Environment $twig, SecurityService $securityService, EnvService $envService, CsrfService $csrfService, SessionService $sessionService, EmailService $emailService, ValidatorInterface $validator)
-    {
+    public function __construct(
+        Environment $twig,
+        SecurityService $securityService,
+        EnvService $envService,
+        CsrfService $csrfService,
+        SessionService $sessionService,
+        EmailService $emailService,
+        ValidatorInterface $validator,
+        UrlGeneratorService $urlGeneratorService
+    ) {
         $this->twig            = $twig;
         $this->securityService = $securityService;
         $this->envService      = $envService;
@@ -89,8 +107,8 @@ class BaseController
         $this->sessionService  = $sessionService;
         $this->emailService    = $emailService;
         $this->validator       = $validator;
+        $this->urlGeneratorService = $urlGeneratorService;
 
-        // Démarre la session si elle n'est pas déjà démarrée.
         if ($this->sessionService->isStarted() === false) {
             $this->sessionService->start();
         }

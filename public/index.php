@@ -8,6 +8,7 @@ use Models\PostsRepository;
 use Models\UsersRepository;
 use App\Services\EnvService;
 use App\Services\CsrfService;
+use App\Services\EmailService;
 use Models\CommentsRepository;
 use App\Services\SessionService;
 use App\Core\DependencyContainer;
@@ -15,15 +16,15 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
-use App\Services\EmailService;
+use App\Services\UrlGeneratorService;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 
@@ -183,6 +184,9 @@ try {
     $matcher   = new UrlMatcher($routes, $context);
     $generator = new UrlGenerator($routes, $context);
 
+    // Créez une instance du UrlGeneratorService.
+    $urlGeneratorService = new UrlGeneratorService($generator);
+
     // Try {
     // Matcher la requête à une route.
     // $parameters = $matcher->match($request->getPathInfo());
@@ -199,7 +203,7 @@ try {
     list($class, $method) = explode('::', $controller);
 
     // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $emailService, $validator);
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $emailService, $validator, $urlGeneratorService);
 
 
     // Supprimer les clés réservées de paramètres.
