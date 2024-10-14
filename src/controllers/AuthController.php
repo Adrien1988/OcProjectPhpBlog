@@ -352,46 +352,25 @@ class AuthController extends BaseController
      */
     public function passwordReset(Request $request, UsersRepository $usersRepository, string $token): Response
     {
-        // Rechercher l'utilisateur avec ce token.
         $user = $usersRepository->findByPasswordResetToken($token);
 
-        if ($user === null || $user->getPasswordResetExpiresAt() < new DateTime()) {
-            // Token invalide ou expiré.
+        if ($this->isTokenValidForPasswordReset($user) === false) {
             return $this->render('auth/password_reset_invalid.html.twig');
         }
 
-        if ($request->isMethod('POST') === true) {
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->isCsrfTokenValid('password_reset_form', $submittedToken) === false) {
-                return new Response('Invalid CSRF token.', 403);
-            }
-
+        if ($request->isMethod('POST') === true && $this->isCsrfTokenValidForForm($request, 'password_reset_form') === true) {
             $newPassword     = trim($request->request->get('password'));
             $confirmPassword = trim($request->request->get('confirm_password'));
 
-            $errors = [];
-
-            // Validation des mots de passe.
-            if (empty($newPassword) === true || empty($confirmPassword) === true) {
-                $errors[] = 'Tous les champs sont obligatoires.';
-            } else if ($newPassword !== $confirmPassword) {
-                $errors[] = 'Les mots de passe ne correspondent pas.';
-            } else if (strlen($newPassword) < 6) {
-                // Vous pouvez ajuster la longueur minimale.
-                $errors[] = 'Le mot de passe doit contenir au moins 6 caractères.';
-            }
+            $errors = $this->validatePasswordResetInput($newPassword, $confirmPassword);
 
             if (empty($errors) === true) {
-                // Hacher le nouveau mot de passe.
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-                // Mettre à jour le mot de passe et supprimer le token.
-                $user->setPassword($hashedPassword);
+                // Hacher le nouveau mot de passe et mettre à jour l'utilisateur.
+                $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
                 $user->setPasswordResetToken(null);
                 $user->setPasswordResetExpiresAt(null);
-                $user->setUpdatedAt(new \DateTime());
+                $user->setUpdatedAt(new DateTime());
 
-                // Mettre à jour l'utilisateur dans la base de données.
                 $usersRepository->updateUser($user);
 
                 // Stocker le message de succès dans la session.
@@ -401,7 +380,6 @@ class AuthController extends BaseController
                 return new Response('', 302, ['Location' => '/login']);
             }
 
-            // Rendre le formulaire avec les erreurs.
             return $this->render(
                 'auth/password_reset.html.twig',
                 [
@@ -413,9 +391,69 @@ class AuthController extends BaseController
         }//end if
 
         // Afficher le formulaire de réinitialisation.
-        return $this->render('auth/password_reset.html.twig', ['token' => $token, 'csrf_token' => $this->generateCsrfToken('password_reset_form'),]);
+        return $this->render(
+            'auth/password_reset.html.twig',
+            [
+                'token' => $token,
+                'csrf_token' => $this->generateCsrfToken('password_reset_form'),
+            ]
+        );
 
     }//end passwordReset()
+
+
+    /**
+     * Valide les mots de passe fournis lors de la réinitialisation.
+     *
+     * @param string $password        Le nouveau mot de passe.
+     * @param string $confirmPassword Le mot de passe de confirmation.
+     *
+     * @return array Liste des erreurs de validation.
+     */
+    private function validatePasswordResetInput(string $password, string $confirmPassword): array
+    {
+        $errors = [];
+        if (empty($password) === true || empty($confirmPassword) === true) {
+            $errors[] = 'Tous les champs sont obligatoires.';
+        } else if ($password !== $confirmPassword) {
+            $errors[] = 'Les mots de passe ne correspondent pas.';
+        } else if (strlen($password) < 6) {
+            $errors[] = 'Le mot de passe doit contenir au moins 6 caractères.';
+        }
+
+        return $errors;
+
+    }//end validatePasswordResetInput()
+
+
+    /**
+     * Vérifie si le token est valide pour la réinitialisation du mot de passe.
+     *
+     * @param User|null $user L'utilisateur pour lequel vérifier le token.
+     *
+     * @return bool Retourne true si le token est valide, sinon false.
+     */
+    private function isTokenValidForPasswordReset(?User $user): bool
+    {
+        return $user !== null && $user->getPasswordResetExpiresAt() >= new DateTime();
+
+    }//end isTokenValidForPasswordReset()
+
+
+    /**
+     * Valide le token CSRF pour le formulaire de réinitialisation.
+     *
+     * @param Request $request  L'objet de la requête
+     *                          HTTP.
+     * @param string  $formName Le nom du formulaire pour le token CSRF.
+     *
+     * @return bool Retourne true si le token est valide, sinon false.
+     */
+    private function isCsrfTokenValidForForm(Request $request, string $formName): bool
+    {
+        return $this->isCsrfTokenValid($formName, $request->request->get('_csrf_token'));
+
+    }//end isCsrfTokenValidForForm()
 
 
 }//end class
