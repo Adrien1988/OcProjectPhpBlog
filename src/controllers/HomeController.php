@@ -159,28 +159,11 @@ class HomeController extends BaseController
                 return new Response('Adresse e-mail de destination non configurée.', 500);
             }
 
-            // Envoyer l'email.
-            $mail = new PHPMailer(true);
-
-            // Configurer le serveur SMTP.
-            $mail->isSMTP();
-            $mail->Host       = $this->getEnv('SMTP_HOST', 'smtp.gmail.com');
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $this->getEnv('SMTP_USERNAME');
-            $mail->Password   = $this->getEnv('SMTP_PASSWORD');
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $this->getEnv('SMTP_PORT', 587);
-
-            // Destinataires.
-            $mail->setFrom($email, $name);
-            $mail->addAddress($toEmail);
-
             // Contenu de l'email.
-            $mail->isHTML(true);
-            $mail->Subject = 'Nouveau message de contact';
-            $mail->Body    = '<b>Nom:</b> '.$name.'<br><b>Email:</b> '.$email.'<br><b>Message:</b><br>'.nl2br($message);
+            $subject = 'Nouveau message de contact';
+            $body    = '<b>Nom:</b> '.$name.'<br><b>Email:</b> '.$email.'<br><b>Message:</b><br>'.nl2br($message);
 
-            $mail->send();
+            $this->emailService->sendEmail($toEmail, $subject, $body, $email, $name);
 
             return new Response('Message envoyé avec succès!', 200);
         } catch (Exception $e) {
