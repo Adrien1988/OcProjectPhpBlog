@@ -62,17 +62,20 @@ class EmailService
     /**
      * Envoie un e-mail.
      *
-     * @param string      $to      L'adresse e-mail du destinataire.
-     * @param string      $subject Le sujet de l'e-mail.
-     * @param string      $body    Le corps de l'e-mail (HTML autorisé).
-     * @param string|null $from    (Optionnel) L'adresse e-mail de l'expéditeur.
-     * @param string|null $name    (Optionnel) Le nom de l'expéditeur.
+     * @param string      $recipientEmail L'adresse e-mail du destinataire.
+     * @param string      $subject        Le sujet de l'e-mail.
+     * @param string      $body           Le corps de l'e-mail (HTML
+     *                                    autorisé).
+     * @param string|null $from           (Optionnel) L'adresse e-mail de
+     *                                    l'expéditeur.
+     * @param string|null $name           (Optionnel) Le nom de
+     *                                    l'expéditeur.
      *
      * @return void
      *
      * @throws Exception Si l'envoi de l'e-mail échoue.
      */
-    public function sendEmail(string $to, string $subject, string $body, ?string $from=null, ?string $name=null): void
+    public function sendEmail(string $recipientEmail, string $subject, string $body, ?string $from=null, ?string $name=null): void
     {
         try {
             $this->mailer->clearAddresses();
@@ -81,14 +84,20 @@ class EmailService
             // Définir l'expéditeur si spécifié.
             if ($from !== null) {
                 $this->mailer->setFrom($from, ($name ?? $from));
-            } else {
+                $this->mailer->addAddress($recipientEmail);
+                $this->mailer->Subject = $subject;
+                $this->mailer->Body    = $body;
+                $this->mailer->isHTML(true);
+                $this->mailer->send();
+                return;
+            }
+
                 // Réinitialiser l'expéditeur au cas où il aurait été modifié précédemment.
                 $defaultFromEmail = $this->envService->getEnv('SMTP_FROM_EMAIL', $this->mailer->Username);
                 $defaultFromName  = $this->envService->getEnv('SMTP_FROM_NAME', 'Votre Application');
                 $this->mailer->setFrom($defaultFromEmail, $defaultFromName);
-            }
 
-            $this->mailer->addAddress($to);
+            $this->mailer->addAddress($recipientEmail);
             $this->mailer->Subject = $subject;
             $this->mailer->Body    = $body;
             $this->mailer->isHTML(true);

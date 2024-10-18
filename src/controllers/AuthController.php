@@ -271,8 +271,8 @@ class AuthController extends BaseController
         $expiresAt = (new DateTime())->modify('+1 hour');
 
         // Enregistrer le token et l'expiration dans la base de données.
-        $user->setPasswordResetToken($token);
-        $user->setPasswordResetExpiresAt($expiresAt);
+        $user->setPwdResetToken($token);
+        $user->setPwdResetExpiresAt($expiresAt);
         $usersRepository->updateUser($user);
 
         // Générer le lien de réinitialisation.
@@ -322,7 +322,7 @@ class AuthController extends BaseController
      */
     public function passwordReset(Request $request, UsersRepository $usersRepository, string $token): Response
     {
-        $user = $usersRepository->findByPasswordResetToken($token);
+        $user = $usersRepository->findByPwdResetToken($token);
 
         if ($this->isTokenValidForPasswordReset($user) === false) {
             return $this->render('auth/password_reset_invalid.html.twig');
@@ -337,8 +337,8 @@ class AuthController extends BaseController
             if (empty($errors) === true) {
                 // Hacher le nouveau mot de passe et mettre à jour l'utilisateur.
                 $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
-                $user->setPasswordResetToken(null);
-                $user->setPasswordResetExpiresAt(null);
+                $user->setPwdResetToken(null);
+                $user->setPwdResetExpiresAt(null);
                 $user->setUpdatedAt(new DateTime());
 
                 $usersRepository->updateUser($user);
@@ -405,7 +405,7 @@ class AuthController extends BaseController
      */
     private function isTokenValidForPasswordReset(?User $user): bool
     {
-        return $user !== null && $user->getPasswordResetExpiresAt() >= new DateTime();
+        return $user !== null && $user->getPwdResetExpiresAt() >= new DateTime();
 
     }//end isTokenValidForPasswordReset()
 

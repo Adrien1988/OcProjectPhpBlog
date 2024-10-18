@@ -79,14 +79,14 @@ class User
      *
      * @var string|null
      */
-    private ?string $passwordResetToken = null;
+    private ?string $pwdResetToken = null;
 
     /**
      * The expiration date and time of the password reset token.
      *
      * @var DateTime|null
      */
-    private ?DateTime $passwordResetExpiresAt = null;
+    private ?DateTime $pwdResetExpiresAt = null;
 
 
     /**
@@ -105,11 +105,11 @@ class User
         $this->role      = $userData['role'];
         $this->setCreatedAt($userData['createdAt']);
         $this->setUpdatedAt((isset($userData['updatedAt']) === true) ? $userData['updatedAt'] : null);
-        $this->token    = ($userData['token'] ?? null);
-        $this->expireAt = ($userData['expireAt'] ?? null);
-        $this->passwordResetToken     = ($userData['passwordResetToken'] ?? null);
-        $this->passwordResetExpiresAt = ($userData['passwordResetExpiresAt'] ?? null);
-        $this->validator = $validator;
+        $this->token         = ($userData['token'] ?? null);
+        $this->expireAt      = ($userData['expireAt'] ?? null);
+        $this->pwdResetToken = ($userData['passwordResetToken'] ?? null);
+        $this->pwdResetExpiresAt = ($userData['passwordResetExpiresAt'] ?? null);
+        $this->validator         = $validator;
 
     }//end __construct()
 
@@ -327,11 +327,11 @@ class User
      *
      * @return string|null
      */
-    public function getPasswordResetToken(): ?string
+    public function getPwdResetToken(): ?string
     {
-        return $this->passwordResetToken;
+        return $this->pwdResetToken;
 
-    }//end getPasswordResetToken()
+    }//end getPwdResetToken()
 
 
     /**
@@ -341,11 +341,11 @@ class User
      *
      * @return void
      */
-    public function setPasswordResetToken(?string $token): void
+    public function setPwdResetToken(?string $token): void
     {
-        $this->passwordResetToken = $token;
+        $this->pwdResetToken = $token;
 
-    }//end setPasswordResetToken()
+    }//end setPwdResetToken()
 
 
     /**
@@ -353,11 +353,11 @@ class User
      *
      * @return DateTime|null
      */
-    public function getPasswordResetExpiresAt(): ?DateTime
+    public function getPwdResetExpiresAt(): ?DateTime
     {
-        return $this->passwordResetExpiresAt;
+        return $this->pwdResetExpiresAt;
 
-    }//end getPasswordResetExpiresAt()
+    }//end getPwdResetExpiresAt()
 
 
     /**
@@ -367,11 +367,11 @@ class User
      *
      * @return void
      */
-    public function setPasswordResetExpiresAt(?DateTime $expiresAt): void
+    public function setPwdResetExpiresAt(?DateTime $expiresAt): void
     {
-        $this->passwordResetExpiresAt = $expiresAt;
+        $this->pwdResetExpiresAt = $expiresAt;
 
-    }//end setPasswordResetExpiresAt()
+    }//end setPwdResetExpiresAt()
 
 
     /**
@@ -388,8 +388,8 @@ class User
                 'email'      => [new Assert\NotBlank(), new Assert\Email()],
                 'password'   => [new Assert\NotBlank(), new Assert\Length(['min' => 8])],
                 'role'       => [new Assert\NotBlank()],
-                'passwordResetToken'      => new Assert\Optional([new Assert\Type('string')]),
-                'passwordResetExpiresAt'  => new Assert\Optional([new Assert\DateTime()]),
+                'pwdResetToken'      => new Assert\Optional([new Assert\Type('string')]),
+                'pwdResetExpiresAt'  => new Assert\Optional([new Assert\DateTime()]),
             ]
         );
 
@@ -399,8 +399,8 @@ class User
             'email'     => $this->getEmail(),
             'password'  => $this->getPassword(),
             'role'      => $this->getRole(),
-            'passwordResetToken'      => $this->getPasswordResetToken(),
-            'passwordResetExpiresAt'  => $this->getPasswordResetExpiresAt() === true ? $this->getPasswordResetExpiresAt()->format('Y-m-d H:i:s') : null,
+            'pwdResetToken'      => $this->getPwdResetToken(),
+            'pwdResetExpiresAt'  => $this->getPwdResetExpiresAt() === true ? $this->getPwdResetExpiresAt()->format('Y-m-d H:i:s') : null,
         ];
 
         return $this->validator->validate($data, $constraints);

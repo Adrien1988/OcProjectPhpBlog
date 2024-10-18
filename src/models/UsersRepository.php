@@ -138,7 +138,7 @@ class UsersRepository
         }
 
         $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, password_reset_token, password_reset_expires_at)
-        VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :password_reset_token, :password_reset_expires_at)";
+        VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :pwd_reset_token, :pwd_reset_expires_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
 
@@ -173,8 +173,8 @@ class UsersRepository
         first_name = :first_name, 
         email = :email, 
         password = :password, 
-        password_reset_token = :password_reset_token, 
-        password_reset_expires_at = :password_reset_expires_at, 
+        password_reset_token = :pwd_reset_token, 
+        password_reset_expires_at = :pwd_reset_expires_at, 
         role = :role, 
         updated_at = :updated_at, 
         token = :token, 
@@ -331,31 +331,23 @@ class UsersRepository
             // Retirer les deux-points pour obtenir le nom du paramètre.
             $paramName = substr($placeholder, 1);
 
-            // Vérifier si le paramètre a un mapping spécifique.
-            if (isset($paramMethodMap[$paramName]) === true) {
-                $methodName = $paramMethodMap[$paramName];
-            } else {
-                // Convertir le nom du paramètre en nom de méthode.
-                $methodName = 'get'.str_replace('_', '', ucwords($paramName, '_'));
-            }
+            // Obtenir le nom de la méthode.
+            $methodName = ($paramMethodMap[$paramName] ?? 'get').str_replace('_', '', ucwords($paramName, '_'));
 
-            if (method_exists($user, $methodName) === true) {
-                $value = $user->$methodName();
-
-                // Gérer les dates (DateTime).
-                if ($value instanceof \DateTime) {
-                    $value = $value->format('Y-m-d H:i:s');
-                }
-
-                // Gérer les valeurs nulles.
-                if ($value === null) {
-                    $stmt->bindValue($placeholder, null, \PDO::PARAM_NULL);
-                } else {
-                    $stmt->bindValue($placeholder, $value);
-                }
-            } else {
+            if (method_exists($user, $methodName) === false) {
                 throw new Exception("Méthode {$methodName} non définie dans la classe User.");
             }
+
+            $value = $user->$methodName();
+
+            // Gérer les dates (DateTime).
+            if ($value instanceof \DateTime) {
+                $value = $value->format('Y-m-d H:i:s');
+            }
+
+            // Gérer les valeurs nulles.
+            $paramType = $value === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR;
+            $stmt->bindValue($placeholder, $value, $paramType);
         }//end foreach
 
         return $stmt;
@@ -370,7 +362,7 @@ class UsersRepository
      *
      * @return User|null Retourne l'objet User si trouvé, sinon null.
      */
-    public function findByPasswordResetToken(string $token): ?User
+    public function findByPwdResetToken(string $token): ?User
     {
         $stmt = $this->dbi->prepare("SELECT * FROM user WHERE password_reset_token = :token");
         $stmt->bindValue(':token', $token);
@@ -384,7 +376,7 @@ class UsersRepository
 
         return $this->createUserFromResult($result);
 
-    }//end findByPasswordResetToken()
+    }//end findByPwdResetToken()
 
 
 }//end class
