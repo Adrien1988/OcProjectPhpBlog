@@ -1,34 +1,31 @@
 <?php
 
-session_start();
 
 use Dotenv\Dotenv;
-use ReflectionMethod;
 use Twig\Environment;
-use ReflectionException;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;
 use App\Services\EnvService;
 use App\Services\CsrfService;
+use App\Services\EmailService;
 use Models\CommentsRepository;
+use App\Services\SessionService;
 use App\Core\DependencyContainer;
 use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Controllers\ErrorController;
-use Models\CommentsRepository;
-use Models\UsersRepository;
+use App\Services\UrlGeneratorService;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Config\Definition\Exception\Exception;
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 
 /**
@@ -117,9 +114,12 @@ try {
     // Initialiser le conteneur de dépendances.
     $container = initializeContainer($config);
 
+    // Instanciation du validateur.
+    $validator = Validation::createValidator();
+
     // Création de l'instance de PostsRepository.
-    $postsRepository    = new PostsRepository($container->getDatabase());
-    $usersRepository    = new UsersRepository($container->getDatabase());
+    $postsRepository    = new PostsRepository($container->getDatabase(), $validator);
+    $usersRepository    = new UsersRepository($container->getDatabase(), $validator);
     $commentsRepository = new CommentsRepository($container->getDatabase());
 
     // Configurer Twig.
@@ -145,6 +145,32 @@ try {
     // Créez une instance de EnvService.
     $envService = new EnvService($dotenv);
 
+    // Créez une instance de EmaiService.
+    $emailService = new EmailService($envService);
+
+    // Initialiser le gestionnaire de session Symfony.
+    $sessionStorage = new NativeSessionStorage();
+    $session        = new Session($sessionStorage);
+    $session->start();
+
+    // Créez une instance de SessionService avec la session Symfony.
+    $sessionService = new SessionService($session);
+
+    // Récupérer l'utilisateur actuellement connecté.
+    $currentUser = null;
+    if ($sessionService->has('user_id') === true) {
+        $userId      = $sessionService->get('user_id');
+        $currentUser = $usersRepository->findById($userId);
+    }
+
+    // Passer l'utilisateur actuel à Twig.
+    $twig->addGlobal(
+        'app',
+        [
+            'user' => $currentUser,
+        ]
+    );
+
     // $errorController = new ErrorController();
     // Charger les routes.
     $routes = include __DIR__.'/../src/config/routes.php';
@@ -157,6 +183,9 @@ try {
     // Initialiser le matcher et le générateur d'URL.
     $matcher   = new UrlMatcher($routes, $context);
     $generator = new UrlGenerator($routes, $context);
+
+    // Créez une instance du UrlGeneratorService.
+    $urlGeneratorService = new UrlGeneratorService($generator);
 
     // Try {
     // Matcher la requête à une route.
@@ -174,7 +203,8 @@ try {
     list($class, $method) = explode('::', $controller);
 
     // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService);
+    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $emailService, $validator, $urlGeneratorService);
+
 
     // Supprimer les clés réservées de paramètres.
     unset($parameters['_controller'], $parameters['_route']);
@@ -197,6 +227,7 @@ try {
     $allowedMethods = [
         'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
         'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
+        'App\Controllers\AuthController' => ['register', 'login', 'logout', 'passwordResetRequest', 'passwordReset', 'passwordResetRequestSuccess'],
         // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
     ];
 
@@ -212,10 +243,10 @@ try {
     $response = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($request, $controllerInstance, $method, $postsRepository, $parameters, $csrfService) {
+        function () use ($request, $controllerInstance, $method, $postsRepository, $usersRepository, $parameters, $csrfService) {
             try {
                 // Utiliser la réflexion pour obtenir les paramètres de la méthode.
-                $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
+                $reflectionMethod = new \ReflectionMethod($controllerInstance, $method);
 
                 // Vérifier que la méthode est publique.
                 if ($reflectionMethod->isPublic() === false) {
@@ -239,6 +270,8 @@ try {
                                 $methodParameters[] = $request;
                             } else if ($typeName === PostsRepository::class) {
                                 $methodParameters[] = $postsRepository;
+                            } else if ($typeName === UsersRepository::class) {
+                                $methodParameters[] = $usersRepository;
                             } else if ($typeName === CsrfService::class) {
                                 $methodParameters[] = $csrfService;
                             } else {
@@ -279,7 +312,7 @@ try {
 
                 // Appeler la méthode du contrôleur avec les paramètres résolus.
                 return $controllerInstance->$method(...$methodParameters);
-            } catch (ReflectionException $e) {
+            } catch (\ReflectionException $e) {
                 // Gérer les erreurs de réflexion.
                 return new Response('Méthode introuvable : '.$e->getMessage(), 404);
             } catch (Exception $e) {
