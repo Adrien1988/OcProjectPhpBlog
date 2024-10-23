@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "8fedb297dd6fc11d9abe33c0ec7e5cac",
+  "content-hash": "2d99a3fe44878531e19afd84b2854154",
   "packages": [
     {
       "name": "graham-campbell/result-type",
@@ -2293,6 +2293,101 @@
         }
       ],
       "time": "2024-02-01T13:16:41+00:00"
+    },
+    {
+      "name": "symfony/translation",
+      "version": "v6.4.12",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/symfony/translation.git",
+        "reference": "cf8360b8352b086be620fae8342c4d96e391a489"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/symfony/translation/zipball/cf8360b8352b086be620fae8342c4d96e391a489",
+        "reference": "cf8360b8352b086be620fae8342c4d96e391a489",
+        "shasum": ""
+      },
+      "require": {
+        "php": ">=8.1",
+        "symfony/deprecation-contracts": "^2.5|^3",
+        "symfony/polyfill-mbstring": "~1.0",
+        "symfony/translation-contracts": "^2.5|^3.0"
+      },
+      "conflict": {
+        "symfony/config": "<5.4",
+        "symfony/console": "<5.4",
+        "symfony/dependency-injection": "<5.4",
+        "symfony/http-client-contracts": "<2.5",
+        "symfony/http-kernel": "<5.4",
+        "symfony/service-contracts": "<2.5",
+        "symfony/twig-bundle": "<5.4",
+        "symfony/yaml": "<5.4"
+      },
+      "provide": {
+        "symfony/translation-implementation": "2.3|3.0"
+      },
+      "require-dev": {
+        "nikic/php-parser": "^4.18|^5.0",
+        "psr/log": "^1|^2|^3",
+        "symfony/config": "^5.4|^6.0|^7.0",
+        "symfony/console": "^5.4|^6.0|^7.0",
+        "symfony/dependency-injection": "^5.4|^6.0|^7.0",
+        "symfony/finder": "^5.4|^6.0|^7.0",
+        "symfony/http-client-contracts": "^2.5|^3.0",
+        "symfony/http-kernel": "^5.4|^6.0|^7.0",
+        "symfony/intl": "^5.4|^6.0|^7.0",
+        "symfony/polyfill-intl-icu": "^1.21",
+        "symfony/routing": "^5.4|^6.0|^7.0",
+        "symfony/service-contracts": "^2.5|^3",
+        "symfony/yaml": "^5.4|^6.0|^7.0"
+      },
+      "type": "library",
+      "autoload": {
+        "files": [
+          "Resources/functions.php"
+        ],
+        "psr-4": {
+          "Symfony\\Component\\Translation\\": ""
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Fabien Potencier",
+          "email": "fabien@symfony.com"
+        },
+        {
+          "name": "Symfony Community",
+          "homepage": "https://symfony.com/contributors"
+        }
+      ],
+      "description": "Provides tools to internationalize your application",
+      "homepage": "https://symfony.com",
+      "support": {
+        "source": "https://github.com/symfony/translation/tree/v6.4.12"
+      },
+      "funding": [
+        {
+          "url": "https://symfony.com/sponsor",
+          "type": "custom"
+        },
+        {
+          "url": "https://github.com/fabpot",
+          "type": "github"
+        },
+        {
+          "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+          "type": "tidelift"
+        }
+      ],
+      "time": "2024-09-16T06:02:54+00:00"
     },
     {
       "name": "symfony/translation-contracts",

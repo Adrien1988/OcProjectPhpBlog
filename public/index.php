@@ -20,10 +20,12 @@ use App\Services\UrlGeneratorService;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Translation\Translator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
@@ -114,8 +116,17 @@ try {
     // Initialiser le conteneur de dépendances.
     $container = initializeContainer($config);
 
+    // Initialisation du traducteur.
+    $translator = new Translator('fr');
+    $translator->addLoader('xlf', new XliffFileLoader());
+
+    // Chemin vers les fichiers de traduction des validateurs Symfony.
+    $translationPath = __DIR__.'/../vendor/symfony/validator/Resources/translations/validators.fr.xlf';
+
+    $translator->addResource('xlf', $translationPath, 'fr', 'validators');
+
     // Instanciation du validateur.
-    $validator = Validation::createValidator();
+    $validator = Validation::createValidatorBuilder()->setTranslator($translator)->setTranslationDomain('validators')->getValidator();
 
     // Création de l'instance de PostsRepository.
     $postsRepository    = new PostsRepository($container->getDatabase(), $validator);

@@ -103,10 +103,31 @@ class PostController extends BaseController
                 'content' => $postContent,
                 'author' => $authorId,
                 'createdAt' => new DateTime(),
-                'updatedAt' => null,
             ];
 
             $post = new Post($postData, $this->validator);
+
+            // Validation du post.
+            $violations = $post->validate();
+
+            if (count($violations) > 0) {
+                // Si des erreurs de validation sont présentes, les renvoyer à la vue.
+                $errors = [];
+
+                foreach ($violations as $violation) {
+                    $errors[] = $violation->getMessage();
+                }
+
+                // Renvoyer le formulaire avec les erreurs et les données soumises pour conserver les saisies.
+                return $this->render(
+                    'posts/create.html.twig',
+                    [
+                        'csrf_token' => $this->generateCsrfToken('create_post_form'),
+                        'errors'     => $errors,
+                        'post'       => $postData,
+                    ]
+                );
+            }
 
             try {
                 // Enregistre le post en base de données via le repository.

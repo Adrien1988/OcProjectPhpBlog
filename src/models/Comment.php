@@ -25,13 +25,6 @@ class Comment
      */
     private bool $isValidated;
 
-    /**
-     * The ID of the post to which the comment belongs.
-     *
-     * @var integer
-     */
-    private int $postId;
-
 
     /**
      * Gets the content of the comment.
@@ -83,32 +76,6 @@ class Comment
         $this->isValidated = $isValidated;
 
     }//end setIsValidated()
-
-
-    /**
-     * Gets the ID of the post to which the comment belongs.
-     *
-     * @return int
-     */
-    public function getPostId(): int
-    {
-        return $this->postId;
-
-    }//end getPostId()
-
-
-    /**
-     * Sets the ID of the post to which the comment belongs.
-     *
-     * @param int $postId The ID of the post.
-     *
-     * @return void
-     */
-    public function setPostId(int $postId): void
-    {
-        $this->postId = $postId;
-
-    }//end setPostId()
 
 
 }//end class

@@ -36,8 +36,13 @@
 								<div class="card-body">
 									<h3 class="card-title text-center">{{ post.title }}</h3>
 									<p class="card-text">
-										<strong>Date de dernière modification:</strong>
-										{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
+										{% if post.updatedAt %}
+											<strong>Date de dernière modification :</strong>
+											{{ post.updatedAt|date('d-m-Y H:i') }}
+										{% else %}
+											<strong>Date de création :</strong>
+											{{ post.createdAt|date('d-m-Y H:i') }}
+										{% endif %}
 									</p>
 									<p>{{ post.chapo }}</p>
 
