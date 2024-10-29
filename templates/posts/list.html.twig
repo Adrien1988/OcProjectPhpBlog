@@ -52,14 +52,16 @@
 									</div>
 
 									<!-- Modifier et Supprimer -->
-									<div class="text-center">
-										<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
+									{% if app.user is defined and app.user and post.author == app.user.id %}
+										<div class="text-center">
+											<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
 
-										<!-- Bouton pour ouvrir la modale -->
-										<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
-											Supprimer
-										</button>
-									</div>
+											<!-- Bouton pour ouvrir la modale -->
+											<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
+												Supprimer
+											</button>
+										</div>
+									{% endif %}
 								</div>
 							</div>
 						</div>
