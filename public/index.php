@@ -1,11 +1,11 @@
 <?php
 
-
 use Dotenv\Dotenv;
 use Twig\Environment;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;
+use App\Models\User;
 use App\Services\EnvService;
 use App\Services\CsrfService;
 use App\Services\EmailService;
@@ -15,7 +15,6 @@ use App\Core\DependencyContainer;
 use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
-use App\Controllers\ErrorController;
 use App\Services\UrlGeneratorService;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,313 +23,224 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
+// Inclusion de l'autoloader
+require __DIR__ . '/../vendor/autoload.php';
+
+try {
+    // Initialiser les composants de base
+    $envService = initializeEnvironment();
+    $config = loadConfig();
+    $container = initializeContainer($config);
+    $validator = Validation::createValidator();
+
+    // Initialiser les services et dépendances
+    $services = initializeServices($envService, $container, $validator);
+
+    // Configuration Twig et récupération de l'utilisateur
+    $twig = initializeTwig($services['csrfService']);
+    $currentUser = getCurrentUser($services['sessionService'], $services['usersRepository']);
+    $twig->addGlobal('app', ['user' => $currentUser]);
+
+    // Initialiser le contexte, les routes et le générateur d'URL
+    $context = new RequestContext();
+    $request = Request::createFromGlobals();
+    $context->fromRequest($request);
+    $routes = include __DIR__ . '/../src/config/routes.php';
+    $matcher = new UrlMatcher($routes, $context);
+    $urlGeneratorService = new UrlGeneratorService(new UrlGenerator($routes, $context));
+
+    // Correspondance de la route
+    $parameters = $matcher->match($request->getPathInfo());
+
+    // **Extraction du contrôleur et de la méthode de la route**
+    if (isset($parameters['_controller']) === false) {
+        throw new Exception('Le contrôleur n\'est pas défini dans les paramètres de la route.');
+    }
+
+    $controller = $parameters['_controller'];
+    list($class, $method) = explode('::', $controller);
+
+    // **Vérification que la méthode n'est pas nulle**
+    if (empty($method)) {
+        throw new Exception('La méthode est indéfinie ou vide.');
+    }
+
+    // Suppression des clés réservées avant de passer les paramètres
+    unset($parameters['_controller'], $parameters['_route']);
+
+    // Instanciation du contrôleur
+    $controllerInstance = getControllerInstance($class, $twig, $services, $urlGeneratorService);
+
+    // Exécution des middlewares et de l'action du contrôleur
+    // Exécution des middlewares et de l'action du contrôleur
+    $middlewares = $request->isMethod('POST') ? [new CsrfMiddleware($services['csrfService'])] : [];
+    $response = handleMiddlewares(
+        $request,
+        $middlewares,
+        fn() => executeControllerAction($controllerInstance, $method, $parameters, $request, $services) // Utilisation de $method
+    );
+} catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
+    $response = new Response('Page non trouvée : ' . $e->getMessage(), 404);
+} catch (Exception $e) {
+    $response = new Response('Une erreur est survenue : ' . $e->getMessage(), 500);
+}
+
+// Envoi de la réponse
+$response->send();
+
+/**
+ * Initialisation de l'environnement.
+ */
+function initializeEnvironment(): EnvService
+{
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+    return new EnvService($dotenv);
+}
 
 /**
  * Charge la configuration de l'application.
- *
- * @return array La configuration de l'application.
- *
- * @throws Exception Si la configuration de la base de données est introuvable.
  */
 function loadConfig(): array
 {
-    $configPath = __DIR__.'/../src/config/config.php';
-
-    if (file_exists($configPath) === false) {
+    $configPath = __DIR__ . '/../src/config/config.php';
+    if (!file_exists($configPath)) {
         throw new Exception('Le fichier de configuration n\'existe pas.');
     }
 
-    // Inclure le fichier de configuration et appeler la fonction getDatabaseConfig.
     include $configPath;
     $config = getDatabaseConfig();
 
-    if ($config === false || isset($config['database']) === false) {
+    if ($config === false || !isset($config['database'])) {
         throw new Exception('Configuration de la base de données introuvable.');
     }
 
     return $config;
-
-}//end loadConfig()
-
+}
 
 /**
- * Initialise le conteneur d'injection de dépendances.
- *
- * @param array $config La configuration de l'application.
- *
- * @return DependencyContainer Le conteneur de dépendances initialisé.
+ * Initialise le conteneur de dépendances.
  */
 function initializeContainer(array $config): DependencyContainer
 {
-    return new DependencyContainer(
-        [
-            'dsn'         => 'mysql:host='.$config['database']['host'].';dbname='.$config['database']['dbname'].';charset=utf8mb4',
-            'db_user'     => $config['database']['user'],
-            'db_password' => $config['database']['password'],
-        ]
-    );
-
-}//end initializeContainer()
-
+    return new DependencyContainer([
+        'dsn' => 'mysql:host=' . $config['database']['host'] . ';dbname=' . $config['database']['dbname'] . ';charset=utf8mb4',
+        'db_user' => $config['database']['user'],
+        'db_password' => $config['database']['password'],
+    ]);
+}
 
 /**
- * Fonction pour gérer les middlewares.
- *
- * @param Request  $request          La requête.
- * @param array    $middlewares      Les middlewares à exécuter.
- * @param callable $controllerAction L'action du contrôleur à exécuter.
- * @param array    $dependencies     Les dépendances à passer aux middlewares.
- *
- * @return Response La réponse générée.
+ * Initialise les services principaux.
  */
-function handleMiddlewares(Request $request, array $middlewares, callable $controllerAction, array $dependencies): Response
+function initializeServices(EnvService $envService, DependencyContainer $container, $validator): array
+{
+    $csrfService = new CsrfService();
+    $sessionService = initializeSessionService();
+    return [
+        'csrfService' => $csrfService,
+        'securityService' => new SecurityService(),
+        'emailService' => new EmailService($envService),
+        'envService' => $envService,
+        'sessionService' => $sessionService,
+        'postsRepository' => new PostsRepository($container->getDatabase(), $validator),
+        'usersRepository' => new UsersRepository($container->getDatabase(), $validator),
+        'commentsRepository' => new CommentsRepository($container->getDatabase()),
+        'validator' => $validator
+    ];
+}
+
+/**
+ * Initialisation de Twig avec l'extension CSRF.
+ */
+function initializeTwig(CsrfService $csrfService): Environment
+{
+    $loader = new FilesystemLoader(__DIR__ . '/../templates');
+    $twig = new Environment($loader, ['cache' => false, 'auto_reload' => true]);
+    $twig->addExtension(new CsrfExtension($csrfService));
+    return $twig;
+}
+
+/**
+ * Initialisation du service de session Symfony.
+ */
+function initializeSessionService(): SessionService
+{
+    $sessionStorage = new NativeSessionStorage();
+    $session = new Session($sessionStorage);
+    $session->start();
+    return new SessionService($session);
+}
+
+/**
+ * Récupère l'utilisateur actuellement connecté.
+ */
+function getCurrentUser(SessionService $sessionService, UsersRepository $usersRepository): ?User
+{
+    if ($sessionService->has('user_id')) {
+        $userId = $sessionService->get('user_id');
+        return $usersRepository->findById($userId);
+    }
+    return null;
+}
+
+/**
+ * Instancie le contrôleur en fonction de la route.
+ */
+function getControllerInstance($class, Environment $twig, $services, UrlGeneratorService $urlGeneratorService)
+{
+    return new $class(
+        $twig,
+        $services['securityService'],
+        $services['envService'],
+        $services['csrfService'],
+        $services['sessionService'],
+        $services['emailService'],
+        $services['validator'],
+        $urlGeneratorService
+    );
+}
+
+/**
+ * Exécute une action du contrôleur avec les paramètres appropriés.
+ */
+function executeControllerAction($controllerInstance, string $method, array $parameters, Request $request, array $services): Response
+{
+    try {
+        $reflectionMethod = new \ReflectionMethod($controllerInstance, $method);
+        if ($reflectionMethod->isPublic() === false) {
+            throw new Exception('Méthode non accessible');
+        }
+
+        $methodParameters = [];
+        foreach ($reflectionMethod->getParameters() as $param) {
+            $paramType = $param->getType();
+            $paramName = $param->getName();
+
+            $methodParameters[] = match ($paramType?->getName()) {
+                Request::class => $request,
+                PostsRepository::class => $services['postsRepository'],
+                UsersRepository::class => $services['usersRepository'],
+                default => $parameters[$paramName] ?? null,
+            };
+        }
+
+        return $controllerInstance->$method(...$methodParameters);
+    } catch (\ReflectionException $e) {
+        return new Response('Méthode introuvable : ' . $e->getMessage(), 404);
+    } catch (Exception $e) {
+        return new Response('Une erreur est survenue : ' . $e->getMessage(), 500);
+    }
+}
+
+/**
+ * Gère l'exécution des middlewares.
+ */
+function handleMiddlewares(Request $request, array $middlewares, callable $controllerAction): Response
 {
     $middleware = array_shift($middlewares);
-
-    if ($middleware === null) {
-        return $controllerAction($request);
-    }
-
-    return $middleware->handle(
-        $request,
-        function (Request $request) use ($middlewares, $controllerAction, $dependencies) {
-            return handleMiddlewares($request, $middlewares, $controllerAction, $dependencies);
-        }
-    );
-
-}//end handleMiddlewares()
-
-
-// Inclusion des fichiers nécessaires après les déclarations de fonctions.
-require __DIR__.'/../vendor/autoload.php';
-
-try {
-    // Charger la configuration.
-    $config = loadConfig();
-
-    // Initialiser le conteneur de dépendances.
-    $container = initializeContainer($config);
-
-    // Instanciation du validateur.
-    $validator = Validation::createValidator();
-
-    // Création de l'instance de PostsRepository.
-    $postsRepository    = new PostsRepository($container->getDatabase(), $validator);
-    $usersRepository    = new UsersRepository($container->getDatabase(), $validator);
-    $commentsRepository = new CommentsRepository($container->getDatabase());
-
-    // Configurer Twig.
-    $loader = new FilesystemLoader(__DIR__.'/../templates');
-    $twig   = new Environment(
-        $loader,
-        [
-            'cache' => false,
-            'auto_reload' => true,
-        ]
-    );
-
-    // Enregistrer l'extension CsrfExtension.
-    $csrfService = new CsrfService();
-    $twig->addExtension(new CsrfExtension($csrfService));
-
-    // Créez une instance de SecurityService.
-    $securityService = new SecurityService();
-
-    // Créez une instance de Dotenv.
-    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
-
-    // Créez une instance de EnvService.
-    $envService = new EnvService($dotenv);
-
-    // Créez une instance de EmaiService.
-    $emailService = new EmailService($envService);
-
-    // Initialiser le gestionnaire de session Symfony.
-    $sessionStorage = new NativeSessionStorage();
-    $session        = new Session($sessionStorage);
-    $session->start();
-
-    // Créez une instance de SessionService avec la session Symfony.
-    $sessionService = new SessionService($session);
-
-    // Récupérer l'utilisateur actuellement connecté.
-    $currentUser = null;
-    if ($sessionService->has('user_id') === true) {
-        $userId      = $sessionService->get('user_id');
-        $currentUser = $usersRepository->findById($userId);
-    }
-
-    // Passer l'utilisateur actuel à Twig.
-    $twig->addGlobal(
-        'app',
-        [
-            'user' => $currentUser,
-        ]
-    );
-
-    // $errorController = new ErrorController();
-    // Charger les routes.
-    $routes = include __DIR__.'/../src/config/routes.php';
-
-    // Initialiser le contexte de la requête.
-    $context = new RequestContext();
-    $request = Request::createFromGlobals();
-    $context->fromRequest($request);
-
-    // Initialiser le matcher et le générateur d'URL.
-    $matcher   = new UrlMatcher($routes, $context);
-    $generator = new UrlGenerator($routes, $context);
-
-    // Créez une instance du UrlGeneratorService.
-    $urlGeneratorService = new UrlGeneratorService($generator);
-
-    // Try {
-    // Matcher la requête à une route.
-    // $parameters = $matcher->match($request->getPathInfo());
-    // } catch (\Throwable $th) {
-    // $class = 'App\Controllers\ErrorController';
-    // $parameters['_controller'] = 'App\Controllers\ErrorController';
-    // $parameters['_route'] = '/index';
-    // }
-    // Ajouter un try catch de parameters ici pour intégrer les erreurs d'url dans une page 404.
-    $parameters = $matcher->match($request->getPathInfo());
-
-    // Extraire le contrôleur et l'action.
-    $controller           = $parameters['_controller'];
-    list($class, $method) = explode('::', $controller);
-
-    // Instancier le contrôleur.
-    $controllerInstance = new $class($twig, $securityService, $envService, $csrfService, $sessionService, $emailService, $validator, $urlGeneratorService);
-
-
-    // Supprimer les clés réservées de paramètres.
-    unset($parameters['_controller'], $parameters['_route']);
-
-    // Dépendances pour les middlewares.
-    $dependencies = [
-        'csrfService' => $csrfService,
-    ];
-
-    // Middleware à exécuter.
-    if ($request->isMethod('POST') === true) {
-        $middlewares = [
-            new CsrfMiddleware($csrfService),
-        ];
-    } else {
-        $middlewares = [];
-    }
-
-    // Définir une liste de méthodes autorisées par contrôleur.
-    $allowedMethods = [
-        'App\Controllers\PostController' => ['listPosts', 'detailPost', 'createPost', 'editPost', 'deletePost'],
-        'App\Controllers\HomeController' => ['index', 'showTerms', 'showPrivacyPolicy', 'downloadCv', 'submitContact'],
-        'App\Controllers\AuthController' => ['register', 'login', 'logout', 'passwordResetRequest', 'passwordReset', 'passwordResetRequestSuccess'],
-        // Ajoutez d'autres contrôleurs et méthodes si nécessaire.
-    ];
-
-    // Vérifier si la méthode est autorisée.
-    if (isset($allowedMethods[$class]) === false || in_array($method, $allowedMethods[$class]) === false) {
-        $response = new Response('Méthode non autorisée', 403);
-        $response->send();
-        exit;
-    }
-
-
-    // Appeler la méthode du contrôleur avec les middlewares.
-    $response = handleMiddlewares(
-        $request,
-        $middlewares,
-        function () use ($request, $controllerInstance, $method, $postsRepository, $usersRepository, $parameters, $csrfService) {
-            try {
-                // Utiliser la réflexion pour obtenir les paramètres de la méthode.
-                $reflectionMethod = new \ReflectionMethod($controllerInstance, $method);
-
-                // Vérifier que la méthode est publique.
-                if ($reflectionMethod->isPublic() === false) {
-                    throw new Exception('Méthode non accessible');
-                }
-
-                // Préparer les paramètres de la méthode.
-                $methodParameters = [];
-
-                foreach ($reflectionMethod->getParameters() as $param) {
-                    $paramName = $param->getName();
-                    $paramType = $param->getType();
-
-                    if ($paramType !== null) {
-                        $typeName = $paramType->getName();
-
-                        // Vérifier si le type est une classe (objet) ou un type scalaire.
-                        if ($paramType->isBuiltin() === false) {
-                            // Injecter les dépendances en fonction du type.
-                            if ($typeName === Request::class) {
-                                $methodParameters[] = $request;
-                            } else if ($typeName === PostsRepository::class) {
-                                $methodParameters[] = $postsRepository;
-                            } else if ($typeName === UsersRepository::class) {
-                                $methodParameters[] = $usersRepository;
-                            } else if ($typeName === CsrfService::class) {
-                                $methodParameters[] = $csrfService;
-                            } else {
-                                throw new Exception("Type de paramètre non pris en charge : {$typeName}");
-                            }
-                        } else {
-                            // Pour les types scalaires, chercher dans les paramètres de la route.
-                            if (isset($parameters[$paramName]) === true) {
-                                // Convertir la valeur en fonction du type attendu.
-                                settype($parameters[$paramName], $typeName);
-                                $methodParameters[] = $parameters[$paramName];
-                            } else if ($param->isOptional() === true) {
-                                // Si le paramètre est optionnel, utiliser la valeur par défaut s'il existe.
-                                if ($param->isDefaultValueAvailable() === true) {
-                                    $methodParameters[] = $param->getDefaultValue();
-                                } else {
-                                    // Si aucune valeur par défaut, utiliser null pour les types nullable.
-                                    $methodParameters[] = null;
-                                }
-                            } else {
-                                throw new Exception("Paramètre requis manquant : '{$paramName}'");
-                            }
-                        }//end if
-                    } else if (isset($parameters[$paramName]) === true) {
-                        // Utiliser les paramètres de la route.
-                        $methodParameters[] = $parameters[$paramName];
-                    } else if ($param->isOptional() === true) {
-                        // Si le paramètre est optionnel, utiliser la valeur par défaut s'il existe.
-                        if ($param->isDefaultValueAvailable() === true) {
-                            $methodParameters[] = $param->getDefaultValue();
-                        } else {
-                            $methodParameters[] = null;
-                        }
-                    } else {
-                        throw new Exception("Impossible de résoudre le paramètre '{$paramName}' pour la méthode '{$method}'");
-                    }//end if
-                }//end foreach
-
-                // Appeler la méthode du contrôleur avec les paramètres résolus.
-                return $controllerInstance->$method(...$methodParameters);
-            } catch (\ReflectionException $e) {
-                // Gérer les erreurs de réflexion.
-                return new Response('Méthode introuvable : '.$e->getMessage(), 404);
-            } catch (Exception $e) {
-                // Gérer les autres exceptions.
-                return new Response('Une erreur est survenue : '.$e->getMessage(), 500);
-            }//end try
-        },
-        $dependencies
-    );
-} catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-    $response = new Response('Page non trouvée : '.$e->getMessage(), 404);
-} catch (Exception $e) {
-    $response = new Response('Une erreur est survenue : '.$e->getMessage(), 500);
-}//end try
-
-// Assurez-vous que $response est défini avant de l'envoyer.
-if (isset($response) === true) {
-    $response->send();
-} else {
-    echo "An unexpected error occurred without response handling.";
-}//end if
+    return $middleware === null
+        ? $controllerAction($request)
+        : $middleware->handle($request, fn($req) => handleMiddlewares($req, $middlewares, $controllerAction));
+}
