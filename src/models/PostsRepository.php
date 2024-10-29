@@ -7,6 +7,7 @@ use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
@@ -23,15 +24,25 @@ class PostsRepository
      */
     private DatabaseInterface $dbi;
 
+    /**
+     * Le validateur Symfony.
+     *
+     * @var ValidatorInterface
+     */
+    private ValidatorInterface $validator;
+
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
+     * @param DatabaseInterface  $dbi       Interface pour interagir avec la base de
+     *                                      données.
+     * @param ValidatorInterface $validator Le validateur Symfony.
      */
-    public function __construct(DatabaseInterface $dbi)
+    public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
     {
-        $this->dbi = $dbi;
+        $this->dbi       = $dbi;
+        $this->validator = $validator;
 
     }//end __construct()
 
@@ -62,17 +73,17 @@ class PostsRepository
     /**
      * Récupère un article par son identifiant.
      *
-     * @param int $id L'identifiant de l'article à récupérer.
+     * @param int $postId L'identifiant de l'article à récupérer.
      *
      * @return Post|null Retourne l'objet Post si trouvé, sinon null.
      */
-    public function findById(int $id): ?Post
+    public function findById(int $postId): ?Post
     {
         // Prépare la requête SQL.
         $stmt = $this->dbi->prepare("SELECT * FROM post WHERE post_id = :post_id");
 
         // Exécute la requête avec l'ID du post.
-        $success = $this->dbi->execute($stmt, [':post_id' => $id]);
+        $success = $this->dbi->execute($stmt, [':post_id' => $postId]);
 
         if ($success === false) {
             throw new Exception('Erreur lors de l\'exécution de la requête.');
@@ -107,6 +118,19 @@ class PostsRepository
      */
     public function createPost(Post $post): Post
     {
+        $post->setValidator($this->validator);
+
+        // Validation avant l'insertion.
+        $violations = $post->validate();
+        if ($violations->count() > 0) {
+            $messages = [];
+            foreach ($violations as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+
+            throw new Exception('Erreur de validation : '.implode(', ', $messages));
+        }
+
         // La requête SQL pour insérer un nouvel article.
         $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`, `updated_at`) 
         VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
@@ -184,13 +208,13 @@ class PostsRepository
      * lie l'identifiant de l'article à la requête pour éviter les injections SQL,
      * et exécute la requête. Elle est sécurisée et ne permet que la suppression par identifiant.
      *
-     * @param int $id L'identifiant de l'article à supprimer.
+     * @param int $postId L'identifiant de l'article à supprimer.
      *
      * @return bool Retourne true si la suppression a réussi, sinon false.
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deletePost(int $id): bool
+    public function deletePost(int $postId): bool
     {
         // La requête SQL pour supprimer un article.
         $sql = "DELETE FROM post WHERE post_id = :post_id";
@@ -199,7 +223,7 @@ class PostsRepository
         $stmt = $this->dbi->prepare($sql);
 
         // Liaison de l'identifiant à la requête préparée.
-        $stmt->bindValue(':post_id', $id);
+        $stmt->bindValue(':post_id', $postId);
 
         // Exécution de la requête.
         if ($this->dbi->execute($stmt, []) === false) {
@@ -292,15 +316,17 @@ class PostsRepository
      */
     private function buildPostFromRow(array $row): Post
     {
-        return new Post(
-            id: (int) $row['post_id'],
-            title: $row['title'],
-            chapo: $row['chapo'],
-            content: $row['content'],
-            author: (int) $row['author'],
-            createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) === true && $row['updated_at'] !== null ? new DateTime($row['updated_at']) : null
-        );
+        $postData = [
+            'postId' => (int) $row['post_id'],
+            'title'  => $row['title'],
+            'chapo'  => $row['chapo'],
+            'content' => $row['content'],
+            'author' => (isset($row['author']) === true) ? (int) $row['author'] : null,
+            'createdAt' => new DateTime($row['created_at']),
+            'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
+        ];
+
+        return new Post($postData, $this->validator);
 
     }//end buildPostFromRow()
 

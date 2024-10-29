@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Dotenv\Dotenv;
+use Dotenv\Repository\RepositoryInterface;
 
 /**
  * Service pour charger les variables d'environnement.
@@ -13,19 +13,19 @@ class EnvService
     /**
      * Les variables d'environnement chargées.
      *
-     * @var array
+     * @var RepositoryInterface
      */
-    private array $envVariables = [];
+    private RepositoryInterface $repository;
 
 
     /**
      * Constructeur de la classe.
      *
-     * @param Dotenv $dotenv Instance de Dotenv pour charger les variables d'environnement.
+     * @param RepositoryInterface $repository Instance du dépôt des variables d'environnement.
      */
-    public function __construct(Dotenv $dotenv)
+    public function __construct(RepositoryInterface $repository)
     {
-        $this->envVariables = $dotenv->load();
+        $this->repository = $repository;
 
     }//end __construct()
 
@@ -40,7 +40,8 @@ class EnvService
      */
     public function getEnv(string $key, $default=null)
     {
-        return ($this->envVariables[$key] ?? $default);
+        $value = $this->repository->get($key);
+        return $value !== null ? $value : $default;
 
     }//end getEnv()
 

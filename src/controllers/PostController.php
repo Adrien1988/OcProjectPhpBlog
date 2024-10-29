@@ -92,22 +92,21 @@ class PostController extends BaseController
             $chapo       = $this->cleanInput($request->request->get('chapo'));
             $postContent = $this->cleanInput($request->request->get('content'));
 
+            // Récupérer l'ID de l'auteur depuis la session.
+            $authorId = $this->sessionService->get('user_id');
+
             // Crée un nouvel objet Post avec les données nettoyées.
-            $post = new Post(
-                id: 0,
-                title: $title,
-                chapo: $chapo,
-                content: $postContent,
-                author: 1,
-                createdAt: new DateTime(),
-                updatedAt: new DateTime()
-            );
-            $post->setTitle($title);
-            $post->setChapo($chapo);
-            $post->setContent($postContent);
-            $post->setAuthor(1);
-            $post->setCreatedAt(new DateTime());
-            $post->setUpdatedAt(new DateTime());
+            $postData = [
+                'postId' => null,
+                'title' => $title,
+                'chapo' => $chapo,
+                'content' => $postContent,
+                'author' => $authorId,
+                'createdAt' => new DateTime(),
+                'updatedAt' => null,
+            ];
+
+            $post = new Post($postData, $this->validator);
 
             try {
                 // Enregistre le post en base de données via le repository.

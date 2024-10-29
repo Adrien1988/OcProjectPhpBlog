@@ -8,6 +8,7 @@ use PDOStatement;
 use App\Models\User;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersRepository
 {
@@ -21,15 +22,25 @@ class UsersRepository
      */
     private DatabaseInterface $dbi;
 
+    /**
+     * Le validateur Symfony.
+     *
+     * @var ValidatorInterface
+     */
+    private ValidatorInterface $validator;
+
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface $dbi Interface pour interagir avec la base de données.
+     * @param DatabaseInterface  $dbi       Interface pour interagir avec la base de
+     *                                      données.
+     * @param ValidatorInterface $validator Le validateur Symfony.
      */
-    public function __construct(DatabaseInterface $dbi)
+    public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
     {
-        $this->dbi = $dbi;
+        $this->dbi       = $dbi;
+        $this->validator = $validator;
 
     }//end __construct()
 
@@ -63,10 +74,12 @@ class UsersRepository
      */
     public function findById(int $userId): ?User
     {
-        $result = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id", ['id' => $userId]);
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE user_id = :id");
+        $stmt->execute(['id' => $userId]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (empty($result) === false) {
-            return $this->createUserFromResult($result[0]);
+        if ($result !== false) {
+            return $this->createUserFromResult($result);
         }
 
         return null;
@@ -83,12 +96,12 @@ class UsersRepository
      */
     public function findByEmail(string $email): ?User
     {
-        $results = $this->dbi->query("SELECT * FROM users WHERE email = :email", [':email' => $email]);
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        foreach ($results as $result) {
-            if ($result !== null) {
-                return $this->createUserFromResult($result);
-            }
+        if ($result !== false) {
+            return $this->createUserFromResult($result);
         }
 
         return null;
@@ -111,7 +124,21 @@ class UsersRepository
      */
     public function createUser(User $user): User
     {
-        $sql = "INSERT INTO users (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at) VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at)";
+        $user->setValidator($this->validator);
+
+        // Validation avant l'insertion.
+        $violations = $user->validate();
+        if ($violations->count() > 0) {
+            $messages = [];
+            foreach ($violations as $violation) {
+                $messages[] = $violation->getMessage();
+            }
+
+            throw new Exception('Erreur de validation : '.implode(', ', $messages));
+        }
+
+        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, pwd_reset_token, pwd_reset_expires_at)
+        VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :pwd_reset_token, :pwd_reset_expires_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
 
@@ -119,7 +146,7 @@ class UsersRepository
             throw new Exception("Failed to insert the user into the database.");
         }
 
-        $user->setUserId((int) $this->dbi->lastInsertId());
+        $user->setId((int) $this->dbi->lastInsertId());
 
         return $user;
 
@@ -141,12 +168,21 @@ class UsersRepository
      */
     public function updateUser(User $user): bool
     {
-        $sql = "UPDATE users SET last_name = :last_name, first_name = :first_name, email = :email, 
-         password = :password, role = :role, created_at = :created_at, updated_at = :updated_at, 
-         token = :token, expire_at = :expire_at WHERE user_id = :user_id";
+        $sql = "UPDATE user SET 
+        last_name = :last_name, 
+        first_name = :first_name, 
+        email = :email, 
+        password = :password, 
+        pwd_reset_token = :pwd_reset_token, 
+        pwd_reset_expires_at = :pwd_reset_expires_at, 
+        role = :role, 
+        updated_at = :updated_at, 
+        token = :token, 
+        expire_at = :expire_at 
+        WHERE user_id = :user_id";
 
         $stmt = $this->prepareAndBind($sql, $user);
-        $stmt->bindValue(':user_id', $user->getUserId());
+        $stmt->bindValue(':user_id', $user->getId());
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Failed to update the user in the database.");
@@ -172,7 +208,7 @@ class UsersRepository
      */
     public function deleteUser(int $userId): bool
     {
-        $sql = "DELETE FROM users WHERE user_id = :user_id";
+        $sql = "DELETE FROM user WHERE user_id = :user_id";
 
         $stmt = $this->dbi->prepare($sql);
 
@@ -188,7 +224,7 @@ class UsersRepository
 
 
     /**
-     * Crée un utilisateur à partir d'une ligne de données.
+     * Transforme une ligne de données en un objet User après validation.
      *
      * @param array $row La ligne de données contenant les informations de l'utilisateur.
      *
@@ -224,11 +260,10 @@ class UsersRepository
             'password',
             'role',
             'created_at',
-            'expire_at',
         ];
         foreach ($requiredFields as $field) {
-            if (empty($row[$field]) !== null) {
-                throw new InvalidArgumentException("Tous les champs sauf 'updated_at' et 'token' sont requis.");
+            if (empty($row[$field]) === true && isset($row[$field]) === false) {
+                throw new InvalidArgumentException("Le champ '{$field}' est requis et ne peut pas être vide.");
             }
         }
 
@@ -244,18 +279,25 @@ class UsersRepository
      */
     private function buildUserFromRow(array $row): User
     {
-        return new User(
-            userId: (int) $row['user_id'],
-            lastName: $row['last_name'],
-            firstName: $row['first_name'],
-            email: $row['email'],
-            password: $row['password'],
-            role: $row['role'],
-            createdAt: new DateTime($row['created_at']),
-            updatedAt: isset($row['updated_at']) !== null ? new DateTime($row['updated_at']) : null,
-            token: ($row['token'] ?? ''),
-            expireAt: new DateTime($row['expire_at'])
-        );
+
+        // Regrouper les données de l'utilisateur dans un tableau.
+        $userData = [
+            'userId'    => (int) $row['user_id'],
+            'lastName'  => $row['last_name'],
+            'firstName' => $row['first_name'],
+            'email'     => $row['email'],
+            'password'  => $row['password'],
+            'role'      => $row['role'],
+            'createdAt' => new DateTime($row['created_at']),
+            'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
+            'token'     => ($row['token'] ?? null),
+            'expireAt'  => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+            'passwordResetToken'    => ($row['password_reset_token'] ?? null),
+            'passwordResetExpiresAt' => (isset($row['password_reset_expires_at']) === true && $row['password_reset_expires_at'] !== null) ? new DateTime($row['password_reset_expires_at']) : null,
+        ];
+
+        // Créer l'objet User avec le tableau de données et le validateur.
+        return new User($userData, $this->validator);
 
     }//end buildUserFromRow()
 
@@ -273,19 +315,77 @@ class UsersRepository
     private function prepareAndBind(string $sql, User $user): PDOStatement
     {
         $stmt = $this->dbi->prepare($sql);
-        $stmt->bindValue(':last_name', $user->getLastName());
-        $stmt->bindValue(':first_name', $user->getFirstName());
-        $stmt->bindValue(':email', $user->getEmail());
-        $stmt->bindValue(':password', $user->getPassword());
-        $stmt->bindValue(':role', $user->getRole());
-        $stmt->bindValue(':created_at', $user->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format('Y-m-d H:i:s') : null);
-        $stmt->bindValue(':token', $user->getToken());
-        $stmt->bindValue(':expire_at', $user->getExpireAt()->format('Y-m-d H:i:s'));
+
+        // Extraire les placeholders de la requête SQL.
+        preg_match_all('/:\w+/', $sql, $matches);
+        $placeholders = $matches[0];
+
+        // Définir le mapping des paramètres aux méthodes.
+        $paramMethodMap = [
+            'user_id' => 'getId',
+            'last_name' => 'getLastName',
+            'first_name' => 'getFirstName',
+            'email' => 'getEmail',
+            'password' => 'getPassword',
+            'role' => 'getRole',
+            'token' => 'getToken',
+            'expire_at' => 'getExpireAt',
+            'pwd_reset_token' => 'getPwdResetToken',
+            'pwd_reset_expires_at' => 'getPwdResetExpiresAt',
+        // Ajoutez d'autres mappings si nécessaire.
+        ];
+
+        // Parcourir les placeholders et lier les valeurs correspondantes.
+        foreach ($placeholders as $placeholder) {
+            // Retirer les deux-points pour obtenir le nom du paramètre.
+            $paramName = substr($placeholder, 1);
+
+            // Obtenir le nom de la méthode.
+            $methodName = ($paramMethodMap[$paramName] ?? 'get').str_replace('_', '', ucwords($paramName, '_'));
+
+            if (method_exists($user, $methodName) === false) {
+                throw new Exception("Méthode {$methodName} non définie dans la classe User.");
+            }
+
+            $value = $user->$methodName();
+
+            // Gérer les dates (DateTime).
+            if ($value instanceof \DateTime) {
+                $value = $value->format('Y-m-d H:i:s');
+            }
+
+            // Gérer les valeurs nulles.
+            $paramType = $value === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR;
+            $stmt->bindValue($placeholder, $value, $paramType);
+        }//end foreach
 
         return $stmt;
 
     }//end prepareAndBind()
+
+
+    /**
+     * Récupère un utilisateur par son token de réinitialisation de mot de passe.
+     *
+     * @param string $token Le token de réinitialisation de mot de passe.
+     *
+     * @return User|null Retourne l'objet User si trouvé, sinon null.
+     */
+    public function findByPwdResetToken(string $token): ?User
+    {
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE password_reset_token = :token");
+        $stmt->bindValue(':token', $token);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return null;
+        }
+
+        return $this->createUserFromResult($result);
+
+    }//end findByPwdResetToken()
 
 
 }//end class
