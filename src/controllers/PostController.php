@@ -80,6 +80,13 @@ class PostController extends BaseController
     public function createPost(Request $request, PostsRepository $postsRepository): Response
     {
 
+         // Vérifier si l'utilisateur est connecté.
+         $authorId = $this->sessionService->get('user_id');
+        if ($authorId === null) {
+            // Rediriger vers la page de connexion.
+            return new Response('', 302, ['Location' => '/login']);
+        }
+
         if ($request->isMethod('POST') === true) {
             // Vérifier le token CSRF.
             $submittedToken = $request->request->get('_csrf_token');
@@ -94,6 +101,9 @@ class PostController extends BaseController
 
             // Récupérer l'ID de l'auteur depuis la session.
             $authorId = $this->sessionService->get('user_id');
+
+            // Assurer que $authorId est un entier.
+            $authorId = (int) $authorId;
 
             // Crée un nouvel objet Post avec les données nettoyées.
             $postData = [
@@ -140,17 +150,28 @@ class PostController extends BaseController
      */
     public function editPost(Request $request, int $postId, PostsRepository $postsRepository): Response
     {
+
+        // Vérifier si l'utilisateur est connecté.
+        $currentUser = $this->sessionService->get('user_id');
+        if ($currentUser === null) {
+            // Rediriger vers la page de connexion.
+            return new Response('', 302, ['Location' => '/login']);
+        }
+
+        // Récupérer l'utilisateur connecté.
+        $currentUser = $this->sessionService->get('user_id');
+
         $post = $postsRepository->findById($postId);
 
         if ($post === null) {
             throw new Exception('Post not found');
         }
 
-        // // Récupérer l'utilisateur authentifié (en supposant que SecurityService a une méthode getUser())
-        // $currentUser = $this->securityService->getUser(); // Supposons que cette méthode retourne l'utilisateur connecté
-        // if ($currentUser === null) {
-        // throw new Exception('Utilisateur non authentifié');
-        // }
+        // Vérifier si l'utilisateur est l'auteur du post.
+        if ($post->getAuthor() !== (int) $currentUser) {
+            return new Response('Vous n\'êtes pas autorisé à modifier ce post.', 403);
+        }
+
         // Si la requête est en POST, on traite le formulaire de modification.
         if ($request->isMethod('POST') === true) {
             $submittedToken = $request->request->get('_csrf_token');
