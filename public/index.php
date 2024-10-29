@@ -1,14 +1,17 @@
 <?php
 
 use Dotenv\Dotenv;
+use App\Models\User;
 use Twig\Environment;
+use Dotenv\Loader\Loader;
+use Dotenv\Parser\Parser;
 use App\Twig\CsrfExtension;
 use Models\PostsRepository;
 use Models\UsersRepository;
-use App\Models\User;
 use App\Services\EnvService;
 use App\Services\CsrfService;
 use App\Services\EmailService;
+use Dotenv\Store\StoreBuilder;
 use Models\CommentsRepository;
 use App\Services\SessionService;
 use App\Core\DependencyContainer;
@@ -16,6 +19,7 @@ use App\Services\SecurityService;
 use Twig\Loader\FilesystemLoader;
 use App\Middlewares\CsrfMiddleware;
 use App\Services\UrlGeneratorService;
+use Dotenv\Repository\RepositoryBuilder;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
@@ -23,6 +27,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 // Inclusion de l'autoloader.
@@ -78,7 +83,7 @@ try {
     $response    = handleMiddlewares(
         $request,
         $middlewares,
-        fn() => executeControllerAction($controllerInstance, $method, $parameters, $request, $services)
+        function () use ($controllerInstance, $method, $parameters, $request, $services) {return executeControllerAction($controllerInstance, $method, $parameters, $request, $services);}
     );
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
     $response = new Response('Page non trouvée : '.$e->getMessage(), 404);
@@ -97,8 +102,27 @@ $response->send();
  */
 function initializeEnvironment(): EnvService
 {
-    $dotenv = Dotenv::createImmutable(__DIR__.'/../');
-    return new EnvService($dotenv);
+    $repository = RepositoryBuilder::createWithDefaultAdapters()->make();
+
+    $store = StoreBuilder::createWithNoNames()
+        ->addPath(__DIR__ . '/../')
+        ->addName('.env')
+        ->make();
+
+
+
+    $content = $store->read();
+
+    $parser = new Parser();
+    $entries = $parser->parse($content);
+
+    $loader = new Loader();
+
+    foreach ($entries as $entry) {
+        $loader->load($repository, [$entry]);
+    }
+
+    return new EnvService($repository);
 
 }//end initializeEnvironment()
 
