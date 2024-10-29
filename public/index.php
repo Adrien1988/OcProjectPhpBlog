@@ -83,7 +83,9 @@ try {
     $response    = handleMiddlewares(
         $request,
         $middlewares,
-        function () use ($controllerInstance, $method, $parameters, $request, $services) {return executeControllerAction($controllerInstance, $method, $parameters, $request, $services);}
+        function () use ($controllerInstance, $method, $parameters, $request, $services) {
+            return executeControllerAction($controllerInstance, $method, $parameters, $request, $services);
+        }
     );
 } catch (Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
     $response = new Response('Page non trouvée : '.$e->getMessage(), 404);
@@ -105,15 +107,13 @@ function initializeEnvironment(): EnvService
     $repository = RepositoryBuilder::createWithDefaultAdapters()->make();
 
     $store = StoreBuilder::createWithNoNames()
-        ->addPath(__DIR__ . '/../')
+        ->addPath(__DIR__.'/../')
         ->addName('.env')
         ->make();
 
-
-
     $content = $store->read();
 
-    $parser = new Parser();
+    $parser  = new Parser();
     $entries = $parser->parse($content);
 
     $loader = new Loader();

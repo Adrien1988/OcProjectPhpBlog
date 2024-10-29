@@ -9,12 +9,14 @@ use Dotenv\Repository\RepositoryInterface;
  */
 class EnvService
 {
+
     /**
      * Les variables d'environnement chargées.
      *
      * @var RepositoryInterface
      */
     private RepositoryInterface $repository;
+
 
     /**
      * Constructeur de la classe.
@@ -24,7 +26,9 @@ class EnvService
     public function __construct(RepositoryInterface $repository)
     {
         $this->repository = $repository;
-    }
+
+    }//end __construct()
+
 
     /**
      * Récupère la valeur d'une variable d'environnement.
@@ -34,9 +38,12 @@ class EnvService
      *
      * @return mixed La valeur de la variable d'environnement ou la valeur par défaut.
      */
-    public function getEnv(string $key, $default = null)
+    public function getEnv(string $key, $default=null)
     {
         $value = $this->repository->get($key);
         return $value !== null ? $value : $default;
-    }
-}
+
+    }//end getEnv()
+
+
+}//end class
