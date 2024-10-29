@@ -137,7 +137,7 @@ class UsersRepository
             throw new Exception('Erreur de validation : '.implode(', ', $messages));
         }
 
-        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, password_reset_token, password_reset_expires_at)
+        $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, pwd_reset_token, pwd_reset_expires_at)
         VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :pwd_reset_token, :pwd_reset_expires_at)";
 
         $stmt = $this->prepareAndBind($sql, $user);
@@ -173,8 +173,8 @@ class UsersRepository
         first_name = :first_name, 
         email = :email, 
         password = :password, 
-        password_reset_token = :pwd_reset_token, 
-        password_reset_expires_at = :pwd_reset_expires_at, 
+        pwd_reset_token = :pwd_reset_token, 
+        pwd_reset_expires_at = :pwd_reset_expires_at, 
         role = :role, 
         updated_at = :updated_at, 
         token = :token, 
@@ -323,6 +323,15 @@ class UsersRepository
         // Définir le mapping des paramètres aux méthodes.
         $paramMethodMap = [
             'user_id' => 'getId',
+            'last_name' => 'getLastName',
+            'first_name' => 'getFirstName',
+            'email' => 'getEmail',
+            'password' => 'getPassword',
+            'role' => 'getRole',
+            'token' => 'getToken',
+            'expire_at' => 'getExpireAt',
+            'pwd_reset_token' => 'getPwdResetToken',
+            'pwd_reset_expires_at' => 'getPwdResetExpiresAt',
         // Ajoutez d'autres mappings si nécessaire.
         ];
 
