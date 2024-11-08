@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Application;
+use Symfony\Component\HttpFoundation\Request;
 
 /*
  * Point d'entrée de l'application.
@@ -12,7 +13,9 @@ use App\Core\Application;
 // Inclusion de l'autoloader de Composer.
 require __DIR__.'/../vendor/autoload.php';
 
+$request = Request::createFromGlobals();
 
-$app = new Application();
+
+$app = new Application($request);
 
 $app->run();

@@ -41,8 +41,10 @@ class Application
      * Constructeur de la classe Application.
      * Initialise les composants essentiels de l'application.
      */
-    public function __construct()
+    public function __construct(Request $request)
     {
+        $this->request = $request;
+
         // Initialiser les composants de base.
         $envInit    = new EnvironmentInit();
         $envService = $envInit->initialize();
@@ -68,9 +70,6 @@ class Application
             $this->services['usersRepository']
         );
         $this->twig->addGlobal('app', ['user' => $currentUser]);
-
-        // Création de la requête HTTP.
-        $this->request = Request::createFromGlobals();
 
     }//end __construct()
 

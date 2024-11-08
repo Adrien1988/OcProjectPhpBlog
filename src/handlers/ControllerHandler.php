@@ -2,11 +2,12 @@
 
 namespace App\Handlers;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Exception;
+use ReflectionMethod;
 use Twig\Environment;
 use App\Services\UrlGeneratorService;
-use Exception;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Gère l'instanciation des contrôleurs et l'exécution de leurs actions.
@@ -64,7 +65,7 @@ class ControllerHandler
         array $services
     ): Response {
         try {
-            $reflectionMethod = new \ReflectionMethod($controllerInstance, $method);
+            $reflectionMethod = new ReflectionMethod($controllerInstance, $method);
             if ($reflectionMethod->isPublic() === false) {
                 throw new Exception('Méthode non accessible');
             }
