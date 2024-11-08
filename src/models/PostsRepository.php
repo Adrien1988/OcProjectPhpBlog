@@ -3,6 +3,7 @@
 namespace Models;
 
 use DateTime;
+use DateTimeZone;
 use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
@@ -132,7 +133,7 @@ class PostsRepository
         }
 
         // Récupérer l'heure actuelle avec le fuseau horaire correct.
-        $createdAt = new DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $createdAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
 
         // La requête SQL pour insérer un nouvel article.
         $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`) 
@@ -191,7 +192,7 @@ class PostsRepository
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
         // Utilisation de la date actuelle pour `updated_at`.
-        $updatedAt = new DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $updatedAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
         $stmt->bindValue(':updated_at', $updatedAt->format('Y-m-d H:i:s'));
         $stmt->bindValue(':post_id', $post->getId());
 
