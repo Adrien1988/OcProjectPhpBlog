@@ -56,15 +56,15 @@ class Comment
      * @param int      $author      L'ID de l'auteur du commentaire.
      */
     public function __construct(
-        ?int $id,
+        ?int $commentId,
         string $content,
         DateTime $createdAt,
         bool $isValidated,
         int $postId,
         int $author
     ) {
-        if ($id !== null) {
-            $this->setId($id);
+        if ($commentId !== null) {
+            $this->setId($commentId);
         }
 
         $this->setContent($content);

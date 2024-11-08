@@ -202,7 +202,7 @@ class CommentsRepository
     private function buildCommentFromRow(array $row): Comment
     {
         return new Comment(
-            id: (int) $row['comment_id'],
+            commentId: (int) $row['comment_id'],
             content: $row['content'],
             createdAt: new DateTime($row['created_at']),
             isValidated: (bool) $row['is_validated'],
