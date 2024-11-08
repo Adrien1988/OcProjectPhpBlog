@@ -53,13 +53,12 @@ class CommentsRepository
         $stmt->bindValue(':is_validated', $comment->isValidated(), \PDO::PARAM_BOOL);
         $stmt->bindValue(':post_id', $comment->getPostId());
         $stmt->bindValue(':author', $comment->getAuthor());
-        $stmt->bindValue(':comment_id', $comment->getCommentId());
 
         if ($this->dbi->execute($stmt, []) === false) {
-            throw new Exception("Failed to insert the comment into the database.");
+            throw new Exception("Échec de l'insertion du commentaire dans la base de données.");
         }
 
-        $comment->setCommentId((int) $this->dbi->lastInsertId());
+        $comment->setId((int) $this->dbi->lastInsertId());
 
         return $comment;
 
@@ -90,6 +89,34 @@ class CommentsRepository
 
 
     /**
+     * Récupère les commentaires validés pour un post donné.
+     *
+     * @param int $postId L'ID du post.
+     *
+     * @return Comment[] Un tableau d'objets Comment.
+     */
+    public function findValidatedCommentsByPostId(int $postId): array
+    {
+        $sql  = "SELECT * FROM comments WHERE post_id = :post_id AND is_validated = 1 ORDER BY created_at DESC";
+        $stmt = $this->dbi->prepare($sql);
+        $stmt->bindValue(':post_id', $postId, \PDO::PARAM_INT);
+
+        $this->dbi->execute($stmt);
+
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $comments = [];
+
+        foreach ($results as $row) {
+            $comments[] = $this->createCommentFromResult($row);
+        }
+
+        return $comments;
+
+    }//end findValidatedCommentsByPostId()
+
+
+    /**
      * Met à jour le statut de validation d'un commentaire.
      *
      * @param int  $commentId   L'identifiant du commentaire à mettre à jour.
@@ -108,7 +135,7 @@ class CommentsRepository
             ':comment_id'   => $commentId,
         ];
         if ($this->dbi->execute($stmt, $params) === false) {
-            throw new Exception("Failed to update the comment status in the database.");
+            throw new Exception("Échec de la mise à jour du statut du commentaire dans la base de données.");
         }
 
         return true;
@@ -158,11 +185,7 @@ class CommentsRepository
 
         foreach ($requiredFields as $field) {
             if (array_key_exists($field, $row) === false || $row[$field] === '') {
-                if ($field === 'is_validated' && array_key_exists($field, $row) === false) {
-                    throw new InvalidArgumentException("Le champ 'is_validated' est requis.");
-                } else if ($field !== 'is_validated') {
-                    throw new InvalidArgumentException("Tous les champs sont requis.");
-                }
+                throw new InvalidArgumentException("Le champ '$field' est requis.");
             }
         }
 
@@ -179,7 +202,7 @@ class CommentsRepository
     private function buildCommentFromRow(array $row): Comment
     {
         return new Comment(
-            commentId: (int) $row['comment_id'],
+            id: (int) $row['comment_id'],
             content: $row['content'],
             createdAt: new DateTime($row['created_at']),
             isValidated: (bool) $row['is_validated'],

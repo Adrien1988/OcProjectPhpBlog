@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Traits\IdTrait;
 use App\Models\Traits\TimestampableTrait;
 use App\Models\Traits\AuthTrait;
-use DateTime;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
