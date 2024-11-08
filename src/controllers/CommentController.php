@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use DateTime;
 use App\Models\User;
 use App\Models\Comment;
 use Models\PostsRepository;
@@ -53,7 +54,7 @@ class CommentController extends BaseController
         $comment = new Comment(
             commentId: null,
             content: $content,
-            createdAt: new \DateTime(),
+            createdAt: new DateTime(),
             isValidated: false,
             postId: $postId,
             author: (int) $authorId
@@ -175,10 +176,10 @@ class CommentController extends BaseController
         if ($user === null) {
             // Si l'utilisateur n'existe pas, continuer sans notification.
             return new Response("Utilisateur introuvable pour le commentaire ID: $commentId");
-        } else {
-            // Envoyer une notification à l'utilisateur.
-            $this->notifyUserCommentInvalidated($user, $comment, $reason);
         }
+
+        // Envoyer une notification à l'utilisateur.
+        $this->notifyUserCommentInvalidated($user, $comment, $reason);
 
         // Supprimer le commentaire.
         try {
