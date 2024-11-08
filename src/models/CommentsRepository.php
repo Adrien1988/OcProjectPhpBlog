@@ -66,6 +66,26 @@ class CommentsRepository
 
 
     /**
+     * Supprime un commentaire de la base de données.
+     *
+     * @param int $commentId L'ID du commentaire à supprimer.
+     *
+     * @return void
+     */
+    public function deleteComment(int $commentId): void
+    {
+        $sql    = 'DELETE FROM comments WHERE comment_id = :comment_id';
+        $params = [':comment_id' => $commentId];
+
+        $stmt = $this->dbi->prepare($sql);
+        if ($this->dbi->execute($stmt, $params) === false) {
+            throw new Exception('Échec de la suppression du commentaire.');
+        }
+
+    }//end deleteComment()
+
+
+    /**
      * Récupère tous les articles.
      *
      * @return Post[] Un tableau d'objets Post.
@@ -86,6 +106,41 @@ class CommentsRepository
         return $comments;
 
     }//end findAll()
+
+
+    /**
+     * Trouve un commentaire par son ID.
+     *
+     * @param int $commentId L'ID du commentaire à trouver.
+     *
+     * @return Comment|null Le commentaire trouvé ou null s'il n'existe pas.
+     */
+    public function findById(int $commentId): ?Comment
+    {
+        $sql    = 'SELECT * FROM comments WHERE comment_id = :comment_id';
+        $params = [':comment_id' => $commentId];
+
+        $stmt = $this->dbi->prepare($sql);
+        $this->dbi->execute($stmt, $params);
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($data === false) {
+            return null;
+        }
+
+        // Créez une instance de Comment à partir des données récupérées.
+        $comment = new Comment(
+            commentId: (int) $data['comment_id'],
+            content: $data['content'],
+            createdAt: new DateTime($data['created_at']),
+            isValidated: (bool) $data['is_validated'],
+            postId: (int) $data['post_id'],
+            author: (int) $data['author']
+        );
+
+        return $comment;
+
+    }//end findById()
 
 
     /**
