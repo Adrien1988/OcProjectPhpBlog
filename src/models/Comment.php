@@ -44,6 +44,7 @@ class Comment
     )]
     private int $postId;
 
+
     /**
      * Constructeur de la classe Comment.
      *
