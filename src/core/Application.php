@@ -40,6 +40,8 @@ class Application
     /**
      * Constructeur de la classe Application.
      * Initialise les composants essentiels de l'application.
+     *
+     * @param Request $request La requête HTTP à traiter.
      */
     public function __construct(Request $request)
     {
