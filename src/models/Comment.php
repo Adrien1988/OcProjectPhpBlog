@@ -48,7 +48,8 @@ class Comment
     /**
      * Constructeur de la classe Comment.
      *
-     * @param int|null $id          L'ID du commentaire (null si non défini).
+     * @param int|null $commentId   L'ID du commentaire (null si non
+     *                              défini).
      * @param string   $content     Le contenu du commentaire.
      * @param DateTime $createdAt   La date de création du commentaire.
      * @param bool     $isValidated Indique si le commentaire est validé.
