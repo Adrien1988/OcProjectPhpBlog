@@ -37,6 +37,7 @@ class ServicesInit
         $validator = Validation::createValidatorBuilder()
             ->setTranslator($translator)
             ->setTranslationDomain('validators')
+            ->enableAttributeMapping()
             ->getValidator();
 
         // Initialiser les services spécifiques.
