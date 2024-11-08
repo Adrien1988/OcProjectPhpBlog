@@ -25,13 +25,6 @@ class Comment
      */
     private bool $isValidated;
 
-    /**
-     * The ID of the post to which the comment belongs.
-     *
-     * @var integer
-     */
-    private int $postId;
-
 
     /**
      * Gets the content of the comment.

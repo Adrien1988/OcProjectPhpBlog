@@ -3,6 +3,7 @@
 namespace Models;
 
 use DateTime;
+use DateTimeZone;
 use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
@@ -131,9 +132,12 @@ class PostsRepository
             throw new Exception('Erreur de validation : '.implode(', ', $messages));
         }
 
+        // Récupérer l'heure actuelle avec le fuseau horaire correct.
+        $createdAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
+
         // La requête SQL pour insérer un nouvel article.
-        $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`, `updated_at`) 
-        VALUES (:title, :chapo, :content, :author, :created_at, :updated_at)";
+        $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`) 
+        VALUES (:title, :chapo, :content, :author, :created_at)";
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
         $stmt = $this->dbi->prepare($sql);
@@ -143,8 +147,7 @@ class PostsRepository
         $stmt->bindValue(':chapo', $post->getChapo());
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
-        $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
+        $stmt->bindValue(':created_at', $createdAt->format('Y-m-d H:i:s'));
 
         // Exécution de la requête.
         if ($this->dbi->execute($stmt) === false) {
@@ -153,7 +156,8 @@ class PostsRepository
 
         // Récupération et définition de l'ID de la dernière ligne insérée.
         $post->setId((int) $this->dbi->lastInsertId());
-
+        $post->setCreatedAt($createdAt);
+        // Met à jour l'objet Post avec la date correcte.
         return $post;
 
     }//end createPost()
@@ -176,7 +180,7 @@ class PostsRepository
     {
         // La requête SQL pour mettre à jour un article existant.
         $sql = "UPDATE post SET title = :title, chapo = :chapo, content = :content, 
-                author = :author, created_at = :created_at, updated_at = :updated_at 
+                author = :author, updated_at = :updated_at 
                 WHERE post_id = :post_id";
 
         // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
@@ -187,8 +191,9 @@ class PostsRepository
         $stmt->bindValue(':chapo', $post->getChapo());
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
-        $stmt->bindValue(':created_at', $post->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':updated_at', $post->getUpdatedAt() !== null ? $post->getUpdatedAt()->format('Y-m-d H:i:s') : null);
+        // Utilisation de la date actuelle pour `updated_at`.
+        $updatedAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $stmt->bindValue(':updated_at', $updatedAt->format('Y-m-d H:i:s'));
         $stmt->bindValue(':post_id', $post->getId());
 
         // Exécution de la requête.

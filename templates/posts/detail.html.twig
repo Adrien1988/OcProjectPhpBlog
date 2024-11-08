@@ -39,14 +39,16 @@
 					</p>
 
 					<!-- Buttons to Edit and Delete Post -->
-					<div class="text-center mt-4">
-						<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
+					{% if app.user is defined and app.user and post.author == app.user.id %}
+						<div class="text-center mt-4">
+							<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
 
-						<!-- Button to trigger the modal -->
-						<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
-							Supprimer
-						</button>
-					</div>
+							<!-- Button to trigger the modal -->
+							<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
+								Supprimer
+							</button>
+						</div>
+					{% endif %}
 				</div>
 			</div>
 		</div>

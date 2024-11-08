@@ -36,8 +36,13 @@
 								<div class="card-body">
 									<h3 class="card-title text-center">{{ post.title }}</h3>
 									<p class="card-text">
-										<strong>Date de dernière modification:</strong>
-										{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
+										{% if post.updatedAt %}
+											<strong>Date de dernière modification :</strong>
+											{{ post.updatedAt|date('d-m-Y H:i') }}
+										{% else %}
+											<strong>Date de création :</strong>
+											{{ post.createdAt|date('d-m-Y H:i') }}
+										{% endif %}
 									</p>
 									<p>{{ post.chapo }}</p>
 
@@ -47,14 +52,16 @@
 									</div>
 
 									<!-- Modifier et Supprimer -->
-									<div class="text-center">
-										<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
+									{% if app.user is defined and app.user and post.author == app.user.id %}
+										<div class="text-center">
+											<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
 
-										<!-- Bouton pour ouvrir la modale -->
-										<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
-											Supprimer
-										</button>
-									</div>
+											<!-- Bouton pour ouvrir la modale -->
+											<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
+												Supprimer
+											</button>
+										</div>
+									{% endif %}
 								</div>
 							</div>
 						</div>
