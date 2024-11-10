@@ -6,6 +6,7 @@ use DateTime;
 use App\Models\Post;
 use Models\PostsRepository;
 use App\Controllers\BaseController;
+use Models\CommentsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -43,15 +44,17 @@ class PostController extends BaseController
      * Affiche le détail d'un article de blog.
      * Cette méthode récupère un article à partir de son identifiant et rend une vue avec ses détails.
      *
-     * @param int             $postId          L'identifiant de l'article à
-     *                                         afficher.
-     * @param PostsRepository $postsRepository Le repository pour accéder aux posts.
+     * @param int                $postId             L'identifiant de l'article
+     *                                               à afficher.
+     * @param PostsRepository    $postsRepository    Le repository pour accéder
+     *                                               aux posts.
+     * @param CommentsRepository $commentsRepository Le repository pour accéder aux comments.
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      *
      * @throws Exception Si l'article n'est pas trouvé.
      */
-    public function detailPost(int $postId, PostsRepository $postsRepository): Response
+    public function detailPost(int $postId, PostsRepository $postsRepository, CommentsRepository $commentsRepository): Response
     {
         $post = $postsRepository->findById($postId);
 
@@ -59,10 +62,15 @@ class PostController extends BaseController
             throw new Exception('Post not found');
         }
 
+        // Récupérer les commentaires validés pour ce post.
+        $comments = $commentsRepository->findValidatedCommentsByPostId($postId);
+
         return $this->render(
             'posts/detail.html.twig',
             [
                 'post' => $post,
+                'comments' => $comments,
+                'csrf_token' => $this->generateCsrfToken('comment_form'),
             ]
         );
 

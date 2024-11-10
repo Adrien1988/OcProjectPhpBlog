@@ -79,6 +79,7 @@ class ControllerHandler
                     Request::class => $request,
                     \Models\PostsRepository::class => $services['postsRepository'],
                     \Models\UsersRepository::class => $services['usersRepository'],
+                    \Models\CommentsRepository::class => $services['commentsRepository'],
                     default => ($parameters[$paramName] ?? null),
                 };
             }
