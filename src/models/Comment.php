@@ -79,6 +79,50 @@ class Comment
 
     }//end __construct()
 
+    /**
+     * L'ID du post associé.
+     *
+     * @var integer
+     */
+    #[Assert\NotBlank(message: "L'ID du post est requis.")]
+    #[Assert\Type(
+        type: 'integer',
+        message: "L'ID du post doit être un entier."
+    )]
+    private int $postId;
+
+
+    /**
+     * Constructeur de la classe Comment.
+     *
+     * @param int|null $commentId   L'ID du commentaire (null si non
+     *                              défini).
+     * @param string   $content     Le contenu du commentaire.
+     * @param DateTime $createdAt   La date de création du commentaire.
+     * @param bool     $isValidated Indique si le commentaire est validé.
+     * @param int      $postId      L'ID du post associé.
+     * @param int      $author      L'ID de l'auteur du commentaire.
+     */
+    public function __construct(
+        ?int $commentId,
+        string $content,
+        DateTime $createdAt,
+        bool $isValidated,
+        int $postId,
+        int $author
+    ) {
+        if ($commentId !== null) {
+            $this->setId($commentId);
+        }
+
+        $this->setContent($content);
+        $this->setCreatedAt($createdAt);
+        $this->setIsValidated($isValidated);
+        $this->setPostId($postId);
+        $this->setAuthor($author);
+
+    }//end __construct()
+
 
     /**
      * Gets the content of the comment.
