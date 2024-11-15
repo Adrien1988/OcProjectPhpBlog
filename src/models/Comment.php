@@ -28,9 +28,9 @@ class Comment
     /**
      * Indique si le commentaire a été validé.
      *
-     * @var boolean
+     * @var string
      */
-    private bool $isValidated;
+    private string $status;
 
     /**
      * L'ID du post associé.
@@ -48,19 +48,22 @@ class Comment
     /**
      * Constructeur de la classe Comment.
      *
-     * @param int|null $commentId   L'ID du commentaire (null si non
-     *                              défini).
-     * @param string   $content     Le contenu du commentaire.
-     * @param DateTime $createdAt   La date de création du commentaire.
-     * @param bool     $isValidated Indique si le commentaire est validé.
-     * @param int      $postId      L'ID du post associé.
-     * @param int      $author      L'ID de l'auteur du commentaire.
+     * @param int|null $commentId L'ID du commentaire (null si non
+     *                            défini).
+     * @param string   $content   Le contenu du commentaire.
+     * @param DateTime $createdAt La date de création du
+     *                            commentaire.
+     * @param string   $status    Indique l'état du
+     *                            commentaire.
+     * @param int      $postId    L'ID du post
+     *                            associé.
+     * @param int      $author    L'ID de l'auteur du commentaire.
      */
     public function __construct(
         ?int $commentId,
         string $content,
         DateTime $createdAt,
-        bool $isValidated,
+        string $status,
         int $postId,
         int $author
     ) {
@@ -70,7 +73,7 @@ class Comment
 
         $this->setContent($content);
         $this->setCreatedAt($createdAt);
-        $this->setIsValidated($isValidated);
+        $this->setStatus($status);
         $this->setPostId($postId);
         $this->setAuthor($author);
 
@@ -106,27 +109,27 @@ class Comment
     /**
      * Gets whether the comment has been validated.
      *
-     * @return bool
+     * @return string
      */
-    public function isValidated(): bool
+    public function getStatus(): string
     {
-        return $this->isValidated;
+        return $this->status;
 
-    }//end isValidated()
+    }//end getStatus()
 
 
     /**
      * Sets whether the comment has been validated.
      *
-     * @param bool $isValidated whether the comment has been validated.
+     * @param string $status whether the comment has been validated.
      *
      * @return void
      */
-    public function setIsValidated(bool $isValidated): void
+    public function setStatus(string $status): void
     {
-        $this->isValidated = $isValidated;
+        $this->status = $status;
 
-    }//end setIsValidated()
+    }//end setStatus()
 
 
     /**

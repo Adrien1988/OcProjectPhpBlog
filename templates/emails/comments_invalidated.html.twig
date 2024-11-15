@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification de commentaire non accepté</title>
+</head>
+<body>
+    <h2>Bonjour {{ user.firstName }} {{ user.lastName }},</h2>
+
+    <p>Nous vous informons que votre commentaire soumis sur l'article 
+        <strong>"{{ comment.postTitle }}"</strong> n'a pas été accepté.</p>
+
+    <p><strong>Raison :</strong> {{ reason }}</p>
+
+    <p>Voici le contenu de votre commentaire :</p>
+    <blockquote>
+        <p>{{ comment.content }}</p>
+    </blockquote>
+
+    <p>Nous vous remercions pour votre compréhension.</p>
+    <p>Cordialement,</p>
+    <p>L'équipe de PHP_blog</p>
+</body>
+</html>

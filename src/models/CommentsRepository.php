@@ -4,6 +4,7 @@ namespace Models;
 
 use DateTime;
 use Exception;
+use DateTimeZone;
 use App\Models\Comment;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
@@ -44,15 +45,17 @@ class CommentsRepository
      */
     public function createComment(Comment $comment): Comment
     {
-        $sql = "INSERT INTO comments (content, created_at, is_validated, post_id, author) VALUES (:content, :created_at, :is_validated, :post_id, :author)";
+        $sql = "INSERT INTO comment (content, created_at, post_id, author, status) VALUES (:content, :created_at, :post_id, :author, :status)";
 
         $stmt = $this->dbi->prepare($sql);
 
         $stmt->bindValue(':content', $comment->getContent());
-        $stmt->bindValue(':created_at', $comment->getCreatedAt()->format('Y-m-d H:i:s'));
-        $stmt->bindValue(':is_validated', $comment->isValidated(), \PDO::PARAM_BOOL);
+        // Récupérer l'heure actuelle avec le fuseau horaire correct.
+        $createdAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $stmt->bindValue(':created_at', $createdAt->format('Y-m-d H:i:s'));
         $stmt->bindValue(':post_id', $comment->getPostId());
         $stmt->bindValue(':author', $comment->getAuthor());
+        $stmt->bindValue(':status', $comment->getStatus());
 
         if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception("Échec de l'insertion du commentaire dans la base de données.");
@@ -70,40 +73,36 @@ class CommentsRepository
      *
      * @param int $commentId L'ID du commentaire à supprimer.
      *
-     * @return void
+     * @return bool
      */
-    public function deleteComment(int $commentId): void
+    public function deleteComment(int $commentId): bool
     {
-        $sql    = 'DELETE FROM comments WHERE comment_id = :comment_id';
-        $params = [':comment_id' => $commentId];
+        $sql = 'DELETE FROM comment WHERE comment_id = :comment_id';
 
         $stmt = $this->dbi->prepare($sql);
-        if ($this->dbi->execute($stmt, $params) === false) {
+
+        $stmt->bindValue(':comment_id', $commentId);
+
+        if ($this->dbi->execute($stmt, []) === false) {
             throw new Exception('Échec de la suppression du commentaire.');
         }
+
+        return true;
 
     }//end deleteComment()
 
 
     /**
-     * Récupère tous les articles.
+     * Récupère tous les commentaires.
      *
-     * @return Post[] Un tableau d'objets Post.
+     * @return Comment[] Un tableau d'objets Comment.
      */
     public function findAll(): array
     {
         // 'query' retourne maintenant un Iterator.
         $results = $this->dbi->query("SELECT * FROM comment");
 
-        // Initialiser un tableau pour stocker les objets Post.
-        $comments = [];
-
-        // Parcourir chaque ligne retournée par la requête.
-        foreach ($results as $row) {
-            $comments[] = $this->createCommentFromResult($row);
-        }
-
-        return $comments;
+        return array_map([$this, 'createCommentFromResult'], iterator_to_array($results));
 
     }//end findAll()
 
@@ -117,30 +116,52 @@ class CommentsRepository
      */
     public function findById(int $commentId): ?Comment
     {
-        $sql    = 'SELECT * FROM comments WHERE comment_id = :comment_id';
+        $sql    = 'SELECT * FROM comment WHERE comment_id = :comment_id';
         $params = [':comment_id' => $commentId];
 
         $stmt = $this->dbi->prepare($sql);
         $this->dbi->execute($stmt, $params);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($data === false) {
-            return null;
-        }
-
-        // Créez une instance de Comment à partir des données récupérées.
-        $comment = new Comment(
-            commentId: (int) $data['comment_id'],
-            content: $data['content'],
-            createdAt: new DateTime($data['created_at']),
-            isValidated: (bool) $data['is_validated'],
-            postId: (int) $data['post_id'],
-            author: (int) $data['author']
-        );
-
-        return $comment;
+        return $data !== false ? $this->createCommentFromResult($data) : null;
 
     }//end findById()
+
+
+    /**
+     * Récupère les commentaires selon leur statut.
+     *
+     * @param string $status Le statut de validation (pending, validated, rejected).
+     *
+     * @return array Un tableau de commentaires.
+     */
+    public function findCommentsByStatus(string $status): array
+    {
+        $sql    = 'SELECT c.*, CONCAT(u.first_name, " ", u.last_name) AS author_username, p.title AS post_title
+            FROM comment c
+            JOIN user u ON c.author = u.user_id
+            JOIN post p ON c.post_id = p.post_id
+            WHERE c.status = :status';
+        $params = [':status' => $status];
+
+        $stmt = $this->dbi->prepare($sql);
+        $this->dbi->execute($stmt, $params);
+
+        $comments = [];
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            $comment = $this->createCommentFromResult($row);
+
+            // Regrouper les données dans un tableau associatif.
+            $comments[] = [
+                'comment' => $comment,
+                'authorUsername' => $row['author_username'],
+                'postTitle' => $row['post_title'],
+            ];
+        }
+
+        return $comments;
+
+    }//end findCommentsByStatus()
 
 
     /**
@@ -152,18 +173,27 @@ class CommentsRepository
      */
     public function findValidatedCommentsByPostId(int $postId): array
     {
-        $sql  = "SELECT * FROM comments WHERE post_id = :post_id AND is_validated = 1 ORDER BY created_at DESC";
+        $sql    = 'SELECT c.*, CONCAT(u.first_name, " ", u.last_name) AS author_username
+            FROM comment c
+            JOIN user u ON c.author = u.user_id
+            WHERE c.post_id = :post_id AND c.status = :status';
+        $params = [
+            ':post_id' => $postId,
+            ':status' => 'validated',
+        ];
+
         $stmt = $this->dbi->prepare($sql);
-        $stmt->bindValue(':post_id', $postId, \PDO::PARAM_INT);
-
-        $this->dbi->execute($stmt);
-
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $this->dbi->execute($stmt, $params);
 
         $comments = [];
+        while (($row = $stmt->fetch(\PDO::FETCH_ASSOC)) !== false) {
+            $comment = $this->createCommentFromResult($row);
 
-        foreach ($results as $row) {
-            $comments[] = $this->createCommentFromResult($row);
+            // Inclure le nom d'utilisateur de l'auteur.
+            $comments[] = [
+                'comment' => $comment,
+                'authorUsername' => $row['author_username'],
+            ];
         }
 
         return $comments;
@@ -174,21 +204,23 @@ class CommentsRepository
     /**
      * Met à jour le statut de validation d'un commentaire.
      *
-     * @param int  $commentId   L'identifiant du commentaire à mettre à jour.
-     * @param bool $isValidated Le nouveau statut de validation.
+     * @param int    $commentId L'identifiant du commentaire à mettre
+     *                          à jour.
+     * @param string $status    Le nouveau statut de validation.
      *
      * @return bool Retourne true si la mise à jour a réussi, sinon false.
      *
      * @throws Exception Si la mise à jour échoue pour une raison quelconque.
      */
-    public function updateCommentStatus(int $commentId, bool $isValidated): bool
+    public function updateCommentStatus(int $commentId, string $status): bool
     {
-        $sql    = "UPDATE comments SET is_validated = :is_validated WHERE comment_id = :comment_id";
+        $sql    = "UPDATE comment SET status = :status WHERE comment_id = :comment_id";
         $stmt   = $this->dbi->prepare($sql);
         $params = [
-            ':is_validated' => $isValidated,
+            ':status' => $status,
             ':comment_id'   => $commentId,
         ];
+
         if ($this->dbi->execute($stmt, $params) === false) {
             throw new Exception("Échec de la mise à jour du statut du commentaire dans la base de données.");
         }
@@ -233,9 +265,9 @@ class CommentsRepository
             'comment_id',
             'content',
             'created_at',
-            'is_validated',
             'post_id',
             'author',
+            'status',
         ];
 
         foreach ($requiredFields as $field) {
@@ -260,9 +292,9 @@ class CommentsRepository
             commentId: (int) $row['comment_id'],
             content: $row['content'],
             createdAt: new DateTime($row['created_at']),
-            isValidated: (bool) $row['is_validated'],
             postId: (int) $row['post_id'],
-            author: (int) $row['author']
+            author: (int) $row['author'],
+            status: $row['status'],
         );
 
     }//end buildCommentFromRow()
