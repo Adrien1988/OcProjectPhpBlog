@@ -37,8 +37,44 @@ function createRoutes(): RouteCollection
         'password_reset_request_success',
         new Route(
             '/password-reset-request/success',
-            ['_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',
+            [
+                '_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',
             ]
+        )
+    );
+
+    // Routes pour CommentController.
+    $routes->add('add_comment', new Route('/posts/{postId}/comment', ['_controller' => 'App\Controllers\CommentController::createComment'], ['postId' => '\d+'], [], '', [], ['POST']));
+    $routes->add('list_pending_comments', new Route('/admin/pending', ['_controller' => 'App\Controllers\CommentController::listPendingComments']));
+    $routes->add(
+        'validate_comment',
+        new Route(
+            '/admin/validate/{commentId}',
+            [
+                '_controller' => 'App\Controllers\CommentController::validateComment'
+            ],
+            ['commentId' => '\d+'],
+            [],
+            '',
+            [],
+            ['POST']
+        )
+    );
+    $routes->add('list_validated_comments', new Route('/admin/validated', ['_controller' => 'App\Controllers\CommentController::listValidatedComments']));
+    $routes->add('invalidate_comment', new Route('/admin/invalidate/{commentId}', ['_controller' => 'App\Controllers\CommentController::invalidateComment'], ['commentId' => '\d+'], [], '', [], ['POST']));
+    $routes->add('list_invalidated_comments', new Route('/admin/invalidated', ['_controller' => 'App\Controllers\CommentController::listInvalidatedComments']));
+    $routes->add(
+        'delete_invalidated_comment',
+        new Route(
+            '/admin/delete/{commentId}',
+            [
+                '_controller' => 'App\Controllers\CommentController::deleteInvalidatedComment'
+            ],
+            [],
+            [],
+            '',
+            [],
+            ['POST']
         )
     );
 

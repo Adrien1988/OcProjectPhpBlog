@@ -284,7 +284,7 @@ class AuthController extends BaseController
         // Envoyer l'e-mail (Vous devrez implémenter le service d'envoi d'e-mails).
         $subject = 'Réinitialisation de votre mot de passe';
         $body    = $this->renderTemplate(
-            'auth/password_reset_email.html.twig',
+            'emails/password_reset_email.html.twig',
             [
                 'reset_link' => $resetLink,
             ]

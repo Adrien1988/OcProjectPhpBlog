@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "7fcfec17ee5fc5ab486dcade8d230af3",
+  "content-hash": "8bcd13f19fff2a308bb5274d68be1822",
   "packages": [
     {
       "name": "doctrine/annotations",
@@ -879,16 +879,16 @@
     },
     {
       "name": "symfony/http-foundation",
-      "version": "v6.4.12",
+      "version": "v6.4.13",
       "source": {
         "type": "git",
         "url": "https://github.com/symfony/http-foundation.git",
-        "reference": "133ac043875f59c26c55e79cf074562127cce4d2"
+        "reference": "4c0341b3e0a7291e752c69d2a1ed9a84b68d604c"
       },
       "dist": {
         "type": "zip",
-        "url": "https://api.github.com/repos/symfony/http-foundation/zipball/133ac043875f59c26c55e79cf074562127cce4d2",
-        "reference": "133ac043875f59c26c55e79cf074562127cce4d2",
+        "url": "https://api.github.com/repos/symfony/http-foundation/zipball/4c0341b3e0a7291e752c69d2a1ed9a84b68d604c",
+        "reference": "4c0341b3e0a7291e752c69d2a1ed9a84b68d604c",
         "shasum": ""
       },
       "require": {
@@ -936,7 +936,7 @@
       "description": "Defines an object-oriented layer for the HTTP specification",
       "homepage": "https://symfony.com",
       "support": {
-        "source": "https://github.com/symfony/http-foundation/tree/v6.4.12"
+        "source": "https://github.com/symfony/http-foundation/tree/v6.4.13"
       },
       "funding": [
         {
@@ -952,7 +952,7 @@
           "type": "tidelift"
         }
       ],
-      "time": "2024-09-20T08:18:25+00:00"
+      "time": "2024-10-11T19:20:58+00:00"
     },
     {
       "name": "symfony/http-kernel",

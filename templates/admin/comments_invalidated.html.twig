@@ -1,0 +1,60 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+
+	<section class="page-section bg-light mt-5" id="comments-invalidated">
+		<div class="container">
+			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">Commentaires invalidés</h2>
+
+			<!-- Divider -->
+			<div class="divider-custom">
+				<div class="divider-custom-line"></div>
+				<div class="divider-custom-icon">
+					<i class="fas fa-comments"></i>
+				</div>
+				<div class="divider-custom-line"></div>
+			</div>
+
+			<!-- Comments -->
+			<div class="row justify-content-center">
+				<div class="col-lg-8">
+					{% if comments is empty %}
+						<p class="text-center">Aucun commentaire invalidé.</p>
+					{% else %}
+						{% for data in comments %}
+                            {% set comment = data.comment %}
+                            {% set authorUsername = data.authorUsername %}
+                            {% set postTitle = data.postTitle %}
+
+							<div class="comment border-bottom mb-4 pb-2">
+								<p>
+									<strong>{{ authorUsername }}</strong>
+									-
+									{{ comment.createdAt|date('d-m-Y H:i') }}
+									sur l'article
+									<a href="/posts/{{ comment.postId }}">{{ postTitle }}</a>
+								</p>
+								<p>{{ comment.content }}</p>
+								<div
+									class="text-end">
+									<!-- Button to trigger the modal -->
+									<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCommentModal{{ comment.id }}">
+										Supprimer
+									</button>
+								</div>
+							</div>
+							<!-- Inclusion de la modale spécifique à ce commentaire -->
+							{% include 'partials/_confirm_delete_modal.html.twig' with {
+                            modalId: 'deleteCommentModal' ~ comment.id,
+                            itemName: 'le commentaire de ' ~ comment.author,
+                            deleteUrl: '/admin/delete/' ~ comment.id,
+                            csrf_token: csrf_token('delete_comment' ~ comment.id)
+                        } %}
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</section>
+
+{% endblock %}

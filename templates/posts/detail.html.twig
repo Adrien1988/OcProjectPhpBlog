@@ -56,9 +56,7 @@
 
 	<!-- Comments List Section -->
 	<section class="page-section bg-light text-dark" id="comments-list">
-		<div
-			class="container">
-			<!-- Réduction de la taille du titre avec les classes Bootstrap -->
+		<div class="container">
 			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Commentaires</h2>
 
 			<!-- Divider -->
@@ -73,62 +71,79 @@
 			<!-- Comments -->
 			<div class="row justify-content-center">
 				<div class="col-lg-6 col-md-8">
-					{% if comments is empty %}
-						<p class="text-center">Aucun commentaire pour l'instant.</p>
-					{% else %}
-						{% for comment in comments %}
+					{% if comments is defined and comments is not empty %}
+						{% for data in comments %}
+							{% set comment = data.comment %}
+							{% set authorUsername = data.authorUsername %}
+
 							<div class="comment border-bottom mb-2 pb-2">
 								<p>
-									<strong>{{ comment.author }}</strong>
+									<strong>{{ authorUsername }}</strong>
 									-
 									{{ comment.createdAt|date('d-m-Y H:i') }}
 								</p>
 								<p>{{ comment.content }}</p>
 							</div>
 						{% endfor %}
+					{% else %}
+						<p class="text-center">Aucun commentaire pour l'instant.</p>
 					{% endif %}
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- Comment Form Section -->
-	<section class="page-section" id="add-comment">
-		<div
-			class="container">
-			<!-- Réduction de la taille du titre avec les classes Bootstrap -->
-			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Ajouter un commentaire</h2>
-
-			<!-- Divider -->
-			<div class="divider-custom">
-				<div class="divider-custom-line"></div>
-				<div class="divider-custom-icon">
-					<i class="fas fa-comment"></i>
-				</div>
-				<div class="divider-custom-line"></div>
-			</div>
-
-			<!-- Comment Form -->
-			<div class="row justify-content-center">
-				<div class="col-lg-6 col-md-8">
-					<form action="/post/{{ post.id }}/comment" method="POST" id="commentForm">
-						<input
-						type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
-
-						<!-- Réduction de la taille du champ de texte avec form-control-sm -->
-						<div class="form-group mb-3">
-							<textarea class="form-control form-control-sm" id="commentContent" name="content" rows="3" placeholder="Votre commentaire..." required></textarea>
-						</div>
-
-						<!-- Réduction de la taille du bouton avec btn-sm -->
-						<div class="text-center mt-4">
-							<button class="btn btn-primary btn-sm" id="submitButton" type="submit">Soumettre</button>
-						</div>
-					</form>
-				</div>
-			</div>
+	<!-- Display Success Message -->
+	{% if successMessage is defined %}
+		<div class="alert alert-success text-center mt-4">
+			{{ successMessage }}
 		</div>
-	</section>
+	{% endif %}
+
+	<!-- Comment Form Section -->
+	{% if app.user is defined and app.user %}
+		<section class="page-section" id="add-comment">
+			<div class="container">
+				<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Ajouter un commentaire</h2>
+				<div class="divider-custom">
+					<div class="divider-custom-line"></div>
+					<div class="divider-custom-icon">
+						<i class="fas fa-comment"></i>
+					</div>
+					<div class="divider-custom-line"></div>
+				</div>
+
+				{% if errors is defined and errors is not empty %}
+					<div class="alert alert-danger">
+						<ul>
+							{% for error in errors %}
+								<li>{{ error }}</li>
+							{% endfor %}
+						</ul>
+					</div>
+				{% endif %}
+
+				<div class="row justify-content-center">
+					<div class="col-lg-6 col-md-8">
+						<form action="/posts/{{ post.id }}/comment" method="POST">
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
+
+							<div class="form-group mb-3">
+								<textarea class="form-control form-control-sm" name="content" rows="3" placeholder="Votre commentaire..." required></textarea>
+							</div>
+
+							<div class="text-center mt-4">
+								<button class="btn btn-primary btn-sm" type="submit">Soumettre</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</section>
+	{% else %}
+		<p class="text-center">Vous devez être connecté pour ajouter un commentaire.</p>
+	{% endif %}
+
 
 	<!-- Inclusion de la modale avec des variables spécifiques pour ce post -->
 	{% include 'partials/_confirm_delete_modal.html.twig' with {
