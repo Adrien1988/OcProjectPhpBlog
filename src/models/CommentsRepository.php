@@ -202,69 +202,6 @@ class CommentsRepository
 
 
     /**
-     * Trouve un commentaire par son ID.
-     *
-     * @param int $commentId L'ID du commentaire à trouver.
-     *
-     * @return Comment|null Le commentaire trouvé ou null s'il n'existe pas.
-     */
-    public function findById(int $commentId): ?Comment
-    {
-        $sql    = 'SELECT * FROM comments WHERE comment_id = :comment_id';
-        $params = [':comment_id' => $commentId];
-
-        $stmt = $this->dbi->prepare($sql);
-        $this->dbi->execute($stmt, $params);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($data === false) {
-            return null;
-        }
-
-        // Créez une instance de Comment à partir des données récupérées.
-        $comment = new Comment(
-            commentId: (int) $data['comment_id'],
-            content: $data['content'],
-            createdAt: new DateTime($data['created_at']),
-            isValidated: (bool) $data['is_validated'],
-            postId: (int) $data['post_id'],
-            author: (int) $data['author']
-        );
-
-        return $comment;
-
-    }//end findById()
-
-
-    /**
-     * Récupère les commentaires validés pour un post donné.
-     *
-     * @param int $postId L'ID du post.
-     *
-     * @return Comment[] Un tableau d'objets Comment.
-     */
-    public function findValidatedCommentsByPostId(int $postId): array
-    {
-        $sql  = "SELECT * FROM comments WHERE post_id = :post_id AND is_validated = 1 ORDER BY created_at DESC";
-        $stmt = $this->dbi->prepare($sql);
-        $stmt->bindValue(':post_id', $postId, \PDO::PARAM_INT);
-
-        $this->dbi->execute($stmt);
-
-        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        $comments = [];
-
-        foreach ($results as $row) {
-            $comments[] = $this->createCommentFromResult($row);
-        }
-
-        return $comments;
-
-    }//end findValidatedCommentsByPostId()
-
-
-    /**
      * Met à jour le statut de validation d'un commentaire.
      *
      * @param int    $commentId L'identifiant du commentaire à mettre
