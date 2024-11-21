@@ -51,7 +51,7 @@ class Application
         $envInit    = new EnvironmentInit();
         $envService = $envInit->initialize();
 
-        $configInit = new ConfigInit();
+        $configInit = new ConfigInit($envService);
         $config     = $configInit->load();
 
         $containerInit = new ContainerInit();

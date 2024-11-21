@@ -30,6 +30,11 @@ class CommentController extends BaseController
      */
     public function createComment(Request $request, int $postId, CommentsRepository $commentsRepository, PostsRepository $postsRepository): Response
     {
+        $authorId = $this->sessionService->get('user_id');
+        if ($authorId === null) {
+            // Si l'utilisateur n'est pas connecté, rediriger ou afficher un message.
+            return new Response('', 302, ['Location' => '/login']);
+        }
 
         // Récupérer le post pour vérifier son existence.
         $post = $postsRepository->findById($postId);
@@ -44,21 +49,17 @@ class CommentController extends BaseController
             return new Response('Token CSRF invalide.', 403);
         }
 
-        $content  = $this->cleanInput($request->request->get('content'));
-        $authorId = $this->getSessionValue('user_id');
-
-        if ($authorId === null) {
-            // Si l'utilisateur n'est pas connecté, rediriger ou afficher un message.
-            return new Response('Vous devez être connecté pour ajouter un commentaire.', 403);
-        }
+        $content = $this->cleanInput($request->request->get('content'));
 
         $comment = new Comment(
-            commentId: null,
-            content: $content,
-            createdAt: new DateTime(),
-            postId: $postId,
-            author: (int) $authorId,
-            status: 'pending',
+            [
+                'commentId' => null,
+                'content' => $content,
+                'createdAt' => (new DateTime())->format('Y-m-d H:i:s'),
+                'postId' => $postId,
+                'author' => (int) $authorId,
+                'status' => 'pending',
+            ]
         );
 
         // Valider le commentaire.

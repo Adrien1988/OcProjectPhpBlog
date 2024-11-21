@@ -95,6 +95,9 @@ class PostController extends BaseController
             return new Response('', 302, ['Location' => '/login']);
         }
 
+        // Assurer que $authorId est un entier.
+        $authorId = (int) $authorId;
+
         if ($request->isMethod('POST') === true) {
             // Vérifier le token CSRF.
             $submittedToken = $request->request->get('_csrf_token');
@@ -102,31 +105,19 @@ class PostController extends BaseController
                 return new Response('Invalid CSRF token.', 403);
             }
 
-            // Nettoyage des entrées utilisateur avec SecurityService.
-            $title       = $this->cleanInput($request->request->get('title'));
-            $chapo       = $this->cleanInput($request->request->get('chapo'));
-            $postContent = $this->cleanInput($request->request->get('content'));
-
-            // Récupérer l'ID de l'auteur depuis la session.
-            $authorId = $this->sessionService->get('user_id');
-
-            // Assurer que $authorId est un entier.
-            $authorId = (int) $authorId;
-
-            // Crée un nouvel objet Post avec les données nettoyées.
             $postData = [
                 'postId' => null,
-                'title' => $title,
-                'chapo' => $chapo,
-                'content' => $postContent,
-                'author' => $authorId,
-                'createdAt' => new DateTime(),
+                'title' => $this->cleanInput($request->request->get('title')),
+                'chapo' => $this->cleanInput($request->request->get('chapo')),
+                'content' => $this->cleanInput($request->request->get('content')),
+                'author' => (int) $authorId,
+                'createdAt' => (new DateTime())->format('Y-m-d H:i:s'),
             ];
 
-            $post = new Post($postData, $this->validator);
+            $post = new Post($postData);
 
             // Validation du post.
-            $violations = $post->validate();
+            $violations = $this->validator->validate($post);
 
             if (count($violations) > 0) {
                 // Si des erreurs de validation sont présentes, les renvoyer à la vue.
@@ -142,7 +133,7 @@ class PostController extends BaseController
                     [
                         'csrf_token' => $this->generateCsrfToken('create_post_form'),
                         'errors'     => $errors,
-                        'post'       => $postData,
+                        'post'       => $post,
                     ]
                 );
             }
@@ -186,9 +177,6 @@ class PostController extends BaseController
             // Rediriger vers la page de connexion.
             return new Response('', 302, ['Location' => '/login']);
         }
-
-        // Récupérer l'utilisateur connecté.
-        $currentUser = $this->sessionService->get('user_id');
 
         $post = $postsRepository->findById($postId);
 
