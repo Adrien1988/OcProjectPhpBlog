@@ -51,7 +51,7 @@ class EnvironmentInit
             $requiredKeys = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
             foreach ($requiredKeys as $key) {
                 if ($repository->get($key) === null) {
-                    throw new \RuntimeException("La variable d'environnement obligatoire {$key} est manquante dans le fichier .env.");
+                    throw new RuntimeException("La variable d'environnement obligatoire {$key} est manquante dans le fichier .env.");
                 }
             }
 

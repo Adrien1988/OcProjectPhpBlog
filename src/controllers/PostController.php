@@ -188,7 +188,7 @@ class PostController extends BaseController
     {
         try {
             $this->isCsrfTokenValidOrFail('delete_post', $request);
-            $post = $this->fetchPostOrFail($postId, $postsRepository);
+            $this->fetchPostOrFail($postId, $postsRepository);
 
             $postsRepository->deletePost($postId);
 

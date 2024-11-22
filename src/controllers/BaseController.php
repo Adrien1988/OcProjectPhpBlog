@@ -441,6 +441,31 @@ class BaseController
 
 
     /**
+     * Valide l'URL de redirection pour s'assurer qu'elle est sûre.
+     *
+     * @param string $url L'URL à valider.
+     *
+     * @return bool True si l'URL est valide, sinon False.
+     */
+    protected function validateRedirectUrl(string $url): bool
+    {
+        // Autoriser uniquement les URL relatives ou celles appartenant au même domaine.
+        $parsedUrl = parse_url($url);
+        if ($parsedUrl === false) {
+            return false;
+        }
+
+        // Vérifier si l'URL est relative ou appartient au même domaine.
+        if (empty($parsedUrl['host']) || $parsedUrl['host'] === $this->getEnv('APP_HOST')) {
+            return true;
+        }
+
+        return false;
+
+    }//end validateRedirectUrl()
+
+
+    /**
      * Redirige vers une URL donnée.
      *
      * @param string $url L'URL vers laquelle rediriger.
@@ -449,6 +474,11 @@ class BaseController
      */
     protected function redirect(string $url): Response
     {
+
+        if ($this->validateRedirectUrl($url) === false) {
+            throw new Exception('URL de redirection invalide ou non sécurisée.', 400);
+        }
+
         return new Response('', 302, ['Location' => $url]);
 
     }//end redirect()
