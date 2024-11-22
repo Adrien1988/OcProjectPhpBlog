@@ -12,6 +12,7 @@ use App\Services\SecurityService;
 use App\Services\UrlGeneratorService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -440,45 +441,6 @@ class BaseController
     }//end isPostRequest()
 
 
-    // /**
-    // * Valide l'URL de redirection pour s'assurer qu'elle est sûre.
-    // *
-    // * @param string $url L'URL à valider.
-    // *
-    // * @return bool True si l'URL est valide, sinon False.
-    // */
-    // protected function validateRedirectUrl(string $url): bool
-    // {
-    // Liste des motifs autorisés pour toutes les entités.
-    // $allowedPatterns = [
-    // Routes pour les posts.
-    // '#^/posts$#',
-    // '#^/posts/$#',
-    // '#^/posts/\d+$#',
-    // '#^/posts/create$#',
-    // '#^/posts/edit/\d+$#',
-    // '#^/posts/delete/\d+$#',
-    // Routes pour les comments.
-    // '#^/comments$#',
-    // '#^/comments/\d+$#',
-    // '#^/comments/edit/\d+$#',
-    // '#^/comments/delete/\d+$#',
-    // Routes pour les users.
-    // '#^/users$#',
-    // '#^/users/\d+$#',
-    // '#^/users/edit/\d+$#',
-    // '#^/users/delete/\d+$#',
-    // ];
-    // Vérifiez si l'URL correspond à l'un des motifs autorisés.
-    // foreach ($allowedPatterns as $pattern) {
-    // if (preg_match($pattern, $url) === true) {
-    // return true;
-    // }
-    // }
-    // return false;
-    // }//end validateRedirectUrl()
-
-
     /**
      * Redirige vers une URL donnée.
      *
@@ -489,22 +451,13 @@ class BaseController
     protected function redirect(string $url): Response
     {
 
-        // Vérifie que l'URL est relative (commence par "/") pour garantir qu'elle reste interne.
+        // Vérifiez que l'URL est relative.
         if (str_starts_with($url, '/') === false) {
-            throw new Exception('L\'URL de redirection doit être relative et commencer par "/". Donnée : '.$url, 400);
+            throw new Exception('URL invalide pour la redirection. Elle doit commencer par "/".');
         }
 
-        // Vérifie que l'URL ne contient pas de protocole ou de domaine externe.
-        if (preg_match('#^(https?:)?//#', $url) === true) {
-            throw new Exception('Les redirections vers des URLs externes ne sont pas autorisées : '.$url, 400);
-        }
-
-        // Vérifie que l'URL ne contient pas de caractères interdits.
-        if (preg_match('#^[\w\-\/\?=&%]+$#', $url) === false) {
-            throw new Exception('L\'URL contient des caractères non autorisés : '.$url, 400);
-        }
-
-        return new Response('', 302, ['Location' => $url]);
+        // Utiliser RedirectResponse.
+        return new RedirectResponse($url, 302);
 
     }//end redirect()
 

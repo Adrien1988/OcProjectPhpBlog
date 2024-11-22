@@ -163,7 +163,11 @@ class PostController extends BaseController
                 $this->updatePostFromRequest($request, $post);
                 $postsRepository->updatePost($post);
 
-                $url = sprintf('/posts/%d', $postId);
+                if (is_numeric($postId) === false || (int) $postId <= 0) {
+                    throw new Exception('L\'ID du poste est invalide : '.$postId, 400);
+                }
+
+                $url = '/posts/'.(int) $postId;
                 return $this->redirect($url);
             }
 
