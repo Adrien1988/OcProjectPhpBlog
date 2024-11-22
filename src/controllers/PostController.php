@@ -163,7 +163,8 @@ class PostController extends BaseController
                 $this->updatePostFromRequest($request, $post);
                 $postsRepository->updatePost($post);
 
-                return $this->redirect('/posts/'.$postId);
+                $url = sprintf('/posts/%d', $postId);
+                return $this->redirect($url);
             }
 
             return $this->render(
