@@ -30,61 +30,31 @@ class CommentController extends BaseController
      */
     public function createComment(Request $request, int $postId, CommentsRepository $commentsRepository, PostsRepository $postsRepository): Response
     {
-
-        // Récupérer le post pour vérifier son existence.
-        $post = $postsRepository->findById($postId);
-
-        if ($post === null) {
-            throw new Exception('Post not found');
-        }
-
-        // Vérifier le token CSRF.
-        $submittedToken = $request->request->get('_csrf_token');
-        if ($this->isCsrfTokenValid('add_comment', $submittedToken) === false) {
-            return new Response('Token CSRF invalide.', 403);
-        }
-
-        $content  = $this->cleanInput($request->request->get('content'));
-        $authorId = $this->getSessionValue('user_id');
-
-        if ($authorId === null) {
-            // Si l'utilisateur n'est pas connecté, rediriger ou afficher un message.
-            return new Response('Vous devez être connecté pour ajouter un commentaire.', 403);
-        }
-
-        $comment = new Comment(
-            commentId: null,
-            content: $content,
-            createdAt: new DateTime(),
-            postId: $postId,
-            author: (int) $authorId,
-            status: 'pending',
-        );
-
-        // Valider le commentaire.
-        $violations = $this->validator->validate($comment);
-
-        if (count($violations) > 0) {
-            // Gérer les erreurs de validation.
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = $violation->getMessage();
-            }
-
-            // Renvoyer la vue avec les erreurs.
-            return $this->render(
-                'posts/detail.html.twig',
-                [
-                    'post' => $post,
-                    'errors' => $errors,
-                    'csrf_token' => $this->generateCsrfToken('add_comment'),
-                ]
-            );
-        }//end if
-
         // Enregistrer le commentaire dans la base de données.
         try {
+            $authorId = $this->getSessionValue('user_id');
+            if ($authorId === null) {
+                // Si l'utilisateur n'est pas connecté, rediriger ou afficher un message.
+                return $this->redirect('/login');
+            }
+
+            $post = $this->fetchPostOrFail($postId, $postsRepository);
+            $this->isCsrfTokenValid('add_comment', $request);
+
+            $comment = $this->buildComment($request, $postId, $authorId);
+
+            $validationErrors = $this->validateEntity($comment);
+            if (empty($validationErrors) === false) {
+                return $this->renderFormWithErrors(
+                    'posts/detail.html.twig',
+                    $validationErrors,
+                    ['post' => $post],
+                    $this->generateCsrfToken('add_comment')
+                );
+            }
+
             $commentsRepository->createComment($comment);
+
             // Renvoyer la vue avec le message de succès.
             return $this->render(
                 'posts/detail.html.twig',
@@ -95,8 +65,8 @@ class CommentController extends BaseController
                 ]
             );
         } catch (Exception $e) {
-            return new Response('Erreur lors de la création du commentaire : '.$e->getMessage(), 500);
-        }
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
 
     }//end createComment()
 
@@ -110,23 +80,7 @@ class CommentController extends BaseController
      */
     public function listPendingComments(CommentsRepository $commentsRepository): Response
     {
-        $userRole = $this->getSessionValue('user_role');
-
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
-        }
-
-        // Récupérer les commentaires en attente de validation.
-        $comments = $commentsRepository->findCommentsByStatus('pending');
-
-        // Rendre la vue avec les commentaires.
-        return $this->render(
-            'admin/comments_pending.html.twig',
-            [
-                'comments' => $comments,
-                'csrf_token' => $this->generateCsrfToken('comment_action'),
-            ]
-        );
+        return $this->listComments('pending', 'admin/comments_pending.html.twig', $commentsRepository);
 
     }//end listPendingComments()
 
@@ -142,26 +96,14 @@ class CommentController extends BaseController
      */
     public function validateComment(int $commentId, CommentsRepository $commentsRepository): Response
     {
-        $userRole = $this->getSessionValue('user_role');
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
-        }
-
-        $comment = $commentsRepository->findById($commentId);
-        if ($comment === null) {
-            return new Response('Commentaire introuvable.', 404);
-        }
-
         try {
+            $this->ensureAdminAccess();
+            $this->fetchCommentOrFail($commentId, $commentsRepository);
+
             $commentsRepository->updateCommentStatus($commentId, 'validated');
-
-            // Récupérer les commentaires en attente pour mettre à jour la page actuelle.
-            $comments = $commentsRepository->findCommentsByStatus('pending');
-
-            // Rediriger vers la vue des commentaires validés.
-            return $this->render('admin/comments_pending.html.twig', ['comments' => $comments, 'successMessage' => 'Le commentaire a été validé avec succès.', 'csrf_token' => $this->generateCsrfToken('comment_action')]);
+            return $this->listPendingComments($commentsRepository);
         } catch (Exception $e) {
-            return new Response('Erreur lors de la validation du commentaire : '.$e->getMessage(), 500);
+            return $this->renderError($e->getMessage(), $e->getCode());
         }
 
     }//end validateComment()
@@ -183,53 +125,52 @@ class CommentController extends BaseController
         CommentsRepository $commentsRepository,
         UsersRepository $usersRepository
     ): Response {
-        // Vérifier que l'utilisateur est un administrateur.
-        $userRole = $this->getSessionValue('user_role');
-
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
-        }
-
-        // Vérifier si le commentaire existe.
-        $comment = $commentsRepository->findById($commentId);
-        if ($comment === null) {
-            return new Response('Commentaire introuvable.', 404);
-        }
-
-        // Récupérer les informations de l'auteur du commentaire.
-        $authorId = $comment->getAuthor();
-        $user     = $usersRepository->findById($authorId);
-
-        $reason = $this->cleanInput($request->request->get('reason', 'Non conforme aux règles du blog'));
-
-        if ($user === null) {
-            return new Response("Utilisateur introuvable pour le commentaire ID: $commentId");
-        }
-
-        // Envoyer une notification à l'utilisateur.
-        $this->notifyUserCommentInvalidated($user, $comment, $reason);
 
         // Marquer le commentaire comme invalidé (non validé) dans la base de données.
         try {
+            $this->ensureAdminAccess();
+            $comment = $this->fetchCommentOrFail($commentId, $commentsRepository);
+            $user    = $this->fetchUserOrFail($comment->getAuthor(), $usersRepository);
+
+            $reason = $this->cleanInput($request->request->get('reason', 'Non conforme aux règles du blog'));
+
+            // Envoyer une notification à l'utilisateur.
+            $this->notifyUserCommentInvalidated($user, $comment, $reason);
+
             $commentsRepository->updateCommentStatus($commentId, 'rejected');
-
-            // Récupérer les commentaires en attente pour mettre à jour la page actuelle.
-            $comments = $commentsRepository->findCommentsByStatus('pending');
-
-            // Rediriger vers la liste des commentaires invalidés.
-            return $this->render(
-                'admin/comments_pending.html.twig',
-                [
-                    'comments' => $comments,
-                    'successMessage' => 'Le commentaire a été rejeté avec succès.',
-                    'csrf_token' => $this->generateCsrfToken('comment_action'),
-                ]
-            );
+            return $this->listPendingComments($commentsRepository);
         } catch (Exception $e) {
-            return new Response('Erreur lors de l\'invalidation du commentaire : '.$e->getMessage(), 500);
+            return $this->renderError($e->getMessage(), $e->getCode());
         }
 
     }//end invalidateComment()
+
+
+    /**
+     * Supprime un commentaire invalidé de la base de données.
+     *
+     * @param int                $commentId          L'ID du commentaire à supprimer.
+     * @param CommentsRepository $commentsRepository Le repository des commentaires.
+     *
+     * @return Response
+     */
+    public function deleteInvalidatedComment(int $commentId, CommentsRepository $commentsRepository): Response
+    {
+        try {
+            $this->ensureAdminAccess();
+            $comment = $this->fetchCommentOrFail($commentId, $commentsRepository);
+
+            if ($comment->getStatus() === 'validated') {
+                throw new Exception('Commentaire déjà validé.', 400);
+            }
+
+            $commentsRepository->deleteComment($commentId);
+            return $this->redirect('/admin/invalidated');
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }
+
+    }//end deleteInvalidatedComment()
 
 
     /**
@@ -245,22 +186,7 @@ class CommentController extends BaseController
      */
     public function listValidatedComments(CommentsRepository $commentsRepository): Response
     {
-        $userRole = $this->getSessionValue('user_role');
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
-        }
-
-        // Récupérer les commentaires validés.
-        $comments = $commentsRepository->findCommentsByStatus('validated');
-
-        // Afficher la vue des commentaires validés.
-        return $this->render(
-            'admin/comments_validated.html.twig',
-            [
-                'comments' => $comments,
-                'csrf_token' => $this->generateCsrfToken('comment_action'),
-            ]
-        );
+        return $this->listComments('validated', 'admin/comments_validated.html.twig', $commentsRepository);
 
     }//end listValidatedComments()
 
@@ -274,25 +200,138 @@ class CommentController extends BaseController
      */
     public function listInvalidatedComments(CommentsRepository $commentsRepository): Response
     {
-        // Vérifier que l'utilisateur est un administrateur.
-        $userRole = $this->getSessionValue('user_role');
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
+        return $this->listComments('rejected', 'admin/comments_invalidated.html.twig', $commentsRepository);
+
+    }//end listInvalidatedComments()
+
+
+    /**
+     * Récupère un commentaire ou lève une exception s'il est introuvable.
+     *
+     * @param int                $commentId          L'identifiant du commentaire à
+     *                                               récupérer.
+     * @param CommentsRepository $commentsRepository Le repository utilisé pour accéder aux
+     *                                               commentaires.
+     *
+     * @return object Le commentaire trouvé.
+     *
+     * @throws Exception Si le commentaire n'est pas trouvé.
+     */
+    private function fetchCommentOrFail(int $commentId, CommentsRepository $commentsRepository): object
+    {
+        $comment = $commentsRepository->findById($commentId);
+        if ($comment === null) {
+            throw new Exception('Commentaire introuvable.', 404);
         }
 
-        // Récupérer les commentaires invalidés.
-        $comments = $commentsRepository->findCommentsByStatus('rejected');
+        return $comment;
 
-        // Afficher la vue des commentaires invalidés.
-        return $this->render(
-            'admin/comments_invalidated.html.twig',
+    }//end fetchCommentOrFail()
+
+
+    /**
+     * Récupère un utilisateur ou lève une exception s'il est introuvable.
+     *
+     * @param int             $userId          L'identifiant de l'utilisateur à
+     *                                         récupérer.
+     * @param UsersRepository $usersRepository Le repository utilisé pour accéder aux
+     *                                         utilisateurs.
+     *
+     * @return object L'utilisateur trouvé.
+     *
+     * @throws Exception Si l'utilisateur n'est pas trouvé.
+     */
+    private function fetchUserOrFail(int $userId, UsersRepository $usersRepository): object
+    {
+        $user = $usersRepository->findById($userId);
+        if ($user === null) {
+            throw new Exception('Utilisateur introuvable.', 404);
+        }
+
+        return $user;
+
+    }//end fetchUserOrFail()
+
+
+    /**
+     * Construit un objet Comment à partir des données de la requête.
+     *
+     * @param Request $request  La requête HTTP contenant les données nécessaires.
+     * @param int     $postId   L'identifiant du post associé au commentaire.
+     * @param int     $authorId L'identifiant de l'auteur du commentaire.
+     *
+     * @return Comment Le commentaire construit.
+     */
+    private function buildComment(Request $request, int $postId, int $authorId): Comment
+    {
+        return new Comment(
             [
-                'comments' => $comments,
-                'csrf_token' => $this->generateCsrfToken('comment_action'),
+                'commentId' => null,
+                'content' => $this->cleanInput($request->request->get('content')),
+                'createdAt' => (new DateTime())->format('Y-m-d H:i:s'),
+                'postId' => $postId,
+                'author' => $authorId,
+                'status' => 'pending',
             ]
         );
 
-    }//end listInvalidatedComments()
+    }//end buildComment()
+
+
+    /**
+     * Affiche les commentaires par statut.
+     *
+     * @param string             $status             Le statut des commentaires à récupérer (e.g., "pending", "validated").
+     * @param string             $template           Le chemin du template Twig à utiliser pour l'affichage.
+     * @param CommentsRepository $commentsRepository Le repository utilisé pour accéder aux commentaires.
+     *
+     * @return Response La réponse HTTP contenant les commentaires rendus dans la vue.
+     */
+    private function listComments(string $status, string $template, CommentsRepository $commentsRepository): Response
+    {
+        try {
+            $this->ensureAdminAccess();
+            $comments = $commentsRepository->findCommentsByStatus($status);
+            return $this->render(
+                $template,
+                [
+                    'comments' => $comments,
+                    'csrf_token' => $this->generateCsrfToken('comment_action'),
+                ]
+            );
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }
+
+    }//end listComments()
+
+
+    /**
+     * Vérifie si l'utilisateur est administrateur.
+     *
+     * @return bool True si l'utilisateur a le rôle "Admin", sinon False.
+     */
+    private function isAdmin(): bool
+    {
+        return $this->getSessionValue('user_role') === 'Admin';
+
+    }//end isAdmin()
+
+
+    /**
+     * Assure que l'utilisateur est administrateur, sinon lève une exception.
+     *
+     * @throws Exception Si l'utilisateur n'est pas administrateur.
+     *
+     * @return void
+     */
+    private function ensureAdminAccess(): void
+    {
+        if ($this->isAdmin() === false) {
+            throw new Exception('Accès interdit', 403);
+        }
+
+    }//end ensureAdminAccess()
 
 
     /**
@@ -320,41 +359,6 @@ class CommentController extends BaseController
         $this->emailService->sendEmail($user->getEmail(), $subject, $message);
 
     }//end notifyUserCommentInvalidated()
-
-
-    /**
-     * Supprime un commentaire invalidé de la base de données.
-     *
-     * @param int                $commentId          L'ID du commentaire à supprimer.
-     * @param CommentsRepository $commentsRepository Le repository des commentaires.
-     *
-     * @return Response
-     */
-    public function deleteInvalidatedComment(int $commentId, CommentsRepository $commentsRepository): Response
-    {
-        // Vérifier que l'utilisateur est un administrateur.
-        $userRole = $this->getSessionValue('user_role');
-        if ($userRole !== 'Admin') {
-            return new Response('Accès interdit', 403);
-        }
-
-        // Vérifier si le commentaire existe et est invalidé.
-        $comment = $commentsRepository->findById($commentId);
-        if ($comment === null || $comment->getStatus() === 'validated') {
-            return new Response('Commentaire introuvable ou déjà validé.', 404);
-        }
-
-        // Supprimer le commentaire.
-        try {
-            $commentsRepository->deleteComment($commentId);
-
-            // Rediriger vers la liste des commentaires invalidés avec un message de succès.
-            return new Response('', 302, ['Location' => '/admin/invalidated']);
-        } catch (Exception $e) {
-            return new Response('Erreur lors de la suppression du commentaire : '.$e->getMessage(), 500);
-        }
-
-    }//end deleteInvalidatedComment()
 
 
 }//end class

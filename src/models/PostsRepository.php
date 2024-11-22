@@ -8,7 +8,6 @@ use App\Models\Post;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Gère les opérations de la base de données pour les entités Post.
@@ -25,25 +24,16 @@ class PostsRepository
      */
     private DatabaseInterface $dbi;
 
-    /**
-     * Le validateur Symfony.
-     *
-     * @var ValidatorInterface
-     */
-    private ValidatorInterface $validator;
-
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface  $dbi       Interface pour interagir avec la base de
-     *                                      données.
-     * @param ValidatorInterface $validator Le validateur Symfony.
+     * @param DatabaseInterface $dbi Interface pour interagir avec la base de
+     *                               données.
      */
-    public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
+    public function __construct(DatabaseInterface $dbi)
     {
-        $this->dbi       = $dbi;
-        $this->validator = $validator;
+        $this->dbi = $dbi;
 
     }//end __construct()
 
@@ -119,22 +109,6 @@ class PostsRepository
      */
     public function createPost(Post $post): Post
     {
-        $post->setValidator($this->validator);
-
-        // Validation avant l'insertion.
-        $violations = $post->validate();
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[] = $violation->getMessage();
-            }
-
-            throw new Exception('Erreur de validation : '.implode(', ', $messages));
-        }
-
-        // Récupérer l'heure actuelle avec le fuseau horaire correct.
-        $createdAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
-
         // La requête SQL pour insérer un nouvel article.
         $sql = "INSERT INTO `post` (`title`, `chapo`, `content`, `author`, `created_at`) 
         VALUES (:title, :chapo, :content, :author, :created_at)";
@@ -147,6 +121,8 @@ class PostsRepository
         $stmt->bindValue(':chapo', $post->getChapo());
         $stmt->bindValue(':content', $post->getContent());
         $stmt->bindValue(':author', $post->getAuthor());
+        // Récupérer l'heure actuelle avec le fuseau horaire correct.
+        $createdAt = new DateTime('now', new DateTimeZone('Europe/Paris'));
         $stmt->bindValue(':created_at', $createdAt->format('Y-m-d H:i:s'));
 
         // Exécution de la requête.
@@ -321,17 +297,17 @@ class PostsRepository
      */
     private function buildPostFromRow(array $row): Post
     {
-        $postData = [
-            'postId' => (int) $row['post_id'],
-            'title'  => $row['title'],
-            'chapo'  => $row['chapo'],
-            'content' => $row['content'],
-            'author' => (isset($row['author']) === true) ? (int) $row['author'] : null,
-            'createdAt' => new DateTime($row['created_at']),
-            'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
-        ];
-
-        return new Post($postData, $this->validator);
+        return new Post(
+            [
+                'postId' => (int) $row['post_id'],
+                'title' => $row['title'],
+                'chapo' => $row['chapo'],
+                'content' => $row['content'],
+                'author' => (int) $row['author'],
+                'createdAt' => $row['created_at'],
+                'updatedAt' => ($row['updated_at'] ?? null),
+            ]
+        );
 
     }//end buildPostFromRow()
 

@@ -24,92 +24,37 @@ class AuthController extends BaseController
      */
     public function register(Request $request, UsersRepository $usersRepository): Response
     {
-        if ($request->isMethod('POST') === true) {
-            // Vérifier le token CSRF.
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->isCsrfTokenValid('register_form', $submittedToken) === false) {
-                return new Response('Invalid CSRF token.', 403);
-            }
+        try {
+            if ($this->isPostRequest($request) === true) {
+                $this->isCsrfTokenValidOrFail('register_form', $request);
 
-            // Récupération des données du formulaire et création de l'objet User.
-            $userData = [
-                'userId'    => null,
-                // Pour un nouvel utilisateur, mettre null ici.
-                'lastName'  => $this->cleanInput($request->request->get('last_name')),
-                'firstName' => $this->cleanInput($request->request->get('first_name')),
-                'email'     => $this->cleanInput($request->request->get('email')),
-                'password'  => password_hash($request->request->get('password'), PASSWORD_BCRYPT),
-                'role'      => 'user',
-                'createdAt' => new DateTime(),
-                // Date actuelle pour la création.
-                'updatedAt' => null,
-                'token'     => null,
-                'expireAt'  => null,
-                'passwordResetToken'      => null,
-                'passwordResetExpiresAt'  => null,
-            ];
+                $userData = $this->extractUserData($request, ['role' => 'user']);
+                $user     = new User($userData);
 
-            // Instancier l'objet User avec les données et le validateur injecté.
-            $user = new User($userData, $this->validator);
-
-            // Validation de l'utilisateur.
-            $violations = $user->validate();
-
-            if (count($violations) > 0) {
-                $errors = [];
-                foreach ($violations as $violation) {
-                    $errors[] = $violation->getMessage();
+                $validationErrors = $this->validateEntity($user);
+                if (empty($validationErrors) === false) {
+                    return $this->renderFormWithErrors('auth/register.html.twig', $validationErrors, $userData, $this->generateCsrfToken('register_form'));
                 }
 
-                return $this->render(
-                    'auth/register.html.twig',
-                    [
-                        'errors' => $errors,
-                        'last_name' => $user->getLastName(),
-                        'first_name' => $user->getFirstName(),
-                        'email' => $user->getEmail(),
-                        'csrf_token' => $submittedToken,
-                    ]
-                );
-            }
+                if ($usersRepository->findByEmail($user->getEmail()) === true) {
+                    return $this->renderFormWithErrors(
+                        'auth/register.html.twig',
+                        ['Cet email est déjà utilisé.'],
+                        $userData,
+                        $this->generateCsrfToken('register_form')
+                    );
+                }
 
-            // Vérifier si l'utilisateur existe déjà.
-            if ($usersRepository->findByEmail($user->getEmail()) !== null) {
-                $errors[] = 'Un compte avec cet e-mail existe déjà.';
-                return $this->render(
-                    'auth/register.html.twig',
-                    [
-                        'errors' => $errors,
-                        'last_name' => $user->getLastName(),
-                        'first_name' => $user->getFirstName(),
-                        'email' => $user->getEmail(),
-                        'csrf_token' => $submittedToken,
-                    ]
-                );
-            }
+                $usersRepository->createUser($user);
+                $this->loginUser($user);
 
-            // Enregistrer l'utilisateur.
-            $user = $usersRepository->createUser($user);
+                return $this->redirect('/');
+            }//end if
 
-            // Vérifier que l'ID est bien défini.
-            if ($user->getId() === null) {
-                throw new Exception('Impossible de récupérer l\'ID de l\'utilisateur après l\'enregistrement.');
-            }
-
-            // Connecter l'utilisateur en définissant les informations en session.
-            $this->sessionService->set('user_id', $user->getId());
-            $this->sessionService->set('user_role', $user->getRole());
-
-            return new Response('', 302, ['Location' => '/']);
-        }//end if
-
-        // Affichage du formulaire.
-        return $this->render(
-            'auth/register.html.twig',
-            [
-                'csrf_token' => $this->generateCsrfToken('register_form'),
-            ]
-        );
+            return $this->render('auth/register.html.twig', ['csrf_token' => $this->generateCsrfToken('register_form')]);
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
 
     }//end register()
 
@@ -125,52 +70,32 @@ class AuthController extends BaseController
      */
     public function login(Request $request, UsersRepository $usersRepository): Response
     {
-        if ($request->isMethod('POST') === true) {
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->isCsrfTokenValid('login_form', $submittedToken) === false) {
-                return new Response('Invalid CSRF token.', 403);
+        try {
+            if ($this->isPostRequest($request) === true) {
+                $this->isCsrfTokenValidOrFail('login_form', $request);
+
+                $email    = $this->cleanInput($request->request->get('email'));
+                $password = $request->request->get('password');
+                $user     = $usersRepository->findByEmail($email);
+
+                if ($this->isValidLogin($user, $password) === false) {
+                    return $this->renderFormWithErrors(
+                        'auth/login.html.twig',
+                        ['Identifiants incorrects.'],
+                        ['email' => $email],
+                        $this->generateCsrfToken('login_form')
+                    );
+                }
+
+                $this->loginUser($user);
+
+                return $this->redirect('/');
             }
 
-            $email    = $this->cleanInput($request->request->get('email'));
-            $password = $request->request->get('password');
-
-            // Vérifier si l'utilisateur existe.
-            $user = $usersRepository->findByEmail($email);
-
-            if ($user === null || password_verify($password, $user->getPassword()) === false) {
-                $errors = ['Identifiants incorrects'];
-
-                return $this->render(
-                    'auth/login.html.twig',
-                    [
-                        'errors' => $errors,
-                        'email'  => $email,
-                        'csrf_token' => $submittedToken,
-                    ]
-                );
-            }
-
-            // Utiliser le SessionService pour stocker les informations de l'utilisateur connecté.
-            $this->sessionService->set('user_id', $user->getId());
-            $this->sessionService->set('user_role', $user->getRole());
-
-            return new Response('', 302, ['Location' => '/']);
-        }//end if
-
-        // Récupérer le message de succès depuis la session, s'il existe.
-        $successMessage = $this->sessionService->get('success_message', null);
-
-        // Supprimer le message de la session pour qu'il ne s'affiche qu'une seule fois.
-        $this->sessionService->remove('success_message');
-
-        // Affichage du formulaire de connexion.
-        return $this->render(
-            'auth/login.html.twig',
-            [
-                'csrf_token' => $this->generateCsrfToken('login_form'),
-                'successMessage' => $successMessage,
-            ]
-        );
+            return $this->renderLoginPage();
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
 
     }//end login()
 
@@ -184,8 +109,7 @@ class AuthController extends BaseController
     {
         // Utiliser le SessionService pour détruire la session de l'utilisateur.
         $this->sessionService->destroy();
-
-        return new Response('', 302, ['Location' => '/']);
+        return $this->redirect('/');
 
     }//end logout()
 
@@ -198,117 +122,30 @@ class AuthController extends BaseController
      *
      * @return Response La réponse HTTP.
      */
-    public function passwordResetRequest(Request $request, UsersRepository $usersRepository) : Response
+    public function passwordResetRequest(Request $request, UsersRepository $usersRepository): Response
     {
-        if ($request->isMethod('POST') === true) {
-            $email = trim($request->request->get('email'));
+        try {
+            if ($this->isPostRequest($request) === true) {
+                $email = $this->cleanInput($request->request->get('email'));
 
-            // Rechercher l'utilisateur par e-mail.
-            $user = $usersRepository->findByEmail($email);
+                $user = $usersRepository->findByEmail($email);
+                if ($user !== null) {
+                    $this->initiatePasswordReset($user, $usersRepository);
+                }
 
-            if ($user !== null) {
-                // Générer le token et l'envoyer par e-mail.
-                $this->sendPasswordResetEmail($user, $usersRepository);
+                $this->setSuccessMessage('Si cet email est valide, un message vous a été envoyé.');
+                return $this->redirect('/password-reset-request/success');
             }
 
-            // Toujours afficher un message de succès pour éviter de révéler si l'e-mail existe.
-            // Stocker le message de succès dans la session.
-            $this->sessionService->set('success_message', 'Si un compte est associé à cette adresse e-mail, un message a été envoyé avec les instructions pour réinitialiser votre mot de passe. Ce lien expirera dans 1 heure.');
-
-            // Rediriger vers la page de succès.
-            return new Response('', 302, ['Location' => '/password-reset-request/success']);
+            return $this->render(
+                'auth/password_reset_request.html.twig',
+                ['csrf_token' => $this->generateCsrfToken('password_reset_request_form')]
+            );
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
         }
 
-        // Afficher le formulaire de demande de réinitialisation.
-        return $this->render(
-            'auth/password_reset_request.html.twig',
-            [
-                'csrf_token' => $this->generateCsrfToken('password_reset_request_form'),
-            ]
-        );
-
     }//end passwordResetRequest()
-
-
-    /**
-     * Affiche la page de succès après une demande de réinitialisation de mot de passe.
-     *
-     * @return Response La réponse HTTP.
-     */
-    public function passwordResetRequestSuccess(): Response
-    {
-        // Récupérer le message de succès depuis la session.
-        $successMessage = $this->sessionService->get('success_message', null);
-
-        // Supprimer le message de la session pour qu'il ne s'affiche qu'une seule fois.
-        $this->sessionService->remove('success_message');
-
-        // Afficher la vue de succès.
-        return $this->render(
-            'auth/password_reset_request_success.html.twig',
-            [
-                'message' => $successMessage,
-            ]
-        );
-
-    }//end passwordResetRequestSuccess()
-
-
-    /**
-     * Envoie l'e-mail de réinitialisation de mot de passe à l'utilisateur.
-     *
-     * @param User            $user            L'utilisateur qui a demandé la réinitialisation.
-     * @param UsersRepository $usersRepository Le repository pour accéder aux utilisateurs.
-     *
-     * @return void
-     */
-    private function sendPasswordResetEmail(User $user, UsersRepository $usersRepository): void
-    {
-        // Générer un token sécurisé.
-        $token = bin2hex(random_bytes(32));
-
-        // Définir une date d'expiration (par exemple, 1 heure).
-        $expiresAt = (new DateTime())->modify('+1 hour');
-
-        // Enregistrer le token et l'expiration dans la base de données.
-        $user->setPwdResetToken($token);
-        $user->setPwdResetExpiresAt($expiresAt);
-        $usersRepository->updateUser($user);
-
-        // Générer le lien de réinitialisation.
-        $resetLink = $this->generateResetLink($token);
-
-        // Ajouter une instruction pour enregistrer ou afficher le lien.
-        error_log("Lien de réinitialisation généré : {$resetLink}");
-
-        // Envoyer l'e-mail (Vous devrez implémenter le service d'envoi d'e-mails).
-        $subject = 'Réinitialisation de votre mot de passe';
-        $body    = $this->renderTemplate(
-            'emails/password_reset_email.html.twig',
-            [
-                'reset_link' => $resetLink,
-            ]
-        );
-
-        // Utilisez votre service d'envoi d'e-mails.
-        $this->emailService->sendEmail($user->getEmail(), $subject, $body);
-
-    }//end sendPasswordResetEmail()
-
-
-    /**
-     * Génère le lien de réinitialisation de mot de passe.
-     *
-     * @param string $token Le token de réinitialisation du mot de passe.
-     *
-     * @return string Le lien complet pour la réinitialisation du mot de passe.
-     */
-    private function generateResetLink(string $token): string
-    {
-        // Passer le troisième argument à UrlGenerator::ABSOLUTE_URL pour obtenir une URL complète.
-        return $this->urlGeneratorService->generateUrl('password_reset', ['token' => $token], UrlGenerator::ABSOLUTE_URL);
-
-    }//end generateResetLink()
 
 
     /**
@@ -322,54 +159,187 @@ class AuthController extends BaseController
      */
     public function passwordReset(Request $request, UsersRepository $usersRepository, string $token): Response
     {
-        $user = $usersRepository->findByPwdResetToken($token);
-
-        if ($this->isTokenValidForPasswordReset($user) === false) {
-            return $this->render('auth/password_reset_invalid.html.twig');
-        }
-
-        if ($request->isMethod('POST') === true && $this->isCsrfTokenValidForForm($request, 'password_reset_form') === true) {
-            $newPassword     = trim($request->request->get('password'));
-            $confirmPassword = trim($request->request->get('confirm_password'));
-
-            $errors = $this->validatePasswordResetInput($newPassword, $confirmPassword);
-
-            if (empty($errors) === true) {
-                // Hacher le nouveau mot de passe et mettre à jour l'utilisateur.
-                $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
-                $user->setPwdResetToken(null);
-                $user->setPwdResetExpiresAt(null);
-                $user->setUpdatedAt(new DateTime());
-
-                $usersRepository->updateUser($user);
-
-                // Stocker le message de succès dans la session.
-                $this->sessionService->set('success_message', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');
-
-                // Rediriger vers la page de connexion.
-                return new Response('', 302, ['Location' => '/login']);
+        try {
+            $user = $usersRepository->findByPwdResetToken($token);
+            if ($user === false || $this->isTokenValidForPasswordReset($user) === false) {
+                return $this->render('auth/password_reset_invalid.html.twig');
             }
 
-            return $this->render(
-                'auth/password_reset.html.twig',
-                [
-                    'errors' => $errors,
-                    'csrf_token' => $this->generateCsrfToken('password_reset_form'),
-                    'token' => $token,
-                ]
-            );
-        }//end if
+            if ($this->isPostRequest($request) === true) {
+                $this->isCsrfTokenValidOrFail('password_reset_form', $request);
 
-        // Afficher le formulaire de réinitialisation.
-        return $this->render(
-            'auth/password_reset.html.twig',
+                $errors = $this->processPasswordReset($request, $user, $usersRepository);
+                if (empty($errors) === true) {
+                    $this->setSuccessMessage('Mot de passe réinitialisé avec succès.');
+                    return $this->redirect('/login');
+                }
+
+                return $this->renderPasswordResetForm($token, $errors);
+            }
+
+            return $this->renderPasswordResetForm($token);
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
+
+    }//end passwordReset()
+
+
+    /**
+     * Extrait les données utilisateur de la requête.
+     *
+     * @param Request $request        L'objet de la requête
+     *                                HTTP.
+     * @param array   $additionalData Les données supplémentaires à
+     *                                inclure.
+     *
+     * @return array Les données utilisateur extraites.
+     */
+    private function extractUserData(Request $request, array $additionalData=[]): array
+    {
+        return array_merge(
             [
-                'token' => $token,
-                'csrf_token' => $this->generateCsrfToken('password_reset_form'),
+                'userId' => null,
+                'lastName' => $this->cleanInput($request->request->get('last_name')),
+                'firstName' => $this->cleanInput($request->request->get('first_name')),
+                'email' => $this->cleanInput($request->request->get('email')),
+                'password' => password_hash($request->request->get('password'), PASSWORD_BCRYPT),
+                'createdAt' => new DateTime(),
+                'updatedAt' => null,
+                'token' => null,
+                'expireAt' => null,
+                'pwdResetToken' => null,
+                'pwdResetExpiresAt' => null,
+            ],
+            $additionalData
+        );
+
+    }//end extractUserData()
+
+
+    /**
+     * Connecte un utilisateur.
+     *
+     * @param User $user L'utilisateur à connecter.
+     *
+     * @return void
+     */
+    private function loginUser(User $user): void
+    {
+        $this->sessionService->set('user_id', $user->getId());
+        $this->sessionService->set('user_role', $user->getRole());
+
+    }//end loginUser()
+
+
+    /**
+     * Vérifie les identifiants de connexion.
+     *
+     * @param User|null $user     L'utilisateur à vérifier.
+     * @param string    $password Le mot de passe fourni.
+     *
+     * @return bool Retourne true si les identifiants sont valides, sinon false.
+     */
+    private function isValidLogin(?User $user, string $password): bool
+    {
+        return $user !== null && password_verify($password, $user->getPassword());
+
+    }//end isValidLogin()
+
+
+    /**
+     * Rend la page de connexion avec un message de succès, le cas échéant.
+     *
+     * @return Response
+     */
+    private function renderLoginPage(): Response
+    {
+        $successMessage = $this->getAndRemoveSuccessMessage();
+
+        return $this->render(
+            'auth/login.html.twig',
+            [
+                'csrf_token' => $this->generateCsrfToken('login_form'),
+                'successMessage' => $successMessage,
             ]
         );
 
-    }//end passwordReset()
+    }//end renderLoginPage()
+
+
+    /**
+     * Gère l'initialisation de la réinitialisation du mot de passe pour un utilisateur.
+     *
+     * @param User            $user            L'utilisateur concerné.
+     * @param UsersRepository $usersRepository Le repository pour sauvegarder les modifications.
+     *
+     * @return void
+     */
+    private function initiatePasswordReset(User $user, UsersRepository $usersRepository): void
+    {
+        $token     = bin2hex(random_bytes(32));
+        $expiresAt = (new DateTime())->modify('+1 hour');
+
+        $user->setPwdResetToken($token);
+        $user->setPwdResetExpiresAt($expiresAt);
+        $usersRepository->updateUser($user);
+
+        $resetLink = $this->generateResetLink($token);
+        $this->sendPasswordResetEmail($user, $resetLink);
+
+    }//end initiatePasswordReset()
+
+
+    /**
+     * Traite les données soumises pour la réinitialisation du mot de passe.
+     *
+     * @param Request         $request         La requête HTTP contenant les données.
+     * @param User            $user            L'utilisateur concerné.
+     * @param UsersRepository $usersRepository Le repository pour sauvegarder les modifications.
+     *
+     * @return array Liste des erreurs rencontrées lors de la réinitialisation.
+     */
+    private function processPasswordReset(Request $request, User $user, UsersRepository $usersRepository): array
+    {
+        $newPassword     = trim($request->request->get('password'));
+        $confirmPassword = trim($request->request->get('confirm_password'));
+
+        $errors = $this->validatePasswordResetInput($newPassword, $confirmPassword);
+
+        if (empty($errors) === true) {
+            $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
+            $user->setPwdResetToken(null);
+            $user->setPwdResetExpiresAt(null);
+            $user->setUpdatedAt(new DateTime());
+
+            $usersRepository->updateUser($user);
+        }
+
+        return $errors;
+
+    }//end processPasswordReset()
+
+
+    /**
+     * Rend le formulaire de réinitialisation du mot de passe.
+     *
+     * @param string $token  Le token de réinitialisation du mot de passe.
+     * @param array  $errors Liste des erreurs à afficher dans le formulaire (par défaut vide).
+     *
+     * @return Response La réponse HTTP contenant le formulaire rendu.
+     */
+    private function renderPasswordResetForm(string $token, array $errors=[]): Response
+    {
+        return $this->render(
+            'auth/password_reset.html.twig',
+            [
+                'csrf_token' => $this->generateCsrfToken('password_reset_form'),
+                'token'      => $token,
+                'errors'     => $errors,
+            ]
+        );
+
+    }//end renderPasswordResetForm()
 
 
     /**
@@ -411,19 +381,43 @@ class AuthController extends BaseController
 
 
     /**
-     * Valide le token CSRF pour le formulaire de réinitialisation.
+     * Génère le lien de réinitialisation de mot de passe.
      *
-     * @param Request $request  L'objet de la requête
-     *                          HTTP.
-     * @param string  $formName Le nom du formulaire pour le token CSRF.
+     * @param string $token Le token de réinitialisation du mot de passe.
      *
-     * @return bool Retourne true si le token est valide, sinon false.
+     * @return string Le lien complet pour la réinitialisation du mot de passe.
      */
-    private function isCsrfTokenValidForForm(Request $request, string $formName): bool
+    private function generateResetLink(string $token): string
     {
-        return $this->isCsrfTokenValid($formName, $request->request->get('_csrf_token'));
+        // Passer le troisième argument à UrlGenerator::ABSOLUTE_URL pour obtenir une URL complète.
+        return $this->urlGeneratorService->generateUrl('password_reset', ['token' => $token], UrlGenerator::ABSOLUTE_URL);
 
-    }//end isCsrfTokenValidForForm()
+    }//end generateResetLink()
+
+
+    /**
+     * Envoie l'e-mail de réinitialisation de mot de passe à l'utilisateur.
+     *
+     * @param User   $user      L'utilisateur qui a demandé la réinitialisation.
+     * @param string $resetLink Le lien de réinitialisation généré pour l'utilisateur.
+     *
+     * @return void
+     */
+    private function sendPasswordResetEmail(User $user, string $resetLink): void
+    {
+        // Envoyer l'e-mail (Vous devrez implémenter le service d'envoi d'e-mails).
+        $subject = 'Réinitialisation de votre mot de passe';
+        $body    = $this->renderTemplate(
+            'emails/password_reset_email.html.twig',
+            [
+                'reset_link' => $resetLink,
+            ]
+        );
+
+        // Utilisez votre service d'envoi d'e-mails.
+        $this->emailService->sendEmail($user->getEmail(), $subject, $body);
+
+    }//end sendPasswordResetEmail()
 
 
 }//end class

@@ -8,6 +8,9 @@ use App\Models\Traits\AuthTrait;
 use App\Models\Traits\TimestampableTrait;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Classe Comment représentant une entité pour les commentaires.
+ */
 class Comment
 {
 
@@ -26,7 +29,7 @@ class Comment
     private string $content;
 
     /**
-     * Indique si le commentaire a été validé.
+     * Le statut du commentaire (e.g., validé, en attente, rejeté).
      *
      * @var string
      */
@@ -48,40 +51,29 @@ class Comment
     /**
      * Constructeur de la classe Comment.
      *
-     * @param int|null $commentId L'ID du commentaire (null si non
-     *                            défini).
-     * @param string   $content   Le contenu du commentaire.
-     * @param DateTime $createdAt La date de création du
-     *                            commentaire.
-     * @param int      $postId    L'ID du post
-     *                            associé.
-     * @param int      $author    L'ID de l'auteur du commentaire.
-     * @param string   $status    Indique l'état du
-     *                            commentaire.
+     * @param array $commentData Tableau contenant les données du commentaire :
+     *                           - 'commentId' : int|null, l'ID du commentaire.
+     *                           - 'content' : string, le contenu du commentaire.
+     *                           - 'createdAt' : string, la date de création du commentaire.
+     *                           - 'postId' : int, l'ID du post associé.
+     *                           - 'author' : int, l'ID de l'auteur.
+     *                           - 'status' : string, le statut du commentaire.
      */
     public function __construct(
-        ?int $commentId,
-        string $content,
-        DateTime $createdAt,
-        int $postId,
-        int $author,
-        string $status,
+        array $commentData
     ) {
-        if ($commentId !== null) {
-            $this->setId($commentId);
-        }
-
-        $this->setContent($content);
-        $this->setCreatedAt($createdAt);
-        $this->setPostId($postId);
-        $this->setAuthor($author);
-        $this->setStatus($status);
+        $this->setId(($commentData['commentId'] ?? null));
+        $this->setContent($commentData['content']);
+        $this->setCreatedAt(new DateTime($commentData['createdAt']));
+        $this->setPostId($commentData['postId']);
+        $this->setAuthor($commentData['author']);
+        $this->setStatus($commentData['status']);
 
     }//end __construct()
 
 
     /**
-     * Gets the content of the comment.
+     * Obtient le contenu du commentaire.
      *
      * @return string
      */
@@ -93,9 +85,9 @@ class Comment
 
 
     /**
-     * Sets the content of the comment.
+     * Définit le contenu du commentaire.
      *
-     * @param string $content the content of the comment.
+     * @param string $content Le contenu du commentaire.
      *
      * @return void
      */
@@ -107,7 +99,7 @@ class Comment
 
 
     /**
-     * Gets whether the comment has been validated.
+     * Obtient le statut du commentaire.
      *
      * @return string
      */
@@ -119,9 +111,9 @@ class Comment
 
 
     /**
-     * Sets whether the comment has been validated.
+     * Définit le statut du commentaire.
      *
-     * @param string $status whether the comment has been validated.
+     * @param string $status Le statut du commentaire.
      *
      * @return void
      */
@@ -133,7 +125,7 @@ class Comment
 
 
     /**
-     * Gets the ID of the post to which the comment belongs.
+     * Obtient l'ID du post associé.
      *
      * @return int
      */
@@ -145,9 +137,9 @@ class Comment
 
 
     /**
-     * Sets the ID of the post to which the comment belongs.
+     * Définit l'ID du post associé.
      *
-     * @param int $postId The ID of the post.
+     * @param int $postId L'ID du post.
      *
      * @return void
      */

@@ -3,13 +3,17 @@
 namespace App\Controllers;
 
 use Twig\Environment;
+use Models\PostsRepository;
 use App\Services\EnvService;
 use App\Services\CsrfService;
 use App\Services\EmailService;
 use App\Services\SessionService;
 use App\Services\SecurityService;
 use App\Services\UrlGeneratorService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
@@ -116,6 +120,9 @@ class BaseController
     }//end __construct()
 
 
+    // Méthodes de rendu.
+
+
     /**
      * Rendre un template Twig avec les données fournies.
      *
@@ -150,6 +157,47 @@ class BaseController
 
 
     /**
+     * Rend une page d'erreur avec un message et un code de statut.
+     *
+     * @param string          $message    Le message d'erreur à
+     *                                    afficher.
+     * @param int             $statusCode Le code de statut HTTP à
+     *                                    retourner.
+     * @param \Exception|null $exception  (Optionnel) L'exception qui a déclenché
+     *                                    l'erreur.
+     *
+     * @return Response La réponse HTTP avec le message d'erreur.
+     */
+    protected function renderError(string $message, int $statusCode=500, ?\Exception $exception=null): Response
+    {
+        // Si une exception est fournie, on peut consigner l'erreur dans un fichier de log.
+        if ($exception !== null) {
+            error_log('[Error] '.$exception->getMessage().' in '.$exception->getFile().' on line '.$exception->getLine());
+        }
+
+        // Rendu d'une page d'erreur Twig (si disponible) ou simple réponse texte.
+        try {
+            return $this->render(
+                'error.html.twig',
+                [
+                    'error_message' => $message,
+                    'status_code' => $statusCode,
+                    'exception' => $exception,
+                ]
+            )->setStatusCode($statusCode);
+        } catch (\Exception $e) {
+            // Si le rendu Twig échoue, consigner l'erreur dans les logs et retourner une réponse texte.
+            error_log('[Error Rendering] '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine());
+            return new Response($message.' (Une erreur supplémentaire est survenue lors du rendu de la page d\'erreur.)', $statusCode);
+        }
+
+    }//end renderError()
+
+
+    // Méthodes de validation CSRF.
+
+
+    /**
      * Générer un token CSRF.
      *
      * @param string $tokenId L'identifiant du token.
@@ -179,6 +227,41 @@ class BaseController
 
 
     /**
+     * Valide un token CSRF ou lève une exception en cas d'échec.
+     *
+     * @param string  $tokenId Le nom du token attendu.
+     * @param Request $request La requête contenant le token soumis.
+     *
+     * @return void
+     *
+     * @throws Exception Si le token CSRF est invalide.
+     */
+    protected function isCsrfTokenValidOrFail(string $tokenId, Request $request): void
+    {
+        $submittedToken = $request->request->get('_csrf_token');
+        if ($this->isCsrfTokenValid($tokenId, $submittedToken) === false) {
+            throw new Exception('Invalid CSRF token.', 403);
+        }
+
+    }//end isCsrfTokenValidOrFail()
+
+
+    /**
+     * Gérer une erreur CSRF.
+     *
+     * @return Response
+     */
+    protected function csrfErrorResponse(): Response
+    {
+        return new Response('Invalid CSRF token.', 403);
+
+    }//end csrfErrorResponse()
+
+
+    // Nettoyage des entrées utilisateur.
+
+
+    /**
      * Méthode pour nettoyer les entrées utilisateur avec le service de sécurité.
      *
      * @param string $input L'entrée à nettoyer.
@@ -190,6 +273,50 @@ class BaseController
         return $this->securityService->cleanInput($input);
 
     }//end cleanInput()
+
+
+    // Validation d'entité.
+
+
+    /**
+     * Valide une entité et retourne les erreurs.
+     *
+     * @param object $entity L'entité à valider.
+     *
+     * @return array Liste des messages d'erreur.
+     */
+    protected function validateEntity(object $entity): array
+    {
+        $violations = $this->validator->validate($entity);
+        $errors     = [];
+        foreach ($violations as $violation) {
+            $errors[] = $violation->getMessage();
+        }
+
+        return $errors;
+
+    }//end validateEntity()
+
+
+    /**
+     * Gère les erreurs de validation.
+     *
+     * @param string      $template  Le template à afficher.
+     * @param array       $errors    Liste des erreurs.
+     * @param array       $data      Données supplémentaires à transmettre.
+     * @param string|null $csrfToken Token CSRF.
+     *
+     * @return Response
+     */
+    protected function renderFormWithErrors(string $template, array $errors, array $data, ?string $csrfToken): Response
+    {
+        $context = array_merge(['errors' => $errors, 'csrf_token' => $csrfToken], $data);
+        return $this->render($template, $context);
+
+    }//end renderFormWithErrors()
+
+
+    // Gestion des variables d'environnement.
 
 
     /**
@@ -264,6 +391,97 @@ class BaseController
         return $this->sessionService->has($key);
 
     }//end hasSessionKey()
+
+
+    // Messages de succès dans la session.
+
+
+    /**
+     * Gère les messages de succès dans la session.
+     *
+     * @param string $message Le message de succès à stocker.
+     *
+     * @return void
+     */
+    protected function setSuccessMessage(string $message): void
+    {
+        $this->sessionService->set('success_message', $message);
+
+    }//end setSuccessMessage()
+
+
+    /**
+     * Récupère et supprime un message de succès dans la session.
+     *
+     * @return string|null Le message de succès ou null si aucun message n'existe.
+     */
+    protected function getAndRemoveSuccessMessage(): ?string
+    {
+        $message = $this->sessionService->get('success_message');
+        $this->sessionService->remove('success_message');
+        return $message;
+
+    }//end getAndRemoveSuccessMessage()
+
+
+    // Méthodes utilitaires.
+
+
+    /**
+     * Vérifie si la requête est de type POST.
+     *
+     * @param Request $request La requête HTTP.
+     *
+     * @return bool True si la requête est de type POST, sinon False.
+     */
+    protected function isPostRequest(Request $request): bool
+    {
+        return $request->isMethod('POST');
+
+    }//end isPostRequest()
+
+
+    /**
+     * Redirige vers une URL donnée.
+     *
+     * @param string $url L'URL vers laquelle rediriger.
+     *
+     * @return Response
+     */
+    protected function redirect(string $url): Response
+    {
+
+        // Vérifiez que l'URL est relative.
+        if (str_starts_with($url, '/') === false) {
+            throw new Exception('URL invalide pour la redirection. Elle doit commencer par "/".');
+        }
+
+        // Utiliser RedirectResponse.
+        return new RedirectResponse($url, 302);
+
+    }//end redirect()
+
+
+    /**
+     * Récupère un post ou lève une exception s'il est introuvable.
+     *
+     * @param int             $postId          L'identifiant du post à récupérer.
+     * @param PostsRepository $postsRepository Le repository utilisé pour accéder aux posts.
+     *
+     * @return object Le post trouvé.
+     *
+     * @throws Exception Si le post n'est pas trouvé.
+     */
+    protected function fetchPostOrFail(int $postId, PostsRepository $postsRepository): object
+    {
+        $post = $postsRepository->findById($postId);
+        if ($post === null) {
+            throw new Exception('Post introuvable.', 404);
+        }
+
+        return $post;
+
+    }//end fetchPostOrFail()
 
 
     /**

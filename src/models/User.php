@@ -7,11 +7,9 @@ use App\Models\Traits\IdTrait;
 use App\Models\traits\AuthTrait;
 use App\Models\Traits\TimestampableTrait;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
- * Classe User représentant une entité pour les utilisateurs dans la base de données.
+ * Classe User représentant une entité pour les utilisateurs.
  */
 class User
 {
@@ -19,70 +17,72 @@ class User
     use IdTrait, TimestampableTrait, AuthTrait;
 
     /**
-     * Le validateur Symfony.
-     *
-     * @var ValidatorInterface
-     */
-    private ValidatorInterface $validator;
-
-    /**
-     * The last name of the user.
+     * Le nom de famille de l'utilisateur.
      *
      * @var string
      */
+    #[Assert\NotBlank(message: "Le nom de famille est requis.")]
+    #[Assert\Length(min: 2, max: 50, minMessage: "Le nom doit contenir au moins {{ limit }} caractères.")]
     private string $lastName;
 
     /**
-     * The first name of the user.
+     * Le prénom de l'utilisateur.
      *
      * @var string
      */
+    #[Assert\NotBlank(message: "Le prénom est requis.")]
+    #[Assert\Length(min: 2, max: 50, minMessage: "Le prénom doit contenir au moins {{ limit }} caractères.")]
     private string $firstName;
 
     /**
-     * The email address of the user.
+     * L'email de l'utilisateur.
      *
      * @var string
      */
+    #[Assert\NotBlank(message: "L'email est requis.")]
+    #[Assert\Email(message: "L'adresse email n'est pas valide.")]
     private string $email;
 
     /**
-     * The hashed password of the user.
+     * Le mot de passe de l'utilisateur.
      *
      * @var string
      */
+    #[Assert\NotBlank(message: "Le mot de passe est requis.")]
+    #[Assert\Length(min: 8, minMessage: "Le mot de passe doit contenir au moins {{ limit }} caractères.")]
     private string $password;
 
     /**
-     * The role of the user (e.g., admin, user).
+     * Le rôle de l'utilisateur. (e.g., admin, user).
      *
      * @var string
      */
+    #[Assert\NotBlank(message: "Le rôle est requis.")]
     private string $role;
 
     /**
-     * The authentication token for the user.
+     * Le token d'autentification de l'utilisateur.
      *
-     * @var string
+     * @var string|null
      */
-    private ?string $token;
+    private ?string $token = null;
 
     /**
-     * The date and time when the user's session or token expires.
+     * La date et l'heure d'expiration de la session ou du jeton de l'utilisateur.
      *
-     * @var DateTime
+     * @var DateTime|null
      */
-    private ?DateTime $expireAt;
+    private ?DateTime $expireAt = null;
 
     /**
-     * The password reset token.
+     * Le jeton de réinitialisation du mot de passe.
      *
      * @var string|null
      */
     private ?string $pwdResetToken = null;
 
     /**
-     * The expiration date and time of the password reset token.
+     * La date et l'heure d'expiration du jeton de réinitialisation du mot de passe.
      *
      * @var DateTime|null
      */
@@ -90,48 +90,48 @@ class User
 
 
     /**
-     * Constructeur pour la classe User.
+     * Constructeur de la classe User.
      *
-     * @param array              $userData  Tableau contenant les données de l'utilisateur.
-     * @param ValidatorInterface $validator Le validateur Symfony à injecter.
+     * @param array $userData Tableau contenant les données de l'utilisateur :
+     *                        - 'userId' : int|null, l'ID de l'utilisateur.
+     *                        - 'lastName' : string, le nom de famille.
+     *                        - 'firstName' : string, le prénom.
+     *                        - 'email' : string, l'adresse email.
+     *                        - 'password' : string, le mot de passe hashé.
+     *                        - 'role' : string, le rôle de l'utilisateur.
+     *                        - 'createdAt' : string, la date de création.
+     *                        - 'updatedAt' : string|null, la date de mise à jour.
+     *                        - 'token' : string|null, le token d'authentification.
+     *                        - 'expireAt' : string|null, la date d'expiration du token.
+     *                        - 'pwdResetToken' : string|null, le token de réinitialisation.
+     *                        - 'pwdResetExpiresAt' : string|null, la date d'expiration du token de réinitialisation.
      */
-    public function __construct(array $userData, ValidatorInterface $validator)
+    public function __construct(array $userData)
     {
         $this->setId(($userData['userId'] ?? null));
-        $this->lastName  = $userData['lastName'];
-        $this->firstName = $userData['firstName'];
-        $this->email     = $userData['email'];
-        $this->password  = $userData['password'];
-        $this->role      = $userData['role'];
-        $this->setCreatedAt($userData['createdAt']);
-        $this->setUpdatedAt((isset($userData['updatedAt']) === true) ? $userData['updatedAt'] : null);
-        $this->token         = ($userData['token'] ?? null);
-        $this->expireAt      = ($userData['expireAt'] ?? null);
-        $this->pwdResetToken = ($userData['passwordResetToken'] ?? null);
-        $this->pwdResetExpiresAt = ($userData['passwordResetExpiresAt'] ?? null);
-        $this->validator         = $validator;
+        $this->setLastName($userData['lastName']);
+        $this->setFirstName($userData['firstName']);
+        $this->setEmail($userData['email']);
+        $this->setPassword($userData['password']);
+        $this->setRole($userData['role']);
+        $this->setCreatedAt(new DateTime($userData['createdAt']));
+
+        // Vérifier et convertir updatedAt uniquement si défini.
+        $updatedAt = ($userData['updatedAt'] ?? null);
+        $this->setUpdatedAt($updatedAt instanceof DateTime ? $updatedAt : ($updatedAt !== null ? new DateTime($updatedAt) : null));
+
+        $this->setToken(($userData['token'] ?? null));
+        $this->setExpireAt($userData['expireAt'] !== null ? new DateTime($userData['expireAt']) : null);
+        $this->setPwdResetToken(($userData['pwdResetToken'] ?? null));
+        $this->setPwdResetExpiresAt($userData['pwdResetExpiresAt'] !== null ? new DateTime($userData['pwdResetExpiresAt']) : null);
 
     }//end __construct()
 
 
     /**
-     * Injecte le validateur Symfony dans l'entité User.
+     * Retourne le nom de famille de l'utilisateur.
      *
-     * @param ValidatorInterface $validator Le validateur Symfony à injecter.
-     *
-     * @return void
-     */
-    public function setValidator(ValidatorInterface $validator): void
-    {
-        $this->validator = $validator;
-
-    }//end setValidator()
-
-
-    /**
-     * Gets the last name of the user.
-     *
-     * @return string
+     * @return string Le nom de famille de l'utilisateur.
      */
     public function getLastName(): string
     {
@@ -141,9 +141,9 @@ class User
 
 
     /**
-     * Sets the last name of the user.
+     * Définit le nom de famille de l'utilisateur.
      *
-     * @param string $lastName The last name of the user.
+     * @param string $lastName Le nom de famille.
      *
      * @return void
      */
@@ -155,9 +155,9 @@ class User
 
 
     /**
-     * Gets the first name of the user.
+     * Retourne le prénom de l'utilisateur.
      *
-     * @return string
+     * @return string Le prénom de l'utilisateur.
      */
     public function getFirstName(): string
     {
@@ -167,9 +167,9 @@ class User
 
 
     /**
-     * Sets the first name of the user.
+     * Définit le prénom de l'utilisateur.
      *
-     * @param string $firstName The first name of the user.
+     * @param string $firstName Le prénom.
      *
      * @return void
      */
@@ -181,9 +181,9 @@ class User
 
 
     /**
-     * Gets the email address of the user.
+     * Retourne l'adresse email de l'utilisateur.
      *
-     * @return string
+     * @return string L'adresse email de l'utilisateur.
      */
     public function getEmail(): string
     {
@@ -193,9 +193,9 @@ class User
 
 
     /**
-     * Sets the email address of the user.
+     * Définit l'adresse email de l'utilisateur.
      *
-     * @param string $email The email address of the user.
+     * @param string $email L'adresse email.
      *
      * @return void
      */
@@ -207,9 +207,9 @@ class User
 
 
     /**
-     * Gets the hashed password of the user.
+     * Retourne le mot de passe hashé de l'utilisateur.
      *
-     * @return string
+     * @return string Le mot de passe hashé.
      */
     public function getPassword(): string
     {
@@ -219,9 +219,9 @@ class User
 
 
     /**
-     * Sets the hashed password of the user.
+     * Définit le mot de passe hashé de l'utilisateur.
      *
-     * @param string $password The hashed password of the user.
+     * @param string $password Le mot de passe hashé.
      *
      * @return void
      */
@@ -233,9 +233,9 @@ class User
 
 
     /**
-     * Gets the role of the user (e.g., admin, user).
+     * Retourne le rôle de l'utilisateur.
      *
-     * @return string
+     * @return string Le rôle de l'utilisateur.
      */
     public function getRole(): string
     {
@@ -245,9 +245,9 @@ class User
 
 
     /**
-     * Sets the role of the user (e.g., admin, user).
+     * Définit le rôle de l'utilisateur.
      *
-     * @param string $role The role of the user.
+     * @param string $role Le rôle.
      *
      * @return void
      */
@@ -273,7 +273,7 @@ class User
     /**
      * Gets the authentication token for the user.
      *
-     * @return string
+     * @return string|null
      */
     public function getToken(): ?string
     {
@@ -285,7 +285,7 @@ class User
     /**
      * Sets the authentication token for the user.
      *
-     * @param string $token The authentication token for the user.
+     * @param string|null $token The authentication token for the user.
      *
      * @return void
      */
@@ -299,7 +299,7 @@ class User
     /**
      * Gets the date and time when the user's session or token expires.
      *
-     * @return DateTime
+     * @return DateTime|null
      */
     public function getExpireAt(): ?DateTime
     {
@@ -311,7 +311,7 @@ class User
     /**
      * Sets the date and time when the user's session or token expires.
      *
-     * @param DateTime $expireAt The date and time when the user's session or token expires.
+     * @param DateTime|null $expireAt The date and time when the user's session or token expires.
      *
      * @return void
      */
@@ -372,40 +372,6 @@ class User
         $this->pwdResetExpiresAt = $expiresAt;
 
     }//end setPwdResetExpiresAt()
-
-
-    /**
-     * Validates the user entity.
-     *
-     * @return ConstraintViolationListInterface|null Returns the list of violations or null if there are none.
-     */
-    public function validate(): ?ConstraintViolationListInterface
-    {
-        $constraints = new Assert\Collection(
-            [
-                'lastName'   => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 50])],
-                'firstName'  => [new Assert\NotBlank(), new Assert\Length(['min' => 2, 'max' => 50])],
-                'email'      => [new Assert\NotBlank(), new Assert\Email()],
-                'password'   => [new Assert\NotBlank(), new Assert\Length(['min' => 8])],
-                'role'       => [new Assert\NotBlank()],
-                'pwdResetToken'      => new Assert\Optional([new Assert\Type('string')]),
-                'pwdResetExpiresAt'  => new Assert\Optional([new Assert\DateTime()]),
-            ]
-        );
-
-        $data = [
-            'lastName'  => $this->getLastName(),
-            'firstName' => $this->getFirstName(),
-            'email'     => $this->getEmail(),
-            'password'  => $this->getPassword(),
-            'role'      => $this->getRole(),
-            'pwdResetToken'      => $this->getPwdResetToken(),
-            'pwdResetExpiresAt'  => $this->getPwdResetExpiresAt() === true ? $this->getPwdResetExpiresAt()->format('Y-m-d H:i:s') : null,
-        ];
-
-        return $this->validator->validate($data, $constraints);
-
-    }//end validate()
 
 
 }//end class

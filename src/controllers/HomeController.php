@@ -103,10 +103,14 @@ class HomeController extends BaseController
      */
     public function downloadCv(): Response
     {
-        $file = __DIR__.'/../../public/assets/img/CV_Fauquembergue_Adrien.pdf';
+        $filePath = __DIR__.'/../../public/assets/img/CV_Fauquembergue_Adrien.pdf';
+
+        if (file_exists($filePath) === false) {
+            return $this->renderError('Fichier introuvable.', 404);
+        }
 
         return new Response(
-            file_get_contents($file),
+            file_get_contents($filePath),
             200,
             [
                 'Content-Type' => 'application/pdf',
@@ -129,47 +133,56 @@ class HomeController extends BaseController
      */
     public function submitContact(Request $request): Response
     {
-
-        // Vérifier le token CSRF.
-        $submittedToken = $request->request->get('_csrf_token');
-        if ($this->isCsrfTokenValid('contact_form', $submittedToken) === false) {
-            return new Response('Invalid CSRF token.', 400);
-        }
-
-        // Récupérer les données du formulaire.
-        $name    = $this->cleanInput($request->request->get('name', ''));
-        $email   = $this->cleanInput($request->request->get('email', ''));
-        $message = $this->cleanInput($request->request->get('message', ''));
-
-        // Valider les données.
-        if (empty($name) === true || empty($email) === true || empty($message) === true) {
-            return new Response('Tous les champs sont requis.', 400);
-        }
-
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            return new Response('Email non valide.', 400);
-        }
-
         try {
-            // Vérifiez l'adresse e-mail de destination.
-            $toEmail = $this->getEnv('SMTP_USERNAME');
+            $this->isCsrfTokenValidOrFail('contact_form', $request);
 
+            $name    = $this->cleanInput($request->request->get('name', ''));
+            $email   = $this->cleanInput($request->request->get('email', ''));
+            $message = $this->cleanInput($request->request->get('message', ''));
+
+            // Validation des données.
+            $this->validateContactForm($name, $email, $message);
+
+            // Envoi de l'email.
+            $toEmail = $this->getEnv('SMTP_USERNAME');
             if (empty($toEmail) === true) {
-                return new Response('Adresse e-mail de destination non configurée.', 500);
+                throw new Exception('Adresse e-mail de destination non configurée.', 500);
             }
 
-            // Contenu de l'email.
             $subject = 'Nouveau message de contact';
             $body    = '<b>Nom:</b> '.$name.'<br><b>Email:</b> '.$email.'<br><b>Message:</b><br>'.nl2br($message);
-
             $this->emailService->sendEmail($toEmail, $subject, $body, $email, $name);
 
             return new Response('Message envoyé avec succès!', 200);
         } catch (Exception $e) {
-            return new Response('Erreur lors de l\'envoi du message: '.$e->getMessage(), 500);
+            return $this->renderError('Erreur: '.$e->getMessage(), $e->getCode());
         }//end try
 
     }//end submitContact()
+
+
+    /**
+     * Valide les champs du formulaire de contact.
+     *
+     * @param string $name    Le nom du contact.
+     * @param string $email   L'adresse e-mail du contact.
+     * @param string $message Le message du contact.
+     *
+     * @return void
+     *
+     * @throws Exception Si une validation échoue.
+     */
+    private function validateContactForm(string $name, string $email, string $message): void
+    {
+        if (empty($name) === true || empty($email) === true || empty($message) === true) {
+            throw new Exception('Tous les champs sont requis.', 400);
+        }
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            throw new Exception('Email non valide.', 400);
+        }
+
+    }//end validateContactForm()
 
 
 }//end class

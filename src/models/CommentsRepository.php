@@ -62,6 +62,7 @@ class CommentsRepository
         }
 
         $comment->setId((int) $this->dbi->lastInsertId());
+        $comment->setCreatedAt($createdAt);
 
         return $comment;
 
@@ -289,12 +290,14 @@ class CommentsRepository
     private function buildCommentFromRow(array $row): Comment
     {
         return new Comment(
-            commentId: (int) $row['comment_id'],
-            content: $row['content'],
-            createdAt: new DateTime($row['created_at']),
-            postId: (int) $row['post_id'],
-            author: (int) $row['author'],
-            status: $row['status'],
+            [
+                'commentId' => (int) $row['comment_id'],
+                'content' => $row['content'],
+                'createdAt' => $row['created_at'],
+                'postId' => (int) $row['post_id'],
+                'author' => (int) $row['author'],
+                'status' => $row['status'],
+            ]
         );
 
     }//end buildCommentFromRow()

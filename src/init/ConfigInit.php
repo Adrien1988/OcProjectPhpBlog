@@ -2,6 +2,7 @@
 
 namespace App\Init;
 
+use App\Services\EnvService;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
@@ -9,6 +10,25 @@ use Symfony\Component\Config\Definition\Exception\Exception;
  */
 class ConfigInit
 {
+
+    /**
+     * Instance du service pour gérer les variables d'environnement.
+     *
+     * @var EnvService
+     */
+    private EnvService $envService;
+
+
+    /**
+     * Constructeur pour injecter le service d'environnement.
+     *
+     * @param EnvService $envService Le service pour gérer les variables d'environnement.
+     */
+    public function __construct(EnvService $envService)
+    {
+        $this->envService = $envService;
+
+    }//end __construct()
 
 
     /**
@@ -21,15 +41,26 @@ class ConfigInit
     public function load(): array
     {
         $configPath = __DIR__.'/../config/config.php';
-        if (file_exists($configPath) === false) {
-            throw new Exception('Le fichier de configuration n\'existe pas.');
+        $config     = [];
+
+        // Charger le fichier config.php si disponible.
+        if (file_exists($configPath) === true) {
+            include $configPath;
+            if (function_exists('getDatabaseConfig') === true) {
+                $config = getDatabaseConfig($this->envService);
+            }
         }
 
-        include $configPath;
-        $config = getDatabaseConfig();
+        // Vérifier la présence des clés requises (sauf pour un mot de passe vide explicitement autorisé).
+        $requiredKeys = ['host', 'dbname', 'user', 'password'];
+        foreach ($requiredKeys as $key) {
+            if ($key !== 'password' && (empty($config['database'][$key] ?? null) === true)) {
+                throw new Exception("La variable de configuration '{$key}' est manquante ou vide dans la section 'database'.");
+            }
 
-        if ($config === false || isset($config['database']) === false) {
-            throw new Exception('Configuration de la base de données introuvable.');
+            if ($key === 'password' && isset($config['database'][$key]) === false) {
+                throw new Exception("La variable de configuration '{$key}' est manquante dans la section 'database'.");
+            }
         }
 
         return $config;

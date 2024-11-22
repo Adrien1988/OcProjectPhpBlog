@@ -22,13 +22,6 @@ class UsersRepository
      */
     private DatabaseInterface $dbi;
 
-    /**
-     * Le validateur Symfony.
-     *
-     * @var ValidatorInterface
-     */
-    private ValidatorInterface $validator;
-
 
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
@@ -39,8 +32,7 @@ class UsersRepository
      */
     public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
     {
-        $this->dbi       = $dbi;
-        $this->validator = $validator;
+        $this->dbi = $dbi;
 
     }//end __construct()
 
@@ -124,19 +116,6 @@ class UsersRepository
      */
     public function createUser(User $user): User
     {
-        $user->setValidator($this->validator);
-
-        // Validation avant l'insertion.
-        $violations = $user->validate();
-        if ($violations->count() > 0) {
-            $messages = [];
-            foreach ($violations as $violation) {
-                $messages[] = $violation->getMessage();
-            }
-
-            throw new Exception('Erreur de validation : '.implode(', ', $messages));
-        }
-
         $sql = "INSERT INTO user (last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, pwd_reset_token, pwd_reset_expires_at)
         VALUES (:last_name, :first_name, :email, :password, :role, :created_at, :updated_at, :token, :expire_at, :pwd_reset_token, :pwd_reset_expires_at)";
 
@@ -281,23 +260,22 @@ class UsersRepository
     {
 
         // Regrouper les données de l'utilisateur dans un tableau.
-        $userData = [
-            'userId'    => (int) $row['user_id'],
-            'lastName'  => $row['last_name'],
-            'firstName' => $row['first_name'],
-            'email'     => $row['email'],
-            'password'  => $row['password'],
-            'role'      => $row['role'],
-            'createdAt' => new DateTime($row['created_at']),
-            'updatedAt' => (isset($row['updated_at']) === true) ? new DateTime($row['updated_at']) : null,
-            'token'     => ($row['token'] ?? null),
-            'expireAt'  => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
-            'passwordResetToken'    => ($row['password_reset_token'] ?? null),
-            'passwordResetExpiresAt' => (isset($row['password_reset_expires_at']) === true && $row['password_reset_expires_at'] !== null) ? new DateTime($row['password_reset_expires_at']) : null,
-        ];
-
-        // Créer l'objet User avec le tableau de données et le validateur.
-        return new User($userData, $this->validator);
+        return new User(
+            [
+                'userId' => (int) $row['user_id'],
+                'lastName' => $row['last_name'],
+                'firstName' => $row['first_name'],
+                'email' => $row['email'],
+                'password' => $row['password'],
+                'role' => $row['role'],
+                'createdAt' => $row['created_at'],
+                'updatedAt' => (isset($row['updated_at']) === true && $row['updated_at'] !== null) ? new DateTime($row['updated_at']) : null,
+                'token' => ($row['token'] ?? null),
+                'expireAt' => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+                'pwdResetToken' => ($row['pwd_reset_token'] ?? null),
+                'pwdResetExpiresAt' => (isset($row['password_reset_expires_at']) === true && $row['password_reset_expires_at'] !== null) ? new DateTime($row['password_reset_expires_at']) : null,
+            ]
+        );
 
     }//end buildUserFromRow()
 
