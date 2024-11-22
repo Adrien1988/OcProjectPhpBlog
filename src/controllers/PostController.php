@@ -56,23 +56,21 @@ class PostController extends BaseController
      */
     public function detailPost(int $postId, PostsRepository $postsRepository, CommentsRepository $commentsRepository): Response
     {
-        $post = $postsRepository->findById($postId);
+        try {
+            $post     = $this->fetchPostOrFail($postId, $postsRepository);
+            $comments = $commentsRepository->findValidatedCommentsByPostId($postId);
 
-        if ($post === null) {
-            throw new Exception('Post not found');
+            return $this->render(
+                'posts/detail.html.twig',
+                [
+                    'post' => $post,
+                    'comments' => $comments,
+                    'csrf_token' => $this->generateCsrfToken('comment_form'),
+                ]
+            );
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
         }
-
-        // Récupérer les commentaires validés pour ce post.
-        $comments = $commentsRepository->findValidatedCommentsByPostId($postId);
-
-        return $this->render(
-            'posts/detail.html.twig',
-            [
-                'post' => $post,
-                'comments' => $comments,
-                'csrf_token' => $this->generateCsrfToken('comment_form'),
-            ]
-        );
 
     }//end detailPost()
 
@@ -88,69 +86,40 @@ class PostController extends BaseController
     public function createPost(Request $request, PostsRepository $postsRepository): Response
     {
 
-         // Vérifier si l'utilisateur est connecté.
-         $authorId = $this->sessionService->get('user_id');
-        if ($authorId === null) {
-            // Rediriger vers la page de connexion.
-            return new Response('', 302, ['Location' => '/login']);
-        }
-
-        // Assurer que $authorId est un entier.
-        $authorId = (int) $authorId;
-
-        if ($request->isMethod('POST') === true) {
-            // Vérifier le token CSRF.
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->isCsrfTokenValid('create_post_form', $submittedToken) === false) {
-                return new Response('Invalid CSRF token.', 403);
+        try {
+            $authorId = $this->getSessionValue('user_id');
+            if ($authorId === null) {
+                return $this->redirect('/login');
             }
 
-            $postData = [
-                'postId' => null,
-                'title' => $this->cleanInput($request->request->get('title')),
-                'chapo' => $this->cleanInput($request->request->get('chapo')),
-                'content' => $this->cleanInput($request->request->get('content')),
-                'author' => (int) $authorId,
-                'createdAt' => (new DateTime())->format('Y-m-d H:i:s'),
-            ];
+            if ($this->isPostRequest($request) === true) {
+                $this->isCsrfTokenValidOrFail('create_post_form', $request);
 
-            $post = new Post($postData);
+                $post = $this->buildPost($request, (int) $authorId);
 
-            // Validation du post.
-            $violations = $this->validator->validate($post);
-
-            if (count($violations) > 0) {
-                // Si des erreurs de validation sont présentes, les renvoyer à la vue.
-                $errors = [];
-
-                foreach ($violations as $violation) {
-                    $errors[] = $violation->getMessage();
+                $validationErrors = $this->validateEntity($post);
+                if (empty($validationErrors) === false) {
+                    return $this->renderFormWithErrors(
+                        'posts/create.html.twig',
+                        $validationErrors,
+                        ['post' => $post],
+                        $this->generateCsrfToken('create_post_form')
+                    );
                 }
 
-                // Renvoyer le formulaire avec les erreurs et les données soumises pour conserver les saisies.
-                return $this->render(
-                    'posts/create.html.twig',
-                    [
-                        'csrf_token' => $this->generateCsrfToken('create_post_form'),
-                        'errors'     => $errors,
-                        'post'       => $post,
-                    ]
-                );
-            }
-
-            try {
-                // Enregistre le post en base de données via le repository.
                 $postsRepository->createPost($post);
-
-                // Rediriger vers la page de listing des posts après la création.
-                return new Response('', 302, ['Location' => '/posts']);
-            } catch (Exception $e) {
-                return new Response('Erreur lors de la création du post : '.$e->getMessage(), 500);
+                return $this->redirect('/posts');
             }
-        }//end if
 
-        $csrfToken = $this->generateCsrfToken('create_post_form');
-        return $this->render('posts/create.html.twig', ['csrf_token' => $csrfToken]);
+            return $this->render(
+                'posts/create.html.twig',
+                [
+                    'csrf_token' => $this->generateCsrfToken('create_post_form'),
+                ]
+            );
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
 
     }//end createPost()
 
@@ -171,54 +140,33 @@ class PostController extends BaseController
     public function editPost(Request $request, int $postId, PostsRepository $postsRepository): Response
     {
 
-        // Vérifier si l'utilisateur est connecté.
-        $currentUser = $this->sessionService->get('user_id');
-        if ($currentUser === null) {
-            // Rediriger vers la page de connexion.
-            return new Response('', 302, ['Location' => '/login']);
-        }
+        try {
+            $currentUser = (int) $this->getSessionValue('user_id');
+            $post        = $this->fetchPostOrFail($postId, $postsRepository);
 
-        $post = $postsRepository->findById($postId);
-
-        if ($post === null) {
-            throw new Exception('Post not found');
-        }
-
-        // Vérifier si l'utilisateur est l'auteur du post.
-        if ($post->getAuthor() !== (int) $currentUser) {
-            return new Response('Vous n\'êtes pas autorisé à modifier ce post.', 403);
-        }
-
-        // Si la requête est en POST, on traite le formulaire de modification.
-        if ($request->isMethod('POST') === true) {
-            $submittedToken = $request->request->get('_csrf_token');
-            if ($this->isCsrfTokenValid('edit_post_form', $submittedToken) === false) {
-                return new Response('Invalid CSRF token.', 403);
+            if ($post->getAuthor() !== $currentUser) {
+                throw new Exception('Vous n\'êtes pas autorisé à modifier cet article.', 403);
             }
 
-            $title       = $this->cleanInput($request->request->get('title'));
-            $chapo       = $this->cleanInput($request->request->get('chapo'));
-            $postContent = $this->cleanInput($request->request->get('content'));
+            if ($this->isPostRequest($request) === true) {
+                $this->isCsrfTokenValidOrFail('edit_post_form', $request);
 
-            // Mettre à jour les informations du post.
-            $post->setTitle($title);
-            $post->setChapo($chapo);
-            // $post->setAuthor($currentUser->getId());
-            $post->setContent($postContent);
-            $post->setUpdatedAt(new DateTime());
-
-            try {
-                // Sauvegarder les modifications via le repository.
+                $this->updatePostFromRequest($request, $post);
                 $postsRepository->updatePost($post);
-                return new Response('', 302, ['Location' => '/posts/'.$postId]);
-            } catch (Exception $e) {
-                return new Response('Erreur lors de la modification du post : '.$e->getMessage(), 500);
-            }
-        }//end if
 
-        // Sinon, on affiche la page avec le formulaire pré-rempli.
-        $csrfToken = $this->generateCsrfToken('edit_post_form');
-        return $this->render('posts/edit.html.twig', ['post' => $post, 'csrf_token' => $csrfToken]);
+                return $this->redirect('/posts/'.$postId);
+            }
+
+            return $this->render(
+                'posts/edit.html.twig',
+                [
+                    'post' => $post,
+                    'csrf_token' => $this->generateCsrfToken('edit_post_form'),
+                ]
+            );
+        } catch (Exception $e) {
+            return $this->renderError($e->getMessage(), $e->getCode());
+        }//end try
 
     }//end editPost()
 
@@ -238,29 +186,60 @@ class PostController extends BaseController
      */
     public function deletePost(Request $request, int $postId, PostsRepository $postsRepository): Response
     {
-        // Vérifier le token CSRF avant d'effectuer la suppression.
-        $submittedToken = $request->request->get('_csrf_token');
-        if ($this->isCsrfTokenValid('delete_post', $submittedToken) === false) {
-            return new Response('Invalid CSRF token.', 403);
-        }
-
-        $post = $postsRepository->findById($postId);
-
-        if ($post === null) {
-            throw new Exception('Post not found');
-        }
-
         try {
-            // Supprimer l'article via le repository.
+            $this->isCsrfTokenValidOrFail('delete_post', $request);
+            $post = $this->fetchPostOrFail($postId, $postsRepository);
+
             $postsRepository->deletePost($postId);
 
-            // Rediriger vers la page de listing des posts après suppression.
-            return new Response('', 302, ['Location' => '/posts']);
+            return $this->redirect('/posts');
         } catch (Exception $e) {
-            return new Response('Erreur lors de la suppression du post : '.$e->getMessage(), 500);
+            return $this->renderError($e->getMessage(), $e->getCode());
         }
 
     }//end deletePost()
+
+
+    /**
+     * Construit un article à partir des données de la requête.
+     *
+     * @param Request $request  La requête HTTP.
+     * @param int     $authorId L'identifiant de l'auteur.
+     *
+     * @return Post L'article créé.
+     */
+    private function buildPost(Request $request, int $authorId): Post
+    {
+        return new Post(
+            [
+                'postId' => null,
+                'title' => $this->cleanInput($request->request->get('title')),
+                'chapo' => $this->cleanInput($request->request->get('chapo')),
+                'content' => $this->cleanInput($request->request->get('content')),
+                'author' => $authorId,
+                'createdAt' => (new DateTime())->format('Y-m-d H:i:s'),
+            ]
+        );
+
+    }//end buildPost()
+
+
+    /**
+     * Met à jour un article avec les données de la requête.
+     *
+     * @param Request $request La requête HTTP.
+     * @param Post    $post    L'article à mettre à jour.
+     *
+     * @return void
+     */
+    private function updatePostFromRequest(Request $request, Post $post): void
+    {
+        $post->setTitle($this->cleanInput($request->request->get('title')));
+        $post->setChapo($this->cleanInput($request->request->get('chapo')));
+        $post->setContent($this->cleanInput($request->request->get('content')));
+        $post->setUpdatedAt(new DateTime());
+
+    }//end updatePostFromRequest()
 
 
 }//end class
