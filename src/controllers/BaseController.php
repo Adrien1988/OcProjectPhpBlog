@@ -449,15 +449,32 @@ class BaseController
      */
     protected function validateRedirectUrl(string $url): bool
     {
-        // Autoriser uniquement les URL relatives ou celles appartenant au même domaine.
-        $parsedUrl = parse_url($url);
-        if ($parsedUrl === false) {
-            return false;
-        }
+         // Liste des motifs autorisés pour toutes les entités.
+        $allowedPatterns = [
+        // Routes pour les posts.
+            '#^/posts$#',
+            '#^/posts/$#',
+            '#^/posts/\d+$#',
+            '#^/posts/create$#',
+            '#^/posts/edit/\d+$#',
+            '#^/posts/delete/\d+$#',
+        // Routes pour les comments.
+            '#^/comments$#',
+            '#^/comments/\d+$#',
+            '#^/comments/edit/\d+$#',
+            '#^/comments/delete/\d+$#',
+        // Routes pour les users.
+            '#^/users$#',
+            '#^/users/\d+$#',
+            '#^/users/edit/\d+$#',
+            '#^/users/delete/\d+$#',
+        ];
 
-        // Vérifier si l'URL est relative ou appartient au même domaine.
-        if (empty($parsedUrl['host']) || $parsedUrl['host'] === $this->getEnv('APP_HOST')) {
-            return true;
+        // Vérifiez si l'URL correspond à l'un des motifs autorisés.
+        foreach ($allowedPatterns as $pattern) {
+            if (preg_match($pattern, $url) === true) {
+                return true;
+            }
         }
 
         return false;
@@ -476,7 +493,7 @@ class BaseController
     {
 
         if ($this->validateRedirectUrl($url) === false) {
-            throw new Exception('URL de redirection invalide ou non sécurisée.', 400);
+            throw new Exception('Redirection vers une URL non autorisée : '.$url, 400);
         }
 
         return new Response('', 302, ['Location' => $url]);

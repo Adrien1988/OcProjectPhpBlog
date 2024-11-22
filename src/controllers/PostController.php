@@ -7,6 +7,7 @@ use App\Models\Post;
 use Models\PostsRepository;
 use App\Controllers\BaseController;
 use Models\CommentsRepository;
+use Models\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -49,28 +50,36 @@ class PostController extends BaseController
      * @param PostsRepository    $postsRepository    Le repository pour accéder
      *                                               aux posts.
      * @param CommentsRepository $commentsRepository Le repository pour accéder aux comments.
+     * @param UsersRepository    $usersRepository    Le repository pour accéder aux auteurs.
      *
      * @return Response La réponse HTTP avec le contenu rendu.
      *
      * @throws Exception Si l'article n'est pas trouvé.
      */
-    public function detailPost(int $postId, PostsRepository $postsRepository, CommentsRepository $commentsRepository): Response
+    public function detailPost(int $postId, PostsRepository $postsRepository, CommentsRepository $commentsRepository, UsersRepository $usersRepository): Response
     {
         try {
-            $post     = $this->fetchPostOrFail($postId, $postsRepository);
+            $post = $this->fetchPostOrFail($postId, $postsRepository);
+
+            $author = $usersRepository->findById($post->getAuthor());
+            if ($author === null) {
+                throw new Exception('Auteur introuvable.', 404);
+            }
+
             $comments = $commentsRepository->findValidatedCommentsByPostId($postId);
 
             return $this->render(
                 'posts/detail.html.twig',
                 [
                     'post' => $post,
+                    'author' => $author,
                     'comments' => $comments,
                     'csrf_token' => $this->generateCsrfToken('comment_form'),
                 ]
             );
         } catch (Exception $e) {
             return $this->renderError($e->getMessage(), $e->getCode());
-        }
+        }//end try
 
     }//end detailPost()
 
