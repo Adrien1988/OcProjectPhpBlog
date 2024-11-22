@@ -489,18 +489,18 @@ class BaseController
     protected function redirect(string $url): Response
     {
 
-        // Vérifie si l'URL est bien interne et ne contient pas de protocole externe.
-        if (filter_var($url, FILTER_VALIDATE_URL) === true) {
-            throw new Exception('Les redirections vers des URLs externes ne sont pas autorisées : '.$url, 400);
-        }
-
-        // Vérifie que l'URL est relative (commence par "/").
+        // Vérifie que l'URL est relative (commence par "/") pour garantir qu'elle reste interne.
         if (str_starts_with($url, '/') === false) {
             throw new Exception('L\'URL de redirection doit être relative et commencer par "/". Donnée : '.$url, 400);
         }
 
-        // Vérifie que l'URL ne contient pas de caractères potentiellement dangereux.
-        if (preg_match('#[^\w\-\/\?=&]#', $url) === true) {
+        // Vérifie que l'URL ne contient pas de protocole ou de domaine externe.
+        if (preg_match('#^(https?:)?//#', $url) === true) {
+            throw new Exception('Les redirections vers des URLs externes ne sont pas autorisées : '.$url, 400);
+        }
+
+        // Vérifie que l'URL ne contient pas de caractères interdits.
+        if (preg_match('#^[\w\-\/\?=&%]+$#', $url) === false) {
             throw new Exception('L\'URL contient des caractères non autorisés : '.$url, 400);
         }
 
