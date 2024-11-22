@@ -440,46 +440,43 @@ class BaseController
     }//end isPostRequest()
 
 
-    /**
-     * Valide l'URL de redirection pour s'assurer qu'elle est sûre.
-     *
-     * @param string $url L'URL à valider.
-     *
-     * @return bool True si l'URL est valide, sinon False.
-     */
-    protected function validateRedirectUrl(string $url): bool
-    {
-         // Liste des motifs autorisés pour toutes les entités.
-        $allowedPatterns = [
-        // Routes pour les posts.
-            '#^/posts$#',
-            '#^/posts/$#',
-            '#^/posts/\d+$#',
-            '#^/posts/create$#',
-            '#^/posts/edit/\d+$#',
-            '#^/posts/delete/\d+$#',
-        // Routes pour les comments.
-            '#^/comments$#',
-            '#^/comments/\d+$#',
-            '#^/comments/edit/\d+$#',
-            '#^/comments/delete/\d+$#',
-        // Routes pour les users.
-            '#^/users$#',
-            '#^/users/\d+$#',
-            '#^/users/edit/\d+$#',
-            '#^/users/delete/\d+$#',
-        ];
-
-        // Vérifiez si l'URL correspond à l'un des motifs autorisés.
-        foreach ($allowedPatterns as $pattern) {
-            if (preg_match($pattern, $url) === true) {
-                return true;
-            }
-        }
-
-        return false;
-
-    }//end validateRedirectUrl()
+    // /**
+    // * Valide l'URL de redirection pour s'assurer qu'elle est sûre.
+    // *
+    // * @param string $url L'URL à valider.
+    // *
+    // * @return bool True si l'URL est valide, sinon False.
+    // */
+    // protected function validateRedirectUrl(string $url): bool
+    // {
+    // Liste des motifs autorisés pour toutes les entités.
+    // $allowedPatterns = [
+    // Routes pour les posts.
+    // '#^/posts$#',
+    // '#^/posts/$#',
+    // '#^/posts/\d+$#',
+    // '#^/posts/create$#',
+    // '#^/posts/edit/\d+$#',
+    // '#^/posts/delete/\d+$#',
+    // Routes pour les comments.
+    // '#^/comments$#',
+    // '#^/comments/\d+$#',
+    // '#^/comments/edit/\d+$#',
+    // '#^/comments/delete/\d+$#',
+    // Routes pour les users.
+    // '#^/users$#',
+    // '#^/users/\d+$#',
+    // '#^/users/edit/\d+$#',
+    // '#^/users/delete/\d+$#',
+    // ];
+    // Vérifiez si l'URL correspond à l'un des motifs autorisés.
+    // foreach ($allowedPatterns as $pattern) {
+    // if (preg_match($pattern, $url) === true) {
+    // return true;
+    // }
+    // }
+    // return false;
+    // }//end validateRedirectUrl()
 
 
     /**
@@ -492,8 +489,19 @@ class BaseController
     protected function redirect(string $url): Response
     {
 
-        if ($this->validateRedirectUrl($url) === false) {
-            throw new Exception('Redirection vers une URL non autorisée : '.$url, 400);
+        // Vérifie si l'URL est bien interne et ne contient pas de protocole externe.
+        if (filter_var($url, FILTER_VALIDATE_URL) === true) {
+            throw new Exception('Les redirections vers des URLs externes ne sont pas autorisées : '.$url, 400);
+        }
+
+        // Vérifie que l'URL est relative (commence par "/").
+        if (str_starts_with($url, '/') === false) {
+            throw new Exception('L\'URL de redirection doit être relative et commencer par "/". Donnée : '.$url, 400);
+        }
+
+        // Vérifie que l'URL ne contient pas de caractères potentiellement dangereux.
+        if (preg_match('#[^\w\-\/\?=&]#', $url) === true) {
+            throw new Exception('L\'URL contient des caractères non autorisés : '.$url, 400);
         }
 
         return new Response('', 302, ['Location' => $url]);
