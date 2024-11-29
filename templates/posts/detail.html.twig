@@ -4,8 +4,7 @@
 
 	<!-- Post Detail Section -->
 	<section class="page-section bg-light mt-5" id="post-detail">
-		<div
-			class="container">
+		<div class="container">
 			<!-- Post Title -->
 			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">{{ post.title }}</h2>
 
@@ -13,7 +12,7 @@
 			<div class="divider-custom">
 				<div class="divider-custom-line"></div>
 				<div class="divider-custom-icon">
-					<i class="fas fa-star"></i>
+					<i class="fas fa-newspaper"></i>
 				</div>
 				<div class="divider-custom-line"></div>
 			</div>
@@ -37,19 +36,14 @@
 						<strong>Dernière mise à jour :</strong>
 						{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
 					</p>
-
-					<!-- Buttons to Edit and Delete Post -->
-					{% if app.user is defined and app.user and post.author == app.user.id %}
-						<div class="text-center mt-4">
-							<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
-
-							<!-- Button to trigger the modal -->
-							<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
-								Supprimer
-							</button>
-						</div>
-					{% endif %}
 				</div>
+			</div>
+
+			<!-- Back to Posts Button -->
+			<div class="text-center mt-4">
+				<a href="/posts" class="btn btn-secondary btn-lg">
+					<i class="fas fa-arrow-left"></i> Retour aux posts
+				</a>
 			</div>
 		</div>
 	</section>
@@ -143,14 +137,5 @@
 	{% else %}
 		<p class="text-center">Vous devez être connecté pour ajouter un commentaire.</p>
 	{% endif %}
-
-
-	<!-- Inclusion de la modale avec des variables spécifiques pour ce post -->
-	{% include 'partials/_confirm_delete_modal.html.twig' with {
-    modalId: 'deletePostModal' ~ post.id,
-    itemName: post.title,
-    deleteUrl: '/posts/delete/' ~ post.id,
-    csrf_token: csrf_token('delete_post')
-} %}
 
 {% endblock %}

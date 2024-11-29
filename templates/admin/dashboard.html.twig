@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord - Administration{% endblock %}
+
+{% block content %}
+    <!-- Section Tableau de Bord -->
+    <section class="page-section mt-5" id="dashboard">
+        <div class="container">
+            <!-- Section Heading-->
+            <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Administration</h2>
+            <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="divider-custom-line"></div>
+            </div>
+            <!-- Content -->
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p>Bienvenue, {{ app.user.firstName }} {{ app.user.lastName }} !</p>
+                    <p>Utilisez les options ci-dessous pour gérer le site.</p>
+                </div>
+            </div>
+            <!-- Options du Tableau de Bord -->
+            <div class="row justify-content-center">
+                <!-- Gestion des Articles -->
+                <div class="col-md-4 mb-5">
+                    <div class="portfolio-item mx-auto text-center">
+                        <a href="/admin/posts">
+                            <i class="fas fa-edit fa-5x text-secondary"></i>
+                        </a>
+                        <h4 class="mt-3">Gérer les Articles</h4>
+                    </div>
+                </div>
+                <!-- Modération des Commentaires -->
+                <div class="col-md-4 mb-5">
+                    <div class="portfolio-item mx-auto text-center">
+                        <a href="/admin/pending">
+                            <i class="fas fa-comments fa-5x text-secondary"></i>
+                        </a>
+                        <h4 class="mt-3">Modérer les Commentaires</h4>
+                    </div>
+                </div>
+                <!-- Gestion des Utilisateurs -->
+                <div class="col-md-4 mb-5">
+                    <div class="portfolio-item mx-auto text-center">
+                        <a href="/admin/users">
+                            <i class="fas fa-users fa-5x text-secondary"></i>
+                        </a>
+                        <h4 class="mt-3">Gérer les Utilisateurs</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

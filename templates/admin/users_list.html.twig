@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block content %}
+    <!-- Section Liste des Utilisateurs -->
+    <section class="page-section mt-5" id="users">
+        <div class="container">
+        <!-- Section Heading-->
+        <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Gestion des Utilisateurs</h2>
+        <!-- Icon Divider-->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="divider-custom-line"></div>
+            </div>
+            
+            <!-- Tableau des Utilisateurs -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.role|capitalize }}</td>
+                                <td>
+                                    <a href="/admin/users/edit/{{ user.id }}" class="btn btn-sm btn-warning">Modifier</a>
+                                    <form action="/admin/users/delete/{{ user.id }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_user_form') }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Confirmer la suppression ?');">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">Aucun utilisateur trouvé.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/admin/dashboard" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Retour au Tableau de Bord
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

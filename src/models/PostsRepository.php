@@ -45,14 +45,19 @@ class PostsRepository
      */
     public function findAll(): array
     {
-        // 'query' retourne maintenant un Iterator.
-        $results = $this->dbi->query("SELECT * FROM post ORDER BY created_at DESC");
+        $sql = "SELECT p.*, u.first_name AS author_first_name, u.last_name AS author_last_name
+            FROM post p
+            JOIN user u ON p.author = u.user_id";
 
-        // Initialiser un tableau pour stocker les objets Post.
+        $stmt = $this->dbi->prepare($sql);
+        $stmt->execute();
+
+        // Récupérer toutes les lignes.
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
         $posts = [];
 
-        // Parcourir chaque ligne retournée par la requête.
-        foreach ($results as $row) {
+        foreach ($rows as $row) {
             $posts[] = $this->createPostFromResult($row);
         }
 
@@ -304,6 +309,8 @@ class PostsRepository
                 'chapo' => $row['chapo'],
                 'content' => $row['content'],
                 'author' => (int) $row['author'],
+                'authorFirstName' => $row['author_first_name'],
+                'authorLastName' => $row['author_last_name'],
                 'createdAt' => $row['created_at'],
                 'updatedAt' => ($row['updated_at'] ?? null),
             ]

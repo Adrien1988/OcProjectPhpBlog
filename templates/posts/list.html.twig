@@ -15,14 +15,9 @@
 			<div class="divider-custom">
 				<div class="divider-custom-line"></div>
 				<div class="divider-custom-icon">
-					<i class="fas fa-star"></i>
+					<i class="fas fa-newspaper"></i>
 				</div>
 				<div class="divider-custom-line"></div>
-			</div>
-
-			<!-- Button to create a new post -->
-			<div class="text-center mb-4">
-				<a href="/posts/create" class="btn btn-success">Créer un nouveau post</a>
 			</div>
 
 			<!-- Posts List-->
@@ -31,9 +26,9 @@
 					<p class="text-center">Aucun post disponible pour le moment.</p>
 				{% else %}
 					{% for post in posts %}
-						<div class="col-md-6 col-lg-4 mb-5">
-							<div class="post-item mx-auto card shadow-sm">
-								<div class="card-body">
+						<div class="col-md-6 col-lg-4 mb-5 d-flex align-items-stretch">
+							<div class="post-item mx-auto card shadow-sm d-flex flex-column">
+								<div class="card-body d-flex flex-column">
 									<h3 class="card-title text-center">{{ post.title }}</h3>
 									<p class="card-text">
 										{% if post.updatedAt %}
@@ -44,35 +39,17 @@
 											{{ post.createdAt|date('d-m-Y H:i') }}
 										{% endif %}
 									</p>
-									<p>{{ post.chapo }}</p>
+									<p>
+										<strong>Chapô :</strong>
+										{{ post.chapo|length > 100 ? post.chapo|slice(0, 100) ~ '...' : post.chapo }}</p>
 
 									<!-- Lire la suite -->
-									<div class="text-center mb-3">
+									<div class="mt-auto text-center">
 										<a href="/posts/{{ post.id }}" class="btn btn-primary">Lire la suite</a>
 									</div>
-
-									<!-- Modifier et Supprimer -->
-									{% if app.user is defined and app.user and post.author == app.user.id %}
-										<div class="text-center">
-											<a href="/posts/edit/{{ post.id }}" class="btn btn-warning btn-sm">Modifier</a>
-
-											<!-- Bouton pour ouvrir la modale -->
-											<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
-												Supprimer
-											</button>
-										</div>
-									{% endif %}
 								</div>
 							</div>
 						</div>
-
-						<!-- Inclure la modale de confirmation de suppression -->
-						{% include 'partials/_confirm_delete_modal.html.twig' with {
-							modalId: 'deletePostModal' ~ post.id,
-							itemName: post.title,
-							deleteUrl: '/posts/delete/' ~ post.id,
-							csrf_token: csrf_token('delete_post')
-						} %}
 					{% endfor %}
 				{% endif %}
 			</div>

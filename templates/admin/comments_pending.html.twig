@@ -2,60 +2,70 @@
 
 {% block content %}
 
-	{% if successMessage is defined %}
-		<div class="alert alert-success">{{ successMessage }}</div>
-	{% endif %}
+    {% if successMessage is defined %}
+        <div class="alert alert-success">{{ successMessage }}</div>
+    {% endif %}
 
+    <section class="page-section bg-light mt-5" id="comments-pending">
+        <div class="container">
+            <!-- Links to validated and invalidated comments -->
+            <div class="mb-4 text-center">
+                <a href="/admin/validated" class="btn btn-primary me-2">Commentaires Validés</a>
+                <a href="/admin/invalidated" class="btn btn-secondary">Commentaires Invalidés</a>
+            </div>
 
-	<section class="page-section bg-light mt-5" id="comments-pending">
-		<div class="container">
-			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">Commentaires en attente de validation</h2>
+            <h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">Commentaires en attente de validation</h2>
 
-			<!-- Divider -->
-			<div class="divider-custom">
-				<div class="divider-custom-line"></div>
-				<div class="divider-custom-icon">
-					<i class="fas fa-comments"></i>
-				</div>
-				<div class="divider-custom-line"></div>
-			</div>
+            <!-- Divider -->
+            <div class="divider-custom">
+                <div class="divider-custom-line"></div>
+                <div class="divider-custom-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="divider-custom-line"></div>
+            </div>
 
-			<!-- Comments -->
-			<div class="row justify-content-center">
-				<div class="col-lg-8">
-					{% if comments is empty %}
-						<p class="text-center">Aucun commentaire en attente.</p>
-					{% else %}
-						{% for data in comments %}
-							{% set comment = data.comment %}
-							{% set authorUsername = data.authorUsername %}
-							{% set postTitle = data.postTitle %}
+            <!-- Comments -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    {% if comments is empty %}
+                        <p class="text-center">Aucun commentaire en attente.</p>
+                    {% else %}
+                        {% for data in comments %}
+                            {% set comment = data.comment %}
+                            {% set authorUsername = data.authorUsername %}
+                            {% set postTitle = data.postTitle %}
 
-							<div class="comment border-bottom mb-4 pb-2">
-								<p>
-									<strong>{{ authorUsername }}</strong>
-									-
-									{{ comment.createdAt|date('d-m-Y H:i') }}
-									sur l'article
-									<a href="/posts/{{ comment.postId }}">{{ postTitle }}</a>
-								</p>
-								<p>{{ comment.content }}</p>
-								<div class="text-end">
-									<form action="/admin/validate/{{ comment.id }}" method="post" class="d-inline">
-										<input type="hidden" name="_csrf_token" value="{{ csrf_token('validate_comment' ~ comment.id) }}">
-										<button type="submit" class="btn btn-success btn-sm">Valider</button>
-									</form>
-									<form action="/admin/invalidate/{{ comment.id }}" method="post" class="d-inline">
-										<input type="hidden" name="_csrf_token" value="{{ csrf_token('invalidate_comment' ~ comment.id) }}">
-										<button type="submit" class="btn btn-danger btn-sm">Invalider</button>
-									</form>
-								</div>
-							</div>
-						{% endfor %}
-					{% endif %}
-				</div>
-			</div>
-		</div>
-	</section>
+                            <div class="comment border-bottom mb-4 pb-2">
+                                <p>
+                                    <strong>{{ authorUsername }}</strong>
+                                    -
+                                    {{ comment.createdAt|date('d-m-Y H:i') }}
+                                    sur l'article
+                                    <a href="/posts/{{ comment.postId }}">{{ postTitle }}</a>
+                                </p>
+                                <p>{{ comment.content }}</p>
+                                <div class="text-end">
+                                    <form action="/admin/validate/{{ comment.id }}" method="post" class="d-inline">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('validate_comment' ~ comment.id) }}">
+                                        <button type="submit" class="btn btn-success btn-sm">Valider</button>
+                                    </form>
+                                    <form action="/admin/invalidate/{{ comment.id }}" method="post" class="d-inline">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('invalidate_comment' ~ comment.id) }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Invalider</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/admin/dashboard" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Retour au Tableau de Bord
+                </a>
+            </div>
+        </div>
+    </section>
 
 {% endblock %}

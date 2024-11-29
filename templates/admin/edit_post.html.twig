@@ -22,7 +22,7 @@
 			<!-- Form -->
 			<div class="row justify-content-center">
 				<div class="col-lg-8 col-xl-7">
-					<form action="/posts/edit/{{ post.id }}" method="POST" class="mt-4">
+					<form action="/admin/posts/edit/{{ post.id }}" method="POST" class="mt-4">
 						<input
 						type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
@@ -44,12 +44,27 @@
 							<textarea id="content" name="content" class="form-control" rows="5" required>{{ post.content }}</textarea>
 						</div>
 
+                        <!-- Author -->
+                        <div class="mb-3">
+                            <label for="author" class="form-label text-uppercase text-secondary fw-bold">Auteur</label>
+                            <select id="author" name="author" class="form-control">
+                                {% for user in users %}
+                                    <option value="{{ user.id }}" {% if user.id == post.author %}selected{% endif %}>{{ user.firstName }} {{ user.lastName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
 						<div class="d-grid">
 							<button type="submit" class="btn btn-primary btn-xl">Enregistrer les modifications</button>
 						</div>
 					</form>
 				</div>
 			</div>
+            <div class="text-center mt-4">
+                <a href="/admin/posts" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste des posts
+                </a>
+            </div>
 		</div>
 	</section>
 {% endblock %}

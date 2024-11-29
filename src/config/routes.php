@@ -22,10 +22,7 @@ function createRoutes(): RouteCollection
 
     // Routes pour PostController.
     $routes->add('posts_list', new Route('/posts', ['_controller' => 'App\Controllers\PostController::listPosts']));
-    $routes->add('create_post', new Route('/posts/create', ['_controller' => 'App\Controllers\PostController::createPost'], [], [], '', [], ['GET', 'POST']));
     $routes->add('post_detail', new Route('/posts/{postId}', ['_controller' => 'App\Controllers\PostController::detailPost'], ['postId' => '\d+']));
-    $routes->add('edit_post', new Route('/posts/edit/{postId}', ['_controller' => 'App\Controllers\PostController::editPost'], [], [], '', [], ['GET', 'POST']));
-    $routes->add('delete_post', new Route('/posts/delete/{postId}', ['_controller' => 'App\Controllers\PostController::deletePost'], [], [], '', [], ['POST']));
 
     // Routes pour AuthController.
     $routes->add('register', new Route('/register', ['_controller' => 'App\Controllers\AuthController::register'], [], [], '', [], ['GET', 'POST']));
@@ -45,38 +42,28 @@ function createRoutes(): RouteCollection
 
     // Routes pour CommentController.
     $routes->add('add_comment', new Route('/posts/{postId}/comment', ['_controller' => 'App\Controllers\CommentController::createComment'], ['postId' => '\d+'], [], '', [], ['POST']));
-    $routes->add('list_pending_comments', new Route('/admin/pending', ['_controller' => 'App\Controllers\CommentController::listPendingComments']));
-    $routes->add(
-        'validate_comment',
-        new Route(
-            '/admin/validate/{commentId}',
-            [
-                '_controller' => 'App\Controllers\CommentController::validateComment'
-            ],
-            ['commentId' => '\d+'],
-            [],
-            '',
-            [],
-            ['POST']
-        )
-    );
-    $routes->add('list_validated_comments', new Route('/admin/validated', ['_controller' => 'App\Controllers\CommentController::listValidatedComments']));
-    $routes->add('invalidate_comment', new Route('/admin/invalidate/{commentId}', ['_controller' => 'App\Controllers\CommentController::invalidateComment'], ['commentId' => '\d+'], [], '', [], ['POST']));
-    $routes->add('list_invalidated_comments', new Route('/admin/invalidated', ['_controller' => 'App\Controllers\CommentController::listInvalidatedComments']));
-    $routes->add(
-        'delete_invalidated_comment',
-        new Route(
-            '/admin/delete/{commentId}',
-            [
-                '_controller' => 'App\Controllers\CommentController::deleteInvalidatedComment'
-            ],
-            [],
-            [],
-            '',
-            [],
-            ['POST']
-        )
-    );
+
+     // **Routes pour AdminController.**
+    // Routes pour l'administration des posts.
+    $routes->add('admin_dashboard', new Route('/admin/dashboard', ['_controller' => 'App\Controllers\AdminController::dashboard']));
+
+    $routes->add('admin_posts_list', new Route('/admin/posts', ['_controller' => 'App\Controllers\AdminController::listAdminPosts']));
+    $routes->add('admin_create_post', new Route('/admin/posts/create', ['_controller' => 'App\Controllers\AdminController::createPost'], [], [], '', [], ['GET', 'POST']));
+    $routes->add('admin_edit_post', new Route('/admin/posts/edit/{postId}', ['_controller' => 'App\Controllers\AdminController::editPost'], ['postId' => '\d+'], [], '', [], ['GET', 'POST']));
+    $routes->add('admin_delete_post', new Route('/admin/posts/delete/{postId}', ['_controller' => 'App\Controllers\AdminController::deletePost'], ['postId' => '\d+'], [], '', [], ['POST']));
+
+    // Routes pour l'administration des commentaires.
+    $routes->add('list_pending_comments', new Route('/admin/pending', ['_controller' => 'App\Controllers\AdminController::listPendingComments']));
+    $routes->add('validate_comment', new Route('/admin/validate/{commentId}', ['_controller' => 'App\Controllers\AdminController::validateComment'], ['commentId' => '\d+'], [], '', [], ['POST']));
+    $routes->add('invalidate_comment', new Route('/admin/invalidate/{commentId}', ['_controller' => 'App\Controllers\AdminController::invalidateComment'], ['commentId' => '\d+'], [], '', [], ['POST']));
+    $routes->add('list_validated_comments', new Route('/admin/validated', ['_controller' => 'App\Controllers\AdminController::listValidatedComments']));
+    $routes->add('list_invalidated_comments', new Route('/admin/invalidated', ['_controller' => 'App\Controllers\AdminController::listInvalidatedComments']));
+    $routes->add('delete_invalidated_comment', new Route('/admin/delete/{commentId}', ['_controller' => 'App\Controllers\AdminController::deleteInvalidatedComment'], ['commentId' => '\d+'], [], '', [], ['POST']));
+
+    // Routes pour la gestion des utilisateurs.
+    $routes->add('admin_users_list', new Route('/admin/users', ['_controller' => 'App\Controllers\AdminController::listUsers']));
+    $routes->add('admin_edit_user', new Route('/admin/users/edit/{userId}', ['_controller' => 'App\Controllers\AdminController::editUser'], ['userId' => '\d+'], [], '', [], ['GET', 'POST']));
+    $routes->add('admin_delete_user', new Route('/admin/users/delete/{userId}', ['_controller' => 'App\Controllers\AdminController::deleteUser'], ['userId' => '\d+'], [], '', [], ['POST']));
 
     return $routes;
 

@@ -8,7 +8,6 @@ use PDOStatement;
 use App\Models\User;
 use InvalidArgumentException;
 use App\Core\DatabaseInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersRepository
 {
@@ -26,11 +25,10 @@ class UsersRepository
     /**
      * Constructeur qui injecte la dépendance vers la couche d'accès aux données.
      *
-     * @param DatabaseInterface  $dbi       Interface pour interagir avec la base de
-     *                                      données.
-     * @param ValidatorInterface $validator Le validateur Symfony.
+     * @param DatabaseInterface $dbi Interface pour interagir avec la base de
+     *                               données.
      */
-    public function __construct(DatabaseInterface $dbi, ValidatorInterface $validator)
+    public function __construct(DatabaseInterface $dbi)
     {
         $this->dbi = $dbi;
 
@@ -319,7 +317,7 @@ class UsersRepository
             $paramName = substr($placeholder, 1);
 
             // Obtenir le nom de la méthode.
-            $methodName = ($paramMethodMap[$paramName] ?? 'get').str_replace('_', '', ucwords($paramName, '_'));
+            $methodName = ($paramMethodMap[$paramName] ?? ('get'.str_replace('_', '', ucwords($paramName, '_'))));
 
             if (method_exists($user, $methodName) === false) {
                 throw new Exception("Méthode {$methodName} non définie dans la classe User.");
@@ -328,7 +326,7 @@ class UsersRepository
             $value = $user->$methodName();
 
             // Gérer les dates (DateTime).
-            if ($value instanceof \DateTime) {
+            if ($value instanceof DateTime) {
                 $value = $value->format('Y-m-d H:i:s');
             }
 
