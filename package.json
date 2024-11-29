@@ -1,27 +1,22 @@
 {
-  "name": "ocprojectphpblog",
-  "version": "1.0.0",
-  "description": "Project of a professionnal blog in php for my training as a php/symfony web developer for OpenClassrooms.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --fix public/js/**/*.js",
-    "format": "prettier --write ."
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.15.0",
-    "@types/eslint": "^8.56.10",
-    "eslint": "8.2.0",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-prettier": "8.0.0",
-    "eslint-plugin-import": "2.25.0",
-    "eslint-plugin-prettier": "4.0.0",
-    "globals": "^15.12.0",
-    "prettier": "2.5.0",
-    "ts-node": "^10.9.2"
+    "name": "ocprojectphpblog",
+    "version": "1.0.0",
+    "description": "Project of a professional blog in PHP for my training as a PHP/Symfony web developer for OpenClassrooms.",
+    "main": "index.js",
+    "scripts": {
+      "lint": "eslint --fix public/js/**/*.js",
+      "format": "prettier --write ."
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "eslint": "^8.2.0",
+      "eslint-config-airbnb-base": "^15.0.0",
+      "eslint-config-prettier": "^8.0.0",
+      "eslint-plugin-import": "^2.25.2",
+      "eslint-plugin-prettier": "^4.0.0",
+      "prettier": "^2.5.0"
+    }
   }
-}
+  
