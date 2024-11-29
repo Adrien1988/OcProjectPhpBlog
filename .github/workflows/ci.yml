@@ -16,7 +16,7 @@ jobs:
           php-version: '8.1' # Ajustez selon la version de PHP utilisée
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --no-scripts --no-progress
 
       - name: Install PHP_CodeSniffer
         run: composer global require "squizlabs/php_codesniffer=*"
@@ -35,8 +35,19 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install ESLint and dependencies
+      - name: Install ESLint and Prettier
         run: npm install eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-prettier eslint-config-prettier prettier --save-dev
+
+        # Ajouter des scripts NPM pour ESLint et Prettier
+      - name: Add npm scripts
+        run: |
+            echo '{
+                "scripts": {
+                "lint": "eslint ./src --fix",
+                "format": "prettier --write ./src"
+                }
+            }' > package.json
+
 
       - name: Ensure ESLint is executable
         run: chmod +x ./node_modules/.bin/eslint
