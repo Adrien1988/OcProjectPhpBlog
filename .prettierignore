@@ -1,0 +1,15 @@
+# Ignorer les dépendances PHP
+vendor/
+
+# Ignorer les modules Node.js
+node_modules/
+
+# Ignorer les fichiers CSS générés
+public/css/
+
+# Ignorer les bibliothèques JavaScript tierces
+public/js/libs/
+
+# Ignorer les fichiers de build ou de couverture de code
+build/
+coverage/
