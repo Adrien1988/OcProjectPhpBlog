@@ -6,12 +6,12 @@
 
 /* global bootstrap */
 
-(function () {
+(function main() {
   // Vérifier que le DOM est chargé
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', () => {
     // Navbar shrink function.
-    var navbarShrink = function () {
-      var navbarCollapsible = document.body.querySelector('#mainNav');
+    const navbarShrink = function navbarShrink() {
+      const navbarCollapsible = document.body.querySelector('#mainNav');
       if (!navbarCollapsible) {
         return;
       }
@@ -29,22 +29,22 @@
     document.addEventListener('scroll', navbarShrink);
 
     // Activate Bootstrap scrollspy on the main nav element.
-    var mainNav = document.body.querySelector('#mainNav');
+    const mainNav = document.body.querySelector('#mainNav');
     if (mainNav) {
-      new bootstrap.ScrollSpy(document.body, {
+      const _scrollSpy = new bootstrap.ScrollSpy(document.body, {
         target: '#mainNav',
         rootMargin: '0px 0px -40%',
       });
     }
 
     // Collapse responsive navbar when toggler is visible.
-    var navbarToggler = document.body.querySelector('.navbar-toggler');
-    var responsiveNavItems = [].slice.call(
+    const navbarToggler = document.body.querySelector('.navbar-toggler');
+    const responsiveNavItems = [].slice.call(
       document.querySelectorAll('#navbarResponsive .nav-link'),
     );
 
-    responsiveNavItems.forEach(function (responsiveNavItem) {
-      responsiveNavItem.addEventListener('click', function () {
+    responsiveNavItems.forEach((responsiveNavItem) => {
+      responsiveNavItem.addEventListener('click', () => {
         if (window.getComputedStyle(navbarToggler).display !== 'none') {
           navbarToggler.click();
         }
@@ -52,15 +52,15 @@
     });
 
     // Function to reset the form.
-    var resetForm = function () {
-      var form = document.getElementById('contactForm');
+    const resetForm = function resetForm() {
+      const form = document.getElementById('contactForm');
       if (form) {
         form.reset();
       }
     };
 
     // Fonction pour gérer la soumission du formulaire.
-    const handleFormSubmit = function (event) {
+    const handleFormSubmit = function handleFormSubmit(event) {
       event.preventDefault();
 
       const form = document.getElementById('contactForm');
@@ -106,14 +106,14 @@
       }
     };
 
-    var submitButton = document.getElementById('submitButton');
+    const submitButton = document.getElementById('submitButton');
     if (submitButton) {
       submitButton.addEventListener('click', handleFormSubmit);
     }
 
     // Back to top button visibility logic
-    var handleBackToTopButton = function () {
-      var backToTop = document.getElementById('backToTop');
+    const handleBackToTopButton = function handleBackToTopButton() {
+      const backToTop = document.getElementById('backToTop');
       if (backToTop) {
         if (window.scrollY > 200) {
           backToTop.removeAttribute('hidden');
@@ -124,7 +124,7 @@
     };
 
     // Obtenir le bouton "Retour en haut"
-    var backToTopButton = document.getElementById('backToTop');
+    const backToTopButton = document.getElementById('backToTop');
     if (backToTopButton) {
       // Gérer la visibilité du bouton au chargement initial
       handleBackToTopButton();
