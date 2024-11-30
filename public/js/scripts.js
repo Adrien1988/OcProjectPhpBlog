@@ -59,44 +59,46 @@
       }
     };
 
-    // Named function for handling the form submission.
-    var handleFormSubmit = function (event) {
+    // Fonction pour gérer la soumission du formulaire.
+    const handleFormSubmit = function (event) {
       event.preventDefault();
 
-      var form = document.getElementById('contactForm');
+      const form = document.getElementById('contactForm');
       if (form) {
-        var formData = new FormData(form);
+        const formData = new FormData(form);
 
         fetch(form.action, {
           method: 'POST',
           body: formData,
         })
-          .then(function (response) {
+          .then((response) => {
             if (!response.ok) {
-              return response.text().then(function (text) {
+              return response.text().then((text) => {
                 throw new Error(text);
               });
             }
             return response.text();
           })
-          .then(function (data) {
+          .then((data) => {
             document.getElementById('modalMessage').textContent = data;
-            var feedbackModal = new bootstrap.Modal(
+            const feedbackModal = new bootstrap.Modal(
               document.getElementById('feedbackModal'),
             );
             feedbackModal.show();
 
-            // Reset the form after submission.
+            // Réinitialiser le formulaire après soumission.
             resetForm();
 
-            // Add an event listener to reset the form when the modal is closed.
-            var feedbackModalElement = document.getElementById('feedbackModal');
+            // Ajouter un écouteur pour réinitialiser le formulaire lorsque le modal est fermé.
+            const feedbackModalElement =
+              document.getElementById('feedbackModal');
             feedbackModalElement.addEventListener('hidden.bs.modal', resetForm);
           })
-          .catch(function (error) {
-            document.getElementById('modalMessage').textContent =
-              "Erreur lors de l'envoi du message: " + error.message;
-            var feedbackModal = new bootstrap.Modal(
+          .catch((error) => {
+            document.getElementById(
+              'modalMessage',
+            ).textContent = `Erreur lors de l'envoi du message: ${error.message}`;
+            const feedbackModal = new bootstrap.Modal(
               document.getElementById('feedbackModal'),
             );
             feedbackModal.show();
