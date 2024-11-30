@@ -4,19 +4,20 @@
     "description": "Project of a professional blog in PHP for my training as a PHP/Symfony web developer for OpenClassrooms.",
     "main": "index.js",
     "scripts": {
-      "lint": "eslint --fix public/js/**/*.js",
-      "format": "prettier --write \"public/js/**/*.js\""
+        "lint": "eslint --fix public/js/**/*.js",
+        "format": "prettier --write \"public/js/**/*.js\""
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "devDependencies": {
-      "eslint": "^8.2.0",
-      "eslint-config-airbnb-base": "^15.0.0",
-      "eslint-config-prettier": "^8.0.0",
-      "eslint-plugin-import": "^2.25.2",
-      "eslint-plugin-prettier": "^4.0.0",
-      "prettier": "^2.5.0"
+        "@eslint/js": "^9.16.0",
+        "eslint": "^8.2.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-prettier": "^8.0.0",
+        "eslint-plugin-import": "^2.25.2",
+        "eslint-plugin-prettier": "^4.0.0",
+        "globals": "^15.12.0",
+        "prettier": "^2.5.0"
     }
-  }
-  
+}
