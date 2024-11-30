@@ -4,10 +4,10 @@ import pluginJs from '@eslint/js';
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
   {
-    files: ["**/*.js"],
+    files: ['**/*.js'],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       globals: {
         ...globals.browser,
         ...globals.node,
@@ -18,9 +18,9 @@ export default [
     },
     rules: {
       // Vos règles personnalisées
-      "no-var": "error",
-      "prefer-const": "error",
-      "prefer-arrow-callback": "error",
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'prefer-arrow-callback': 'error',
       // Vous pouvez ajouter d'autres règles ici
     },
   },
