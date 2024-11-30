@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
       "lint": "eslint --fix public/js/**/*.js",
-      "format": "prettier --write \"src/**/*.{js,css,html}\" \"public/js/**/*.js\""
+      "format": "prettier --write \"public/js/**/*.js\""
     },
     "keywords": [],
     "author": "",
