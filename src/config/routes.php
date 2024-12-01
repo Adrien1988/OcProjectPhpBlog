@@ -30,15 +30,7 @@ function createRoutes(): RouteCollection
     $routes->add('logout', new Route('/logout', ['_controller' => 'App\Controllers\AuthController::logout'], [], [], '', [], ['GET']));
     $routes->add('password_reset_request', new Route('/password-reset', ['_controller' => 'App\Controllers\AuthController::passwordResetRequest',]));
     $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset',]));
-    $routes->add(
-        'password_reset_request_success',
-        new Route(
-            '/password-reset-request/success',
-            [
-                '_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',
-            ]
-        )
-    );
+    $routes->add('password_reset_request_success', new Route('/password-reset-request/success', ['_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',]));
 
     // Routes pour CommentController.
     $routes->add('add_comment', new Route('/posts/{postId}/comment', ['_controller' => 'App\Controllers\CommentController::createComment'], ['postId' => '\d+'], [], '', [], ['POST']));

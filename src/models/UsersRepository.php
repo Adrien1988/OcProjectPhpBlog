@@ -349,7 +349,7 @@ class UsersRepository
      */
     public function findByPwdResetToken(string $token): ?User
     {
-        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE password_reset_token = :token");
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE pwd_reset_token = :token");
         $stmt->bindValue(':token', $token);
         $stmt->execute();
 
