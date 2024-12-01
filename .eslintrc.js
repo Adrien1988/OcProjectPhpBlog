@@ -8,9 +8,9 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'error',
       {
-      devDependencies: ['**/eslint.config.mjs'],
-      optionalDependencies: false,
-  },
+        devDependencies: ['**/eslint.config.mjs'],
+        optionalDependencies: false,
+},
   ],
   },
   env: {
@@ -21,7 +21,10 @@ module.exports = {
     {
       files: ['eslint.config.js', 'eslint.config.mjs'],
       rules: {
-        'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+        'import/no-extraneous-dependencies': [
+            'error', 
+            { 
+              devDependencies: true }],
       },
     },
   ],
