@@ -6,13 +6,11 @@ module.exports = {
     'no-unused-vars': ['error', { varsIgnorePattern: '^_' }],
     'no-underscore-dangle': ['error', { allow: ['_scrollSpy'] }],
     'import/no-extraneous-dependencies': [
-    'error',
-    {
-      devDependencies: [
-        '**/eslint.config.mjs',
-      ],
+      'error',
+      {
+      devDependencies: ['**/eslint.config.mjs'],
       optionalDependencies: false,
-    },
+  },
   ],
   },
   env: {
