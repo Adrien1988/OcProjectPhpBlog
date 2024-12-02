@@ -16,7 +16,7 @@ jobs:
           php-version: '8.1' # Ajustez selon la version de PHP utilisée
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --no-scripts --no-progress
 
       - name: Install PHP_CodeSniffer
         run: composer global require "squizlabs/php_codesniffer=*"
@@ -35,14 +35,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install ESLint and dependencies
-        run: npm install eslint eslint-config-airbnb-base eslint-plugin-import eslint-plugin-prettier eslint-config-prettier prettier --save-dev
-
-      - name: Ensure ESLint is executable
-        run: chmod +x ./node_modules/.bin/eslint
-
-      - name: Ensure Prettier is executable
-        run: chmod +x ./node_modules/.bin/prettier
+      - name: Install Node.js dependencies
+        run: npm ci
 
       - name: Run Prettier
         run: npm run format
@@ -50,10 +44,3 @@ jobs:
       - name: Run ESLint with fix
         run: npm run lint
 
-    #   - name: Create structured empty coverage file
-    #     run: echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0"><sources><source>.</source></sources><packages></packages></coverage>' > coverage.xml
-
-    #   - name: Send coverage to Codacy
-    #     run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
-    #     env:
-    #       CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}

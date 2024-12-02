@@ -134,6 +134,26 @@ class BaseController
      */
     protected function render(string $template, array $data=[]): Response
     {
+        // Récupérer les informations de l'utilisateur depuis la session.
+        $userId        = $this->sessionService->get('user_id');
+        $userRole      = $this->sessionService->get('user_role');
+        $userFirstName = $this->sessionService->get('user_first_name');
+        $userLastName  = $this->sessionService->get('user_last_name');
+
+        // Construire l'objet 'app' pour Twig.
+        $data['app'] = [
+            'user' => null,
+        ];
+
+        if ($userId !== null) {
+            $data['app']['user'] = [
+                'id' => $userId,
+                'role' => $userRole,
+                'firstName' => $userFirstName,
+                'lastName' => $userLastName,
+            ];
+        }
+
         $content = $this->twig->render($template, $data);
         return new Response($content);
 

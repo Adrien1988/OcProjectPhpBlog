@@ -228,6 +228,8 @@ class AuthController extends BaseController
     {
         $this->sessionService->set('user_id', $user->getId());
         $this->sessionService->set('user_role', $user->getRole());
+        $this->sessionService->set('user_first_name', $user->getFirstName());
+        $this->sessionService->set('user_last_name', $user->getLastName());
 
     }//end loginUser()
 

@@ -16,26 +16,18 @@
                 </li>
 
                 {% if app.user %}
-                    {% if app.user.role == 'Admin' %}
-                        <!-- Menu déroulant "Administration" pour l'administrateur -->
-                        <li class="nav-item dropdown mx-0 mx-lg-1">
-                            <a class="nav-link dropdown-toggle py-3 px-0 px-lg-3 rounded" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Administration
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                <li><a class="dropdown-item" href="/admin/pending">Valider les Commentaires</a></li>
-                                <li><a class="dropdown-item" href="/admin/validated">Commentaires Validés</a></li>
-                                <li><a class="dropdown-item" href="/admin/invalidated">Commentaires Invalidés</a></li>
-                            </ul>
+                    {% if app.user.role|lower == 'admin' %}
+                        <!-- Lien vers le tableau de bord d'administration pour l'administrateur -->
+                        <li class="nav-item mx-0 mx-lg-1">
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" href="/admin/dashboard">Administration</a>
                         </li>
                     {% endif %}
-                    
                     <!-- Menu "Mon Profil" -->
                     <li class="nav-item dropdown mx-0 mx-lg-1">
-                        <a class="nav-link dropdown-toggle py-3 px-0 px-lg-3 rounded" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Mon Profil
+                        <a class="nav-link py-3 px-0 px-lg-3 rounded d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mon Profil">
+                            <i class="fas fa-user"></i>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <li>
                                 <span class="dropdown-item-text small">Connecté en tant que : {{ app.user.firstName }} {{ app.user.lastName }}</span>
                             </li>

@@ -55,6 +55,20 @@ class Post
     )]
     private string $content;
 
+    /**
+     * Le prénom de l'auteur.
+     *
+     * @var string|null
+     */
+    private ?string $authorFirstName;
+
+    /**
+     * Le nom de famille de l'auteur.
+     *
+     * @var string|null
+     */
+    private ?string $authorLastName;
+
 
     /**
      * Constructeur de la classe Post.
@@ -76,6 +90,11 @@ class Post
         $this->setContent($postData['content']);
         $this->setCreatedAt(new DateTime($postData['createdAt']));
         $this->setAuthor($postData['author']);
+
+        // Initialisation des propriétés authorFirstName et authorLastName.
+        $this->authorFirstName = ($postData['authorFirstName'] ?? null);
+        $this->authorLastName  = ($postData['authorLastName'] ?? null);
+
         if (isset($postData['updatedAt']) === true) {
             $this->setUpdatedAt(new DateTime($postData['updatedAt']));
         }
@@ -159,6 +178,30 @@ class Post
         $this->content = $content;
 
     }//end setContent()
+
+
+    /**
+     * Obtient le prénom de l'auteur.
+     *
+     * @return string|null Le prénom de l'auteur.
+     */
+    public function getAuthorFirstName(): ?string
+    {
+        return $this->authorFirstName;
+
+    }//end getAuthorFirstName()
+
+
+    /**
+     * Obtient le nom de famille de l'auteur.
+     *
+     * @return string|null Le nom de famille de l'auteur.
+     */
+    public function getAuthorLastName(): ?string
+    {
+        return $this->authorLastName;
+
+    }//end getAuthorLastName()
 
 
 }//end class
