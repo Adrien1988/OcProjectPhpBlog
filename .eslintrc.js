@@ -6,14 +6,12 @@ module.exports = {
     'no-unused-vars': ['error', { varsIgnorePattern: '^_' }],
     'no-underscore-dangle': ['error', { allow: ['_scrollSpy'] }],
     'import/no-extraneous-dependencies': [
-    'error',
-    {
-      devDependencies: [
-        '**/eslint.config.mjs',
-      ],
-      optionalDependencies: false,
-    },
-  ],
+      'error',
+      {
+        devDependencies: ['**/eslint.config.mjs'],
+        optionalDependencies: false,
+      },
+    ],
   },
   env: {
     browser: true,
@@ -23,7 +21,12 @@ module.exports = {
     {
       files: ['eslint.config.js', 'eslint.config.mjs'],
       rules: {
-        'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: true,
+          },
+        ],
       },
     },
   ],
