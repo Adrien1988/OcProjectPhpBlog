@@ -2,9 +2,6 @@
 
 namespace App\Controllers;
 
-use Twig\Environment;
-use Models\PostsRepository;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
