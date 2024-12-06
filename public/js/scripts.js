@@ -96,7 +96,7 @@
           })
           .catch((error) => {
             document.getElementById(
-              'modalMessage'
+              'modalMessage',
             ).textContent = `Erreur lors de l'envoi du message: ${error.message}`;
             const feedbackModal = new bootstrap.Modal(
               document.getElementById('feedbackModal'),
