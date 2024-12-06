@@ -29,7 +29,7 @@ function createRoutes(): RouteCollection
     $routes->add('login', new Route('/login', ['_controller' => 'App\Controllers\AuthController::login'], [], [], '', [], ['GET', 'POST']));
     $routes->add('logout', new Route('/logout', ['_controller' => 'App\Controllers\AuthController::logout'], [], [], '', [], ['GET']));
     $routes->add('password_reset_request', new Route('/password-reset', ['_controller' => 'App\Controllers\AuthController::passwordResetRequest',]));
-    $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset',]));
+    $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset'], ['token' => '[a-zA-Z0-9]{32}']));
     $routes->add('password_reset_request_success', new Route('/password-reset-request/success', ['_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',]));
 
     // Routes pour CommentController.
@@ -37,7 +37,7 @@ function createRoutes(): RouteCollection
 
      // **Routes pour AdminController.**
     // Routes pour l'administration des posts.
-    $routes->add('admin_dashboard', new Route('/admin/dashboard', ['_controller' => 'App\Controllers\AdminController::dashboard']));
+    $routes->add('admin_dashboard', new Route('/admin/dashboard', ['_controller' => 'App\Controllers\AdminController::dashboard'], [], [], '', [], ['GET']));
 
     $routes->add('admin_posts_list', new Route('/admin/posts', ['_controller' => 'App\Controllers\AdminController::listAdminPosts']));
     $routes->add('admin_create_post', new Route('/admin/posts/create', ['_controller' => 'App\Controllers\AdminController::createPost'], [], [], '', [], ['GET', 'POST']));
