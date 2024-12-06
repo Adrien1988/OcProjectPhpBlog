@@ -4,8 +4,8 @@
     "description": "Project of a professional blog in PHP for my training as a PHP/Symfony web developer for OpenClassrooms.",
     "main": "index.js",
     "scripts": {
-        "lint": "eslint --fix public/js/**/*.js",
-        "format": "prettier --write \"public/js/**/*.js\""
+        "lint": "eslint --fix \"**/*.js\"",
+        "format": "prettier --write \"**/*.js\""
     },
     "keywords": [],
     "author": "",

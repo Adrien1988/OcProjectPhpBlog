@@ -10,8 +10,8 @@ module.exports = {
       {
         devDependencies: ['**/eslint.config.mjs'],
         optionalDependencies: false,
-},
-  ],
+      },
+    ],
   },
   env: {
     browser: true,
@@ -22,9 +22,11 @@ module.exports = {
       files: ['eslint.config.js', 'eslint.config.mjs'],
       rules: {
         'import/no-extraneous-dependencies': [
-            'error', 
-            { 
-              devDependencies: true }],
+          'error',
+          {
+            devDependencies: true,
+          },
+        ],
       },
     },
   ],

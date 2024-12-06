@@ -29,23 +29,15 @@ function createRoutes(): RouteCollection
     $routes->add('login', new Route('/login', ['_controller' => 'App\Controllers\AuthController::login'], [], [], '', [], ['GET', 'POST']));
     $routes->add('logout', new Route('/logout', ['_controller' => 'App\Controllers\AuthController::logout'], [], [], '', [], ['GET']));
     $routes->add('password_reset_request', new Route('/password-reset', ['_controller' => 'App\Controllers\AuthController::passwordResetRequest',]));
-    $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset',]));
-    $routes->add(
-        'password_reset_request_success',
-        new Route(
-            '/password-reset-request/success',
-            [
-                '_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',
-            ]
-        )
-    );
+    $routes->add('password_reset', new Route('/password-reset/{token}', ['_controller' => 'App\Controllers\AuthController::passwordReset'], ['token' => '[a-zA-Z0-9]{32}']));
+    $routes->add('password_reset_request_success', new Route('/password-reset-request/success', ['_controller' => 'App\Controllers\AuthController::passwordResetRequestSuccess',]));
 
     // Routes pour CommentController.
     $routes->add('add_comment', new Route('/posts/{postId}/comment', ['_controller' => 'App\Controllers\CommentController::createComment'], ['postId' => '\d+'], [], '', [], ['POST']));
 
      // **Routes pour AdminController.**
     // Routes pour l'administration des posts.
-    $routes->add('admin_dashboard', new Route('/admin/dashboard', ['_controller' => 'App\Controllers\AdminController::dashboard']));
+    $routes->add('admin_dashboard', new Route('/admin/dashboard', ['_controller' => 'App\Controllers\AdminController::dashboard'], [], [], '', [], ['GET']));
 
     $routes->add('admin_posts_list', new Route('/admin/posts', ['_controller' => 'App\Controllers\AdminController::listAdminPosts']));
     $routes->add('admin_create_post', new Route('/admin/posts/create', ['_controller' => 'App\Controllers\AdminController::createPost'], [], [], '', [], ['GET', 'POST']));
@@ -64,6 +56,12 @@ function createRoutes(): RouteCollection
     $routes->add('admin_users_list', new Route('/admin/users', ['_controller' => 'App\Controllers\AdminController::listUsers']));
     $routes->add('admin_edit_user', new Route('/admin/users/edit/{userId}', ['_controller' => 'App\Controllers\AdminController::editUser'], ['userId' => '\d+'], [], '', [], ['GET', 'POST']));
     $routes->add('admin_delete_user', new Route('/admin/users/delete/{userId}', ['_controller' => 'App\Controllers\AdminController::deleteUser'], ['userId' => '\d+'], [], '', [], ['POST']));
+
+    // **Routes pour les erreurs HTTP**.
+    $routes->add('error_400', new Route('/error/400', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 400]));
+    $routes->add('error_403', new Route('/error/403', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 403]));
+    $routes->add('error_404', new Route('/error/404', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 404]));
+    $routes->add('error_500', new Route('/error/500', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 500]));
 
     return $routes;
 

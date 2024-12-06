@@ -1,0 +1,6 @@
+{% extends 'errors/base_error.html.twig' %}
+
+{% block content %}
+{% set error_message = 'Une erreur interne du serveur est survenue. Veuillez réessayer plus tard.' %}
+{{ parent() }}
+{% endblock %}

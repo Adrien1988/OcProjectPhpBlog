@@ -1,0 +1,6 @@
+{% extends 'errors/base_error.html.twig' %}
+
+{% block content %}
+{% set error_message = 'La page demandée est introuvable. Veuillez vérifier l\'URL ou revenir à l\'accueil.' %}
+{{ parent() }}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Erreur {{ code }}{% endblock %}
+
+{% block content %}
+<!-- Erreur Section -->
+<section class="page-section bg-light mt-5" id="error">
+    <div class="container">
+        <!-- Section Heading -->
+        <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Erreur {{ code }}</h2>
+        <!-- Icon Divider -->
+        <div class="divider-custom">
+            <div class="divider-custom-line"></div>
+            <div class="divider-custom-icon">
+                <i class="fas fa-exclamation-triangle text-danger"></i>
+            </div>
+            <div class="divider-custom-line"></div>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center">
+                    <p class="lead text-dark">
+                        {{ error_message is not empty ? error_message : 'Une erreur s\'est produite. Veuillez réessayer plus tard.' }}
+                    </p>
+                    {% if app.environment == 'dev' and exception is not null %}
+                    <div class="alert alert-warning mt-4 text-start">
+                        <h5>Détails de l'erreur :</h5>
+                        <pre>{{ exception }}</pre>
+                    </div>
+                    {% endif %}
+                    <a href="/" class="btn btn-primary mt-4">Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
