@@ -10,42 +10,31 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Contrôleur pour la page d'accueil.
  */
-class ErrorController
+class ErrorController extends BaseController
 {
 
-    /**
-     * Instance de l'environnement Twig pour le rendu des templates.
-     *
-     * @var Environment
-     */
-    private $twig;
-
 
     /**
-     * Constructeur de la classe.
-     * Initialise l'instance Twig pour le rendu des templates.
+     * Gère les erreurs HTTP et affiche les pages correspondantes.
      *
-     * @param Environment $twig Instance de l'environnement Twig.
+     * @param int         $code    Code HTTP de l'erreur (400, 403, 404, 500).
+     * @param string|null $message Message d'erreur à afficher (optionnel).
+     *
+     * @return Response Page d'erreur.
      */
-    public function __construct(Environment $twig)
+    public function handle(int $code, ?string $message=null): Response
     {
-        $this->twig = $twig;
+        $template = match ($code) {
+            400 => 'errors/400.html.twig',
+            403 => 'errors/403.html.twig',
+            404 => 'errors/404.html.twig',
+            500 => 'errors/500.html.twig',
+            default => 'errors/500.html.twig',
+        };
 
-    }//end __construct()
+        return $this->render($template, ['code' => $code, 'error-message' => $message,]);
 
-
-    /**
-     * Affiche la page d'accueil.
-     * Cette méthode rend le template 'home/index.html.twig' avec des données dynamiques
-     * pour les éléments du portfolio et les modals, et retourne la réponse HTTP correspondante.
-     *
-     * @return Response La réponse HTTP contenant le contenu rendu du template.
-     */
-    public function index(): Response
-    {
-        return new Response("test");
-
-    }//end index()
+    }//end handle()
 
 
 }//end class

@@ -2,15 +2,19 @@
 
 namespace App\Core;
 
+use Throwable;
 use Twig\Environment;
-use App\Init\ConfigInit;
-use App\Init\ContainerInit;
-use App\Init\EnvironmentInit;
-use App\Init\ServicesInit;
-use App\Handlers\RequestHandler;
 use App\Init\TwigInit;
 use App\Init\UserInit;
+use App\Init\ConfigInit;
+use App\Init\ServicesInit;
+use App\Init\ContainerInit;
+use App\Init\EnvironmentInit;
+use App\Handlers\RequestHandler;
+use App\Controllers\ErrorController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 class Application
 {
@@ -71,7 +75,7 @@ class Application
             $this->services['sessionService'],
             $this->services['usersRepository']
         );
-        $this->twig->addGlobal('app', ['user' => $currentUser]);
+        $this->twig->addGlobal('app', ['user' => $currentUser, 'environment' => $envService->getEnv('APP_ENV', 'prod'), ]);
 
     }//end __construct()
 
@@ -84,14 +88,53 @@ class Application
      */
     public function run(): void
     {
-        // Traitement de la requête et obtention de la réponse.
-        $requestHandler = new RequestHandler();
-        $response       = $requestHandler->handle($this->services, $this->twig, $this->request);
+        try {
+            // Traitement de la requête et obtention de la réponse.
+            $requestHandler = new RequestHandler();
+            $response       = $requestHandler->handle($this->services, $this->twig, $this->request);
 
-        // Envoi de la réponse.
-        $response->send();
+            // Envoi de la réponse.
+            $response->send();
+        } catch (ResourceNotFoundException $e) {
+            $this->handleError(404);
+        } catch (Exception $e) {
+            $this->handleError(500, $e);
+        } catch (Throwable $e) {
+            $this->handleError(500, $e);
+        }
 
     }//end run()
+
+
+    /**
+     * Gère les erreurs HTTP et affiche les pages d'erreur correspondantes.
+     *
+     * @param int            $code      Code HTTP de l'erreur (400, 403, 404, 500).
+     * @param Throwable|null $exception (Optionnel) Exception qui a déclenché l'erreur.
+     *
+     * @return void
+     */
+    private function handleError(int $code, ?Throwable $exception=null): void
+    {
+        $errorController = new ErrorController(
+            $this->twig,
+            $this->services['securityService'],
+            $this->services['envService'],
+            $this->services['csrfService'],
+            $this->services['sessionService'],
+            $this->services['emailService'],
+            $this->services['validator'],
+            $this->services['urlGeneratorService']
+        );
+
+        // Inclure le message d'erreur dans la page uniquement en mode développement.
+        $isDevMode    = $this->services['envService']->getEnv('APP_ENV', 'prod') === 'dev';
+        $errorMessage = ($isDevMode === true && $exception !== null) ? $exception->getMessage() : null;
+
+        $response = $errorController->handle($code, $errorMessage);
+        $response->send();
+
+    }//end handleError()
 
 
 }//end class

@@ -1,0 +1,6 @@
+{% extends 'errors/base_error.html.twig' %}
+
+{% block content %}
+{% set error_message = 'Votre requête est invalide. Veuillez vérifier votre saisie.' %}
+{{ parent() }}
+{% endblock %}

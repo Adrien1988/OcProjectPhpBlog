@@ -57,6 +57,12 @@ function createRoutes(): RouteCollection
     $routes->add('admin_edit_user', new Route('/admin/users/edit/{userId}', ['_controller' => 'App\Controllers\AdminController::editUser'], ['userId' => '\d+'], [], '', [], ['GET', 'POST']));
     $routes->add('admin_delete_user', new Route('/admin/users/delete/{userId}', ['_controller' => 'App\Controllers\AdminController::deleteUser'], ['userId' => '\d+'], [], '', [], ['POST']));
 
+    // **Routes pour les erreurs HTTP**.
+    $routes->add('error_400', new Route('/error/400', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 400]));
+    $routes->add('error_403', new Route('/error/403', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 403]));
+    $routes->add('error_404', new Route('/error/404', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 404]));
+    $routes->add('error_500', new Route('/error/500', ['_controller' => 'App\Controllers\ErrorController::handle', 'code' => 500]));
+
     return $routes;
 
 }//end createRoutes()
