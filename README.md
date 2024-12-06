@@ -1,5 +1,7 @@
 # OcProjectPhpBlog
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f74d5137fcdc45308cdc2206f5b9570f)](https://app.codacy.com/gh/Adrien1988/OcProjectPhpBlog?utm_source=github.com&utm_medium=referral&utm_content=Adrien1988/OcProjectPhpBlog&utm_campaign=Badge_Grade)
+
 Project of a professionnal blog in php for my training as a php/symfony web developer for OpenClassrooms.
 
 Installez les dépendances PHP avec Composer :
