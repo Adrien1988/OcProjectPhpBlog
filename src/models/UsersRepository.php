@@ -100,6 +100,30 @@ class UsersRepository
 
 
     /**
+     * Récupère un utilisateur par son token de réinitialisation de mot de passe.
+     *
+     * @param string $token Le token de réinitialisation de mot de passe.
+     *
+     * @return User|null Retourne l'objet User si trouvé, sinon null.
+     */
+    public function findByPwdResetToken(string $token): ?User
+    {
+        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE pwd_reset_token = :token");
+        $stmt->bindValue(':token', $token);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return null;
+        }
+
+        return $this->createUserFromResult($result);
+
+    }//end findByPwdResetToken()
+
+
+    /**
      * Insère un nouvel utilisateur dans la base de données.
      *
      * Cette méthode prépare une requête SQL pour insérer un nouvel utilisateur dans la base de données,
@@ -267,11 +291,11 @@ class UsersRepository
                 'password' => $row['password'],
                 'role' => $row['role'],
                 'createdAt' => $row['created_at'],
-                'updatedAt' => (isset($row['updated_at']) === true && $row['updated_at'] !== null) ? new DateTime($row['updated_at']) : null,
+                'updatedAt' => ($row['updated_at'] ?? null),
                 'token' => ($row['token'] ?? null),
-                'expireAt' => (isset($row['expire_at']) === true && $row['expire_at'] !== null) ? new DateTime($row['expire_at']) : null,
+                'expireAt' => ($row['expire_at'] ?? null),
                 'pwdResetToken' => ($row['pwd_reset_token'] ?? null),
-                'pwdResetExpiresAt' => (isset($row['password_reset_expires_at']) === true && $row['password_reset_expires_at'] !== null) ? new DateTime($row['password_reset_expires_at']) : null,
+                'pwdResetExpiresAt' => ($row['pwd_reset_expires_at'] ?? null),
             ]
         );
 
@@ -338,30 +362,6 @@ class UsersRepository
         return $stmt;
 
     }//end prepareAndBind()
-
-
-    /**
-     * Récupère un utilisateur par son token de réinitialisation de mot de passe.
-     *
-     * @param string $token Le token de réinitialisation de mot de passe.
-     *
-     * @return User|null Retourne l'objet User si trouvé, sinon null.
-     */
-    public function findByPwdResetToken(string $token): ?User
-    {
-        $stmt = $this->dbi->prepare("SELECT * FROM user WHERE password_reset_token = :token");
-        $stmt->bindValue(':token', $token);
-        $stmt->execute();
-
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($result === false) {
-            return null;
-        }
-
-        return $this->createUserFromResult($result);
-
-    }//end findByPwdResetToken()
 
 
 }//end class

@@ -47,7 +47,8 @@ class PostsRepository
     {
         $sql = "SELECT p.*, u.first_name AS author_first_name, u.last_name AS author_last_name
             FROM post p
-            JOIN user u ON p.author = u.user_id";
+            JOIN user u ON p.author = u.user_id
+            ORDER BY p.created_at DESC";
 
         $stmt = $this->dbi->prepare($sql);
         $stmt->execute();

@@ -149,6 +149,25 @@ class AuthController extends BaseController
 
 
     /**
+     * Affiche la page de confirmation après une demande de réinitialisation de mot de passe.
+     *
+     * @return Response La réponse HTTP avec le contenu rendu.
+     */
+    public function passwordResetRequestSuccess(): Response
+    {
+        $message = $this->getAndRemoveSuccessMessage();
+
+        return $this->render(
+            'auth/password_reset_request_success.html.twig',
+            [
+                'message' => $message,
+            ]
+        );
+
+    }//end passwordResetRequestSuccess()
+
+
+    /**
      * Gère la réinitialisation du mot de passe.
      *
      * @param Request         $request         L'objet de la requête HTTP.

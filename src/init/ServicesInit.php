@@ -2,15 +2,20 @@
 
 namespace App\Init;
 
-use App\Services\CsrfService;
-use App\Services\SecurityService;
-use App\Services\EmailService;
-use App\Services\EnvService;
 use Models\PostsRepository;
 use Models\UsersRepository;
+use App\Services\EnvService;
+use App\Services\CsrfService;
+use App\Services\EmailService;
 use Models\CommentsRepository;
 use App\Core\DependencyContainer;
+use App\Services\SecurityService;
+use App\Services\UrlGeneratorService;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 
 /**
  * Initialise les services principaux de l'application.
@@ -24,10 +29,11 @@ class ServicesInit
      *
      * @param EnvService          $envService Le service d'environnement.
      * @param DependencyContainer $container  Le conteneur de dépendances.
+     * @param Request             $request    L'objet de la requête HTTP contenant les données du formulaire.
      *
      * @return array Un tableau contenant les services initialisés.
      */
-    public function initialize(EnvService $envService, DependencyContainer $container): array
+    public function initialize(EnvService $envService, DependencyContainer $container, Request $request): array
     {
         // Initialiser le traducteur.
         $translatorInit = new TranslatorInit();
@@ -46,6 +52,15 @@ class ServicesInit
         $sessionInit    = new SessionInit();
         $sessionService = $sessionInit->initialize();
 
+        // Initialisation des routes et du générateur d'URL.
+        $routes  = include __DIR__.'/../config/routes.php';
+        $context = new RequestContext();
+        $context->fromRequest($request);
+
+        // Créer le générateur d'URL et le matcher.
+        $urlGenerator = new UrlGenerator($routes, $context);
+        $urlMatcher   = new UrlMatcher($routes, $context);
+
         return [
             'csrfService' => $csrfService,
             'securityService' => new SecurityService(),
@@ -57,6 +72,8 @@ class ServicesInit
             'commentsRepository' => new CommentsRepository($container->getDatabase()),
             'validator' => $validator,
             'translator' => $translator,
+            'urlGeneratorService' => new UrlGeneratorService($urlGenerator),
+            'urlMatcher' => $urlMatcher,
         ];
 
     }//end initialize()

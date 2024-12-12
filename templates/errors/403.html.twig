@@ -1,0 +1,6 @@
+{% extends 'errors/base_error.html.twig' %}
+
+{% block content %}
+{% set error_message = 'Accès interdit. Vous n\'avez pas l\'autorisation de consulter cette page.' %}
+{{ parent() }}
+{% endblock %}

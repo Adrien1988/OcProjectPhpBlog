@@ -4,10 +4,6 @@ namespace App\Handlers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\Generator\UrlGenerator;
-use App\Services\UrlGeneratorService;
 use App\Middlewares\CsrfMiddleware;
 use App\Handlers\ControllerHandler;
 use Twig\Environment;
@@ -35,12 +31,8 @@ class RequestHandler
         Request $request
     ): Response {
         try {
-            // Initialiser le contexte, les routes et le générateur d'URL.
-            $context = new RequestContext();
-            $context->fromRequest($request);
-            $routes  = include __DIR__.'/../../src/config/routes.php';
-            $matcher = new UrlMatcher($routes, $context);
-            $urlGeneratorService = new UrlGeneratorService(new UrlGenerator($routes, $context));
+            $urlGeneratorService = $services['urlGeneratorService'];
+            $matcher = $services['urlMatcher'];
 
             // Correspondance de la route.
             $parameters = $matcher->match($request->getPathInfo());
@@ -71,7 +63,7 @@ class RequestHandler
 
             // Exécution des middlewares et de l'action du contrôleur.
             $middlewares = $request->isMethod('POST') === true ? [new CsrfMiddleware($services['csrfService'])] : [];
-            $response    = $this->handleMiddlewares(
+            return $this->handleMiddlewares(
                 $request,
                 $middlewares,
                 function () use ($controllerHandler, $controllerInstance, $method, $parameters, $request, $services) {
@@ -84,12 +76,8 @@ class RequestHandler
                     );
                 }
             );
-
-            return $response;
-        } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException $e) {
-            return new Response('Page non trouvée : '.$e->getMessage(), 404);
         } catch (Exception $e) {
-            return new Response('Une erreur est survenue : '.$e->getMessage(), 500);
+            throw $e;
         }//end try
 
     }//end handle()
