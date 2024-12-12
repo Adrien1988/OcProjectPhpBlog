@@ -47,6 +47,13 @@ class Comment
     )]
     private int $postId;
 
+    /**
+     * Le titre du post associé.
+     *
+     * @var string|null
+     */
+    private ?string $postTitle = null;
+
 
     /**
      * Constructeur de la classe Comment.
@@ -148,6 +155,32 @@ class Comment
         $this->postId = $postId;
 
     }//end setPostId()
+
+
+    /**
+     * Obtient le titre du post associé.
+     *
+     * @return string|null
+     */
+    public function getPostTitle(): ?string
+    {
+        return $this->postTitle;
+
+    }//end getPostTitle()
+
+
+    /**
+     * Définit le titre du post associé.
+     *
+     * @param string $postTitle Le titre du post.
+     *
+     * @return void
+     */
+    public function setPostTitle(string $postTitle): void
+    {
+        $this->postTitle = $postTitle;
+
+    }//end setPostTitle()
 
 
 }//end class

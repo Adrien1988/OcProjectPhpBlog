@@ -256,6 +256,7 @@ class AdminController extends BaseController
      * @param int                $commentId          L'ID du commentaire à invalider.
      * @param CommentsRepository $commentsRepository Le repository des commentaires.
      * @param UsersRepository    $usersRepository    Le repository des utilisateurs.
+     * @param PostsRepository    $postsRepository    Le repository des posts.
      *
      * @return Response
      */
@@ -263,7 +264,8 @@ class AdminController extends BaseController
         Request $request,
         int $commentId,
         CommentsRepository $commentsRepository,
-        UsersRepository $usersRepository
+        UsersRepository $usersRepository,
+        PostsRepository $postsRepository
     ): Response {
 
         // Marquer le commentaire comme invalidé (non validé) dans la base de données.
@@ -275,7 +277,7 @@ class AdminController extends BaseController
             $reason = $this->cleanInput($request->request->get('reason', 'Non conforme aux règles du blog'));
 
             // Envoyer une notification à l'utilisateur.
-            $this->notifyUserCommentInvalidated($user, $comment, $reason);
+            $this->notifyUserCommentInvalidated($user, $comment, $reason, $postsRepository);
 
             $commentsRepository->updateCommentStatus($commentId, 'rejected');
             return $this->listPendingComments($commentsRepository);
@@ -581,14 +583,23 @@ class AdminController extends BaseController
     /**
      * Notifie l'utilisateur que son commentaire a été invalidé.
      *
-     * @param User    $user    L'utilisateur à notifier.
-     * @param Comment $comment Le commentaire invalidé.
-     * @param string  $reason  La raison de l'invalidation.
+     * @param User            $user            L'utilisateur
+     *                                         à notifier.
+     * @param Comment         $comment         Le commentaire
+     *                                         invalidé.
+     * @param string          $reason          La raison de l'invalidation.
+     * @param PostsRepository $postsRepository Le repository des posts.
      *
      * @return void
      */
-    private function notifyUserCommentInvalidated(User $user, Comment $comment, string $reason): void
+    private function notifyUserCommentInvalidated(User $user, Comment $comment, string $reason, PostsRepository $postsRepository): void
     {
+         // Récupérer le titre du post associé au commentaire.
+        $post = $postsRepository->findById($comment->getPostId());
+        if ($post !== null) {
+            $comment->setPostTitle($post->getTitle());
+        }
+
         $subject = 'Votre commentaire n\'a pas été accepté';
         $message = $this->renderTemplate(
             'emails/comments_invalidated.html.twig',
