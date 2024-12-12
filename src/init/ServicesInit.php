@@ -12,6 +12,7 @@ use App\Core\DependencyContainer;
 use App\Services\SecurityService;
 use App\Services\UrlGeneratorService;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -53,6 +54,7 @@ class ServicesInit
         // Initialisation des routes et du générateur d'URL.
         $routes  = include __DIR__.'/../config/routes.php';
         $context = new RequestContext();
+        $context->fromRequest(Request::createFromGlobals());
 
         // Créer le générateur d'URL et le matcher.
         $urlGenerator = new UrlGenerator($routes, $context);

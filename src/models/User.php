@@ -115,8 +115,8 @@ class User
         $this->setPassword($userData['password']);
         $this->setRole($userData['role']);
 
-        // Vérifiez si 'createdAt' est déjà un objet DateTime
-        $createdAt = $userData['createdAt'] ?? null;
+        // Vérifiez si 'createdAt' est déjà un objet DateTime.
+        $createdAt = ($userData['createdAt'] ?? null);
         $this->setCreatedAt($createdAt instanceof DateTime ? $createdAt : new DateTime($createdAt));
 
         // Vérifier et convertir updatedAt uniquement si défini.
