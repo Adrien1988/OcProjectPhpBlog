@@ -32,7 +32,7 @@ class ServicesInit
      *
      * @return array Un tableau contenant les services initialisés.
      */
-    public function initialize(EnvService $envService, DependencyContainer $container): array
+    public function initialize(EnvService $envService, DependencyContainer $container, Request $request): array
     {
         // Initialiser le traducteur.
         $translatorInit = new TranslatorInit();
@@ -54,7 +54,7 @@ class ServicesInit
         // Initialisation des routes et du générateur d'URL.
         $routes  = include __DIR__.'/../config/routes.php';
         $context = new RequestContext();
-        $context->fromRequest(Request::createFromGlobals());
+        $context->fromRequest($request);
 
         // Créer le générateur d'URL et le matcher.
         $urlGenerator = new UrlGenerator($routes, $context);

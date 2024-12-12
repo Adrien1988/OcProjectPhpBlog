@@ -63,7 +63,7 @@ class Application
 
         // Initialiser les services et dépendances.
         $servicesInit   = new ServicesInit();
-        $this->services = $servicesInit->initialize($envService, $container);
+        $this->services = $servicesInit->initialize($envService, $container, $request);
 
         // Configuration de Twig.
         $twigInit   = new TwigInit();
