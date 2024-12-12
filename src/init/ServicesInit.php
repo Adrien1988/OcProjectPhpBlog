@@ -29,6 +29,7 @@ class ServicesInit
      *
      * @param EnvService          $envService Le service d'environnement.
      * @param DependencyContainer $container  Le conteneur de dépendances.
+     * @param Request             $request    L'objet de la requête HTTP contenant les données du formulaire.
      *
      * @return array Un tableau contenant les services initialisés.
      */
