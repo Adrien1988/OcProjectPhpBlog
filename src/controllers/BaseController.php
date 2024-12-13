@@ -27,14 +27,14 @@ class BaseController
      *
      * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
 
     /**
      * Service de sécurité pour la protection contre les attaques XSS.
      *
      * @var SecurityService
      */
-    protected $securityService;
+    protected SecurityService $securityService;
 
     /**
      * Service pour charger les variables d'environnement.
@@ -48,7 +48,7 @@ class BaseController
      *
      * @var CsrfService
      */
-    protected $csrfService;
+    protected CsrfService $csrfService;
 
     /**
      * Service de session pour gérer les sessions utilisateur.
