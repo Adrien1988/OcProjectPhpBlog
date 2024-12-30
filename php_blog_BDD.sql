@@ -8,11 +8,11 @@ SET time_zone = "+00:00";
 
 
 CREATE TABLE IF NOT EXISTS "comment" (
-  comment_id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  content text COLLATE utf8mb4_general_ci NOT NULL,
-  created_at datetime NOT NULL,
-  post_id bigint UNSIGNED NOT NULL,
-  author bigint UNSIGNED NOT NULL
+  comment_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  content TEXT COLLATE utf8mb4_general_ci NOT NULL,
+  created_at DATETIME NOT NULL,
+  post_id BIGINT UNSIGNED NOT NULL,
+  author BIGINT UNSIGNED NOT NULL
 ) ;
 
 INSERT INTO comment (comment_id, content, created_at, post_id, author, status) VALUES
@@ -43,12 +43,12 @@ INSERT INTO comment (comment_id, content, created_at, post_id, author, status) V
 (70, 'Je vais essayer les outils de débogage recommandés dans cet article.', '2024-12-05 16:00:00', 17, 12, 'validated');
 
 CREATE TABLE IF NOT EXISTS post (
-  post_id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  title varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
-  chapo text COLLATE utf8mb4_general_ci NOT NULL,
-  content text COLLATE utf8mb4_general_ci NOT NULL,
-  author bigint UNSIGNED NOT NULL,
-  created_at datetime NOT NULL,
+  post_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(250) COLLATE utf8mb4_general_ci NOT NULL,
+  chapo TEXT COLLATE utf8mb4_general_ci NOT NULL,
+  content TEXT COLLATE utf8mb4_general_ci NOT NULL,
+  author BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL,
   updated_at timestamp NULL DEFAULT NULL,
   PRIMARY KEY (post_id),
   UNIQUE KEY post_id (post_id),
@@ -63,10 +63,10 @@ INSERT INTO post (post_id, title, chapo, content, author, created_at, updated_at
 (17, 'Les outils indispensables pour les développeurs web', 'Découvrez une sélection des meilleurs outils pour améliorer votre productivité en développement web.', 'Des éditeurs de code comme VS Code aux outils de collaboration comme GitHub, cet article couvre une gamme d''outils qui permettent aux développeurs de travailler efficacement. Nous aborderons également des outils spécifiques pour le débogage, les tests, et le déploiement.', 3, '2024-12-30 10:48:21', NULL);
 
 CREATE TABLE IF NOT EXISTS "user" (
-  user_id bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  last_name varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  first_name varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  email varchar(250) COLLATE utf8mb4_general_ci NOT NULL
+  user_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  last_name VARCHAR(150) COLLATE utf8mb4_general_ci NOT NULL,
+  first_name VARCHAR(150) COLLATE utf8mb4_general_ci NOT NULL,
+  email VARCHAR(250) COLLATE utf8mb4_general_ci NOT NULL
 ) ;
 
 INSERT INTO user (user_id, last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, pwd_reset_token, pwd_reset_expires_at) VALUES
