@@ -24,23 +24,23 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Structure de la table `comment`
+-- Structure de la table comment
 --
 
-CREATE TABLE `comment` (
-  `comment_id` bigint UNSIGNED NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` datetime NOT NULL,
-  `post_id` bigint UNSIGNED NOT NULL,
-  `author` bigint UNSIGNED NOT NULL,
-  `status` enum('pending','validated','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending'
+CREATE TABLE comment (
+  comment_id bigint UNSIGNED NOT NULL,
+  content text COLLATE utf8mb4_general_ci NOT NULL,
+  created_at datetime NOT NULL,
+  post_id bigint UNSIGNED NOT NULL,
+  author bigint UNSIGNED NOT NULL,
+  status enum('pending','validated','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `comment`
+-- Déchargement des données de la table comment
 --
 
-INSERT INTO `comment` (`comment_id`, `content`, `created_at`, `post_id`, `author`, `status`) VALUES
+INSERT INTO comment (comment_id, content, created_at, post_id, author, status) VALUES
 (6, 'J''adore l''idée d''utiliser Tailwind CSS pour un design rapide et efficace. Merci pour cet article !', '2024-12-30 11:46:57', 13, 8, 'validated'),
 (7, 'Les injections SQL me font toujours peur. Merci pour les conseils !', '2024-12-30 11:47:21', 14, 8, 'validated'),
 (8, 'TypeScript améliore vraiment la qualité du code. Merci pour cet article !', '2024-12-30 11:47:43', 15, 8, 'validated'),
@@ -70,24 +70,24 @@ INSERT INTO `comment` (`comment_id`, `content`, `created_at`, `post_id`, `author
 -- --------------------------------------------------------
 
 --
--- Structure de la table `post`
+-- Structure de la table post
 --
 
-CREATE TABLE `post` (
-  `post_id` bigint UNSIGNED NOT NULL,
-  `title` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
-  `chapo` text COLLATE utf8mb4_general_ci NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
-  `author` bigint UNSIGNED NOT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+CREATE TABLE post (
+  post_id bigint UNSIGNED NOT NULL,
+  title varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  chapo text COLLATE utf8mb4_general_ci NOT NULL,
+  content text COLLATE utf8mb4_general_ci NOT NULL,
+  author bigint UNSIGNED NOT NULL,
+  created_at datetime NOT NULL,
+  updated_at timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `post`
+-- Déchargement des données de la table post
 --
 
-INSERT INTO `post` (`post_id`, `title`, `chapo`, `content`, `author`, `created_at`, `updated_at`) VALUES
+INSERT INTO post (post_id, title, chapo, content, author, created_at, updated_at) VALUES
 (13, 'Les meilleures pratiques du développement front-end en 2024', 'Découvrez les dernières tendances et pratiques en matière de développement front-end pour améliorer vos projets web.', 'Le développement front-end évolue constamment, avec des frameworks comme React, Vue.js et Svelte. Les développeurs doivent également adopter des outils comme Tailwind CSS pour accélérer la création de designs modernes et accessibles. Dans cet article, nous explorons comment rester à jour et optimiser vos flux de travail.', 3, '2024-12-30 10:41:58', NULL),
 (14, '10 erreurs courantes en PHP à éviter', 'Évitez les pièges classiques en PHP grâce à ce guide qui détaille les erreurs courantes et comment les corriger.', 'PHP reste l''un des langages les plus utilisés pour le développement web, mais de nombreuses erreurs peuvent ralentir vos projets. Nous couvrons des sujets comme la gestion des sessions, les failles de sécurité courantes comme les injections SQL, et l''utilisation efficace des frameworks comme Symfony et Laravel.', 3, '2024-12-30 10:43:55', '2024-12-30 09:49:31'),
 (15, 'Pourquoi TypeScript est incontournable en 2024', 'TypeScript est devenu un incontournable pour les développeurs JavaScript. Découvrez pourquoi et comment l''adopter.', 'TypeScript ajoute des types statiques à JavaScript, offrant ainsi une meilleure sécurité et lisibilité du code. Avec des fonctionnalités comme l''inférence de types et une intégration facile avec les outils modernes, c''est un choix idéal pour les grands projets d''équipe.', 3, '2024-12-30 10:45:04', NULL),
@@ -97,29 +97,29 @@ INSERT INTO `post` (`post_id`, `title`, `chapo`, `content`, `author`, `created_a
 -- --------------------------------------------------------
 
 --
--- Structure de la table `user`
+-- Structure de la table user
 --
 
-CREATE TABLE `user` (
-  `user_id` bigint UNSIGNED NOT NULL,
-  `last_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `first_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('Admin','User') COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `token` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `expire_at` datetime DEFAULT NULL,
-  `pwd_reset_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `pwd_reset_expires_at` datetime DEFAULT NULL
+CREATE TABLE user (
+  user_id bigint UNSIGNED NOT NULL,
+  last_name varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  first_name varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  email varchar(250) COLLATE utf8mb4_general_ci NOT NULL,
+  password varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  role enum('Admin','User') COLLATE utf8mb4_general_ci NOT NULL,
+  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  token varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  expire_at datetime DEFAULT NULL,
+  pwd_reset_token varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  pwd_reset_expires_at datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `user`
+-- Déchargement des données de la table user
 --
 
-INSERT INTO `user` (`user_id`, `last_name`, `first_name`, `email`, `password`, `role`, `created_at`, `updated_at`, `token`, `expire_at`, `pwd_reset_token`, `pwd_reset_expires_at`) VALUES
+INSERT INTO user (user_id, last_name, first_name, email, password, role, created_at, updated_at, token, expire_at, pwd_reset_token, pwd_reset_expires_at) VALUES
 (3, 'Fauquembergue', 'Adrien', 'adrien_fauque@hotmail.fr', '$2y$10$FVSQouWlo4wMuhcF3WNhiOO11UL8Vp6XGHaeSLWIkNUhl34DJc/QW', 'Admin', '2024-10-04 09:58:36', '2024-12-01 15:45:05', NULL, NULL, NULL, NULL),
 (8, 'Alice', 'Dupont', 'alice.dupont@example.com', '$2y$10$6GFSDpVrs813p1LEAS9vpuikbh7ET728kpwAgbCr47K3isW94k5qO', 'User', '2024-12-30 10:27:28', NULL, NULL, NULL, NULL, NULL),
 (9, 'Martin', 'Bob', 'bob.martin@example.com', '52bc47f80b6fe698e9a14327e1bb7ddfa39a21740c8c7017329f3ec555a3bcf6', 'User', '2023-12-10 14:45:00', NULL, NULL, NULL, NULL, NULL),
@@ -133,67 +133,67 @@ INSERT INTO `user` (`user_id`, `last_name`, `first_name`, `email`, `password`, `
 --
 
 --
--- Index pour la table `comment`
+-- Index pour la table comment
 --
-ALTER TABLE `comment`
-  ADD PRIMARY KEY (`comment_id`),
-  ADD UNIQUE KEY `comment_id` (`comment_id`),
-  ADD KEY `post_id` (`post_id`),
-  ADD KEY `author` (`author`);
+ALTER TABLE comment
+  ADD PRIMARY KEY (comment_id),
+  ADD UNIQUE KEY (comment_id),
+  ADD KEY (post_id),
+  ADD KEY (author);
 
 --
--- Index pour la table `post`
+-- Index pour la table post
 --
-ALTER TABLE `post`
-  ADD PRIMARY KEY (`post_id`),
-  ADD UNIQUE KEY `post_id` (`post_id`),
-  ADD KEY `author` (`author`);
+ALTER TABLE post
+  ADD PRIMARY KEY (post_id),
+  ADD UNIQUE KEY (post_id),
+  ADD KEY (author);
 
 --
--- Index pour la table `user`
+-- Index pour la table user
 --
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+ALTER TABLE user
+  ADD PRIMARY KEY (user_id),
+  ADD UNIQUE KEY (user_id);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
 --
 
 --
--- AUTO_INCREMENT pour la table `comment`
+-- AUTO_INCREMENT pour la table comment
 --
-ALTER TABLE `comment`
-  MODIFY `comment_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+ALTER TABLE comment
+  MODIFY comment_id bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
--- AUTO_INCREMENT pour la table `post`
+-- AUTO_INCREMENT pour la table post
 --
-ALTER TABLE `post`
-  MODIFY `post_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+ALTER TABLE post
+  MODIFY post_id bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT pour la table `user`
+-- AUTO_INCREMENT pour la table user
 --
-ALTER TABLE `user`
-  MODIFY `user_id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+ALTER TABLE user
+  MODIFY user_id bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Contraintes pour les tables déchargées
 --
 
 --
--- Contraintes pour la table `comment`
+-- Contraintes pour la table comment
 --
-ALTER TABLE `comment`
-  ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`post_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`author`) REFERENCES `user` (`user_id`);
+ALTER TABLE comment
+  ADD CONSTRAINT comment_ibfk_1 FOREIGN KEY (post_id) REFERENCES post (post_id) ON DELETE CASCADE,
+  ADD CONSTRAINT comment_ibfk_2 FOREIGN KEY (author) REFERENCES user (user_id);
 
 --
--- Contraintes pour la table `post`
+-- Contraintes pour la table post
 --
-ALTER TABLE `post`
-  ADD CONSTRAINT `post_ibfk_1` FOREIGN KEY (`author`) REFERENCES `user` (`user_id`);
+ALTER TABLE post
+  ADD CONSTRAINT post_ibfk_1 FOREIGN KEY (author) REFERENCES user (user_id);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

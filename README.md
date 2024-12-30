@@ -28,6 +28,8 @@ composer.json : Gère les dépendances PHP du projet.
 
 Pour la présentation : 
 
+Créer une BDD nommée php_blog en local et importer le fichier php_blog_BDD.sql qui se trouve à la racine du projet pour avoir des données d'example visibles et manipulables.
+
 Profil admin pour la connexion à l'application en local : 
     
     email : admin@example.com
