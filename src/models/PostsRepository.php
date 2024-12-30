@@ -233,23 +233,17 @@ class PostsRepository
      *
      * @throws Exception Si la suppression échoue pour une raison quelconque.
      */
-    public function deletePost(int $postId): bool
+    public function deletePost(int $postId): void
     {
-        // La requête SQL pour supprimer un article.
-        $sql = "DELETE FROM post WHERE post_id = :post_id";
+        // Supprimer les commentaires associés au post.
+        $sqlDeleteComments = "DELETE FROM comment WHERE post_id = :postId";
+        $stmt = $this->dbi->prepare($sqlDeleteComments);
+        $stmt->execute(['postId' => $postId]);
 
-        // Préparation de la requête SQL à l'aide de la méthode prepare de l'interface DatabaseInterface.
-        $stmt = $this->dbi->prepare($sql);
-
-        // Liaison de l'identifiant à la requête préparée.
-        $stmt->bindValue(':post_id', $postId);
-
-        // Exécution de la requête.
-        if ($this->dbi->execute($stmt, []) === false) {
-            throw new Exception("Failed to delete the post from the database.");
-        }
-
-        return true;
+        // Supprimer le post.
+        $sqlDeletePost = "DELETE FROM post WHERE post_id = :postId";
+        $stmt          = $this->dbi->prepare($sqlDeletePost);
+        $stmt->execute(['postId' => $postId]);
 
     }//end deletePost()
 

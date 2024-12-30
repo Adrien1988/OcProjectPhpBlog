@@ -127,11 +127,14 @@ class Application
             $this->services['urlGeneratorService']
         );
 
+        // Valider le code HTTP.
+        $httpCode = ($code >= 100 && $code < 600) ? $code : 500;
+
         // Inclure le message d'erreur dans la page uniquement en mode développement.
         $isDevMode    = $this->services['envService']->getEnv('APP_ENV', 'prod') === 'dev';
         $errorMessage = ($isDevMode === true && $exception !== null) ? $exception->getMessage() : null;
 
-        $response = $errorController->handle($code, $errorMessage);
+        $response = $errorController->handle($httpCode, $errorMessage);
         $response->send();
 
     }//end handleError()

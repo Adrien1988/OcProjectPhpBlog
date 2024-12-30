@@ -1,141 +1,101 @@
 {% extends "base.html.twig" %}
 
+{% block title %}{{ post.title }}{% endblock %}
+
 {% block content %}
 
-	<!-- Post Detail Section -->
-	<section class="page-section bg-light mt-5" id="post-detail">
-		<div class="container">
-			<!-- Post Title -->
-			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-5">{{ post.title }}</h2>
+<!-- Spacer for Navbar -->
+<div class="mt-5 pt-5"></div>
 
-			<!-- Post Chapô -->
-			<div class="divider-custom">
-				<div class="divider-custom-line"></div>
-				<div class="divider-custom-icon">
-					<i class="fas fa-newspaper"></i>
-				</div>
-				<div class="divider-custom-line"></div>
-			</div>
+<!-- Post Detail Section -->
+<section class="page-section bg-light pb-4" id="post-detail">
+    <div class="container">
+        <!-- Post Title -->
+        <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">{{ post.title }}</h2>
 
-			<!-- Post Information -->
-			<div class="row justify-content-center">
-				<div class="col-lg-8">
-					<p>
-						<strong>Chapô :</strong>
-						{{ post.chapo }}
-					</p>
-					<p>
-						<strong>Contenu :</strong>
-						{{ post.content }}
-					</p>
-					<p>
-						<strong>Auteur :</strong>
-						{{ author.firstName }} {{ author.lastName }}
-					</p>
-					<p>
-						<strong>Dernière mise à jour :</strong>
-						{{ post.updatedAt ? post.updatedAt|date('d-m-Y H:i') : post.createdAt|date('d-m-Y H:i') }}
-					</p>
-				</div>
-			</div>
+        <!-- Icon Divider -->
+        <div class="divider-custom">
+            <div class="divider-custom-line"></div>
+            <div class="divider-custom-icon">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="divider-custom-line"></div>
+        </div>
 
-			<!-- Back to Posts Button -->
-			<div class="text-center mt-4">
-				<a href="/posts" class="btn btn-secondary btn-lg">
-					<i class="fas fa-arrow-left"></i> Retour aux posts
-				</a>
-			</div>
-		</div>
-	</section>
+        <!-- Post Content -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="text-muted text-center">
+                    Publié par {{ author.firstName }} {{ author.lastName }} 
+                    le {{ post.createdAt|date('d-m-Y') }}
+                </p>
+                <p>{{ post.content }}</p>
+            </div>
+        </div>
 
-	<!-- Comments List Section -->
-	<section class="page-section bg-light text-dark" id="comments-list">
-		<div class="container">
-			<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Commentaires</h2>
+        <!-- Back to Posts Button -->
+        <div class="text-center mt-4">
+            <a href="/posts" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left"></i> Retour aux articles
+            </a>
+        </div>
+    </div>
+</section>
 
-			<!-- Divider -->
-			<div class="divider-custom">
-				<div class="divider-custom-line"></div>
-				<div class="divider-custom-icon">
-					<i class="fas fa-comments"></i>
-				</div>
-				<div class="divider-custom-line"></div>
-			</div>
+<!-- Comments Section -->
+<section class="page-section bg-light py-5" id="comments-section">
+    <div class="container">
+        <h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Commentaires</h2>
 
-			<!-- Comments -->
-			<div class="row justify-content-center">
-				<div class="col-lg-6 col-md-8">
-					{% if comments is defined and comments is not empty %}
-						{% for data in comments %}
-							{% set comment = data.comment %}
-							{% set authorUsername = data.authorUsername %}
+        <!-- Divider -->
+        <div class="divider-custom">
+            <div class="divider-custom-line"></div>
+            <div class="divider-custom-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="divider-custom-line"></div>
+        </div>
 
-							<div class="comment border-bottom mb-2 pb-2">
-								<p>
-									<strong>{{ authorUsername }}</strong>
-									-
-									{{ comment.createdAt|date('d-m-Y H:i') }}
-								</p>
-								<p>{{ comment.content }}</p>
-							</div>
-						{% endfor %}
-					{% else %}
-						<p class="text-center">Aucun commentaire pour l'instant.</p>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-	</section>
+        <!-- Comments List -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if comments is defined and comments is not empty %}
+                    {% for data in comments %}
+                        {% set comment = data.comment %}
+                        {% set authorUsername = data.authorUsername %}
+                        <div class="comment mb-3">
+                            <p><strong>{{ authorUsername }}</strong> - {{ comment.createdAt|date('d-m-Y H:i') }}</p>
+                            <p>{{ comment.content }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">Aucun commentaire pour l'instant.</p>
+                {% endif %}
+            </div>
+        </div>
 
-	<!-- Display Success Message -->
-	{% if successMessage is defined %}
-		<div class="alert alert-success text-center mt-4">
-			{{ successMessage }}
-		</div>
-	{% endif %}
-
-	<!-- Comment Form Section -->
-	{% if app.user is defined and app.user %}
-		<section class="page-section" id="add-comment">
-			<div class="container">
-				<h2 class="page-section-heading text-center text-uppercase text-secondary fs-6">Ajouter un commentaire</h2>
-				<div class="divider-custom">
-					<div class="divider-custom-line"></div>
-					<div class="divider-custom-icon">
-						<i class="fas fa-comment"></i>
-					</div>
-					<div class="divider-custom-line"></div>
-				</div>
-
-				{% if errors is defined and errors is not empty %}
-					<div class="alert alert-danger">
-						<ul>
-							{% for error in errors %}
-								<li>{{ error }}</li>
-							{% endfor %}
-						</ul>
-					</div>
-				{% endif %}
-
-				<div class="row justify-content-center">
-					<div class="col-lg-6 col-md-8">
-						<form action="/posts/{{ post.id }}/comment" method="POST">
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
-
-							<div class="form-group mb-3">
-								<textarea class="form-control form-control-sm" name="content" rows="3" placeholder="Votre commentaire..." required></textarea>
-							</div>
-
-							<div class="text-center mt-4">
-								<button class="btn btn-primary btn-sm" type="submit">Soumettre</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-		</section>
-	{% else %}
-		<p class="text-center">Vous devez être connecté pour ajouter un commentaire.</p>
-	{% endif %}
+        <!-- Add Comment Form -->
+        {% if app.user is defined and app.user %}
+            <div class="mt-5">
+                <h3 class="text-center text-secondary fs-5">Ajouter un commentaire</h3>
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <form action="/posts/{{ post.id }}/comment" method="POST">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('add_comment') }}">
+                            <div class="form-group mb-3">
+                                <textarea name="content" class="form-control" rows="3" placeholder="Votre commentaire..." required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Soumettre</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center mt-4">Vous devez être connecté pour ajouter un commentaire.</p>
+        {% endif %}
+    </div>
+</section>
 
 {% endblock %}
